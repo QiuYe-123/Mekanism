@@ -86,6 +86,9 @@ public class TileComponentSecurity implements ITileComponent {
 
     @Override
     public void applyImplicitComponents(@NotNull DataComponentGetter input) {
+        if (tile.isRemote()) {
+            return;
+        }
         securityMode = input.getOrDefault(MekanismDataComponents.SECURITY, securityMode);
         setOwnerUUID(input.getOrDefault(MekanismDataComponents.OWNER, ownerUUID));
     }

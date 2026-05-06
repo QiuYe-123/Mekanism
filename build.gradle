@@ -362,9 +362,9 @@ neoForge {
                 loadedMods.add(mods.named(name))
             }
             //if the selected toolchain is a JBR, enable DCEVM
-            if (javaToolchains.launcherFor(java.toolchain).map { it.metadata.vendor }.getOrElse('').contains('JetBrains')) {
-                jvmArguments.addAll('-XX:+IgnoreUnrecognizedVMOptions', '-XX:+AllowEnhancedClassRedefinition')
-            }
+//            if (javaToolchains.launcherFor(java.toolchain).map { it.metadata.vendor }.getOrElse('').contains('JetBrains')) {
+//                jvmArguments.addAll('-XX:+IgnoreUnrecognizedVMOptions', '-XX:+AllowEnhancedClassRedefinition')
+//            }
 
             // Uncomment this to get verbose debug logging
             // logLevel = org.slf4j.event.Level.DEBUG

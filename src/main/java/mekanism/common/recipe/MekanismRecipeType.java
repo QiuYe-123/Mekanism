@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import mekanism.api.recipes.ChemicalChemicalToChemicalRecipe;
@@ -32,8 +31,6 @@ import mekanism.api.recipes.vanilla_input.SingleChemicalRecipeInput;
 import mekanism.api.recipes.vanilla_input.SingleFluidChemicalRecipeInput;
 import mekanism.api.recipes.vanilla_input.SingleFluidRecipeInput;
 import mekanism.api.recipes.vanilla_input.SingleItemChemicalRecipeInput;
-import mekanism.client.MekanismClient;
-import mekanism.client.recipe_viewer.RecipeViewerUtils;
 import mekanism.common.Mekanism;
 import mekanism.common.recipe.lookup.cache.IInputRecipeCache;
 import mekanism.common.recipe.lookup.cache.InputRecipeCache.DoubleItem;
@@ -62,7 +59,6 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
@@ -192,42 +188,17 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
         return inputCache;
     }
 
-    @Nullable
-    private static RegistryAccess tryGetRegistryAccess() {
-        //Try to get a fallback world if we are in a context that may not have one
-        //If we are on the client get the client's world, if we are on the server get the current server's world
-        if (FMLEnvironment.getDist().isClient()) {
-            Level clientWorld = MekanismClient.tryGetClientWorld();
-            return clientWorld != null ? clientWorld.registryAccess() : null;
-        }
-        return Objects.requireNonNull(ServerLifecycleHooks.getCurrentServer(), "Server not running?").registryAccess();
-    }
-
     @NotNull
     @Override
     public List<RecipeHolder<RECIPE>> getRecipes(@Nullable Level world) {
         RecipeManager recipeManager = null;
-        RegistryAccess registryAccess = null;
-        if (!(world instanceof ServerLevel serverLevel)) {
-            //Try to get a fallback world if we are in a context that may not have one
-            //If we are on the client get the client's world, if we are on the server get the current server's world
-            if (FMLEnvironment.getDist().isClient()) {
-                Level clientWorld = MekanismClient.tryGetClientWorld();
-                if (clientWorld != null) {
-                    //TODO - 26.1 unpossible?
-                    //recipeManager = clientWorld.recipeAccess();
-                    registryAccess = clientWorld.registryAccess();
-                }
-            } else {
-                MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();
-                if (currentServer != null) {
-                    recipeManager = currentServer.getRecipeManager();
-                    registryAccess = currentServer.registryAccess();
-                }
-            }
-        } else {
+        if (world instanceof ServerLevel serverLevel) {
             recipeManager = serverLevel.recipeAccess();
-            registryAccess = world.registryAccess();
+        } else {
+            MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();
+            if (currentServer != null) {
+                recipeManager = currentServer.getRecipeManager();
+            }
         }
         if (recipeManager == null) {
             //If we failed, then return no recipes
@@ -264,13 +235,16 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
         if (this == SMELTING.get()) {
             //Ensure the recipes can be modified
             recipes = new ArrayList<>(recipes);
-            for (RecipeHolder<SmeltingRecipe> recipeHolder : recipeMap.byType(RecipeType.SMELTING)) {
-                SmeltingRecipe smeltingRecipe = recipeHolder.value();
+            for (RecipeHolder<?> recipeHolder : recipeMap.byType(RecipeType.SMELTING)) {
+                if (!(recipeHolder.value() instanceof SmeltingRecipe smeltingRecipe)) {
+                    // Some mods register custom recipes under the vanilla smelting type.
+                    continue;
+                }
                 if (smeltingRecipe.input().isEmpty()) {
                     continue;
                 }
                 ItemStackToItemStackRecipe possiblyUnwrapped = WrappedSmelterRecipe.tryUnwrap(smeltingRecipe);
-                ResourceKey<Recipe<?>> generateId = RecipeViewerUtils.syntheticKey(recipeHolder.id(), "mekanism_generated");
+                ResourceKey<Recipe<?>> generateId = syntheticKey(recipeHolder.id(), "mekanism_generated");
                 recipes.add(new RecipeHolder<>(generateId, castRecipe(possiblyUnwrapped)));
 
             }
@@ -284,6 +258,10 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
             throw new IllegalArgumentException("Wrong recipe type");
         }
         return (RECIPE) o;
+    }
+
+    private static ResourceKey<Recipe<?>> syntheticKey(ResourceKey<Recipe<?>> key, String prefix) {
+        return ResourceKey.create(key.registryKey(), key.identifier().withPrefix("/" + prefix + "/"));
     }
 
     private boolean checkMyIncompleteRecipes(RecipeManager recipeManager) {
