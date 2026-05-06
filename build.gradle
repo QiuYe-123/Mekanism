@@ -294,7 +294,7 @@ def setupTasks(SourceSet sourceSet) {
     }
 }
 
-group = 'mekanism'
+group = project.findProperty('group') ?: 'mekanism'
 def basicVersion = "${mod_version}." + (System.getenv('BUILD_NUMBER') ?: 'homebaked')
 version = "${minecraft_version}-${basicVersion}"
 project.base.archivesName = 'Mekanism'
