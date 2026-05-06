@@ -753,6 +753,7 @@ publishing {
         }
     }
     repositories {
+        mavenLocal()
         maven {
             url = 'https://modmaven.dev/artifactory/local-releases/'
             if (MODMAVEN_PW != null) {
