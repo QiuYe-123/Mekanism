@@ -37,10 +37,12 @@ public class RenderFluidTankItem implements SpecialModelRenderer<RenderFluidTank
 
     private final BlockStateModelPart fluidTankmodel;
     private final int tierTint;
+    private final Vector3fc[] extents;
 
     public RenderFluidTankItem(BlockStateModelPart fluidTankmodel, int tierTint) {
         this.fluidTankmodel = fluidTankmodel;
         this.tierTint = tierTint;
+        extents = CuboidItemModelWrapper.computeExtents(fluidTankmodel.getQuads(null));
     }
 
     @Override
@@ -59,8 +61,8 @@ public class RenderFluidTankItem implements SpecialModelRenderer<RenderFluidTank
 
     @Override
     public void getExtents(Consumer<Vector3fc> output) {
-        if (fluidTankmodel instanceof SimpleModelWrapper simpleModelWrapper) {
-            CuboidItemModelWrapper.computeExtents(simpleModelWrapper.getQuads(null));
+        for (Vector3fc extent : extents) {
+            output.accept(extent);
         }
     }
 
@@ -83,6 +85,7 @@ public class RenderFluidTankItem implements SpecialModelRenderer<RenderFluidTank
                 fluidTexture = MekanismRenderer.getSinglePicker(MekanismRenderer.getFluidTexture(fluid, MekanismRenderer.FluidTextureType.STILL));
             }
         }
+        //todo - 26.1: do this with the block model from model manager (copy Energy cube item)
         BlockModelRenderState blockModel = new BlockModelRenderState();
         blockModel.setupModel(new Matrix4f(), true).add(fluidTankmodel);
         blockModel.tintLayers().add(tierTint);
