@@ -171,11 +171,11 @@ public class MekanismModelProvider extends BaseModelProvider {
         simpleISTER(itemModels, MekanismItems.SCUBA_TANK, RenderScubaTank.Unbaked.INSTANCE);
 
         //todo - 26.1: we could possibly merge the base item models to one now? Assuming the perspective translations are the same
-        simpleISTER(itemModels, MekanismBlocks.ADVANCED_FLUID_TANK.getItemHolder(), new RenderFluidTankItem.Unbaked(BaseTier.ADVANCED));
-        simpleISTER(itemModels, MekanismBlocks.BASIC_FLUID_TANK.getItemHolder(), new RenderFluidTankItem.Unbaked(BaseTier.BASIC));
-        simpleISTER(itemModels, MekanismBlocks.ELITE_FLUID_TANK.getItemHolder(), new RenderFluidTankItem.Unbaked(BaseTier.ELITE));
-        simpleISTER(itemModels, MekanismBlocks.ULTIMATE_FLUID_TANK.getItemHolder(), new RenderFluidTankItem.Unbaked(BaseTier.ULTIMATE));
-        simpleISTER(itemModels, MekanismBlocks.CREATIVE_FLUID_TANK.getItemHolder(), new RenderFluidTankItem.Unbaked(BaseTier.CREATIVE));
+        simpleISTER(itemModels, MekanismBlocks.ADVANCED_FLUID_TANK.getItemHolder(), RenderFluidTankItem.Unbaked.INSTANCE);
+        simpleISTER(itemModels, MekanismBlocks.BASIC_FLUID_TANK.getItemHolder(), RenderFluidTankItem.Unbaked.INSTANCE);
+        simpleISTER(itemModels, MekanismBlocks.ELITE_FLUID_TANK.getItemHolder(), RenderFluidTankItem.Unbaked.INSTANCE);
+        simpleISTER(itemModels, MekanismBlocks.ULTIMATE_FLUID_TANK.getItemHolder(), RenderFluidTankItem.Unbaked.INSTANCE);
+        simpleISTER(itemModels, MekanismBlocks.CREATIVE_FLUID_TANK.getItemHolder(), RenderFluidTankItem.Unbaked.INSTANCE);
 
         {
             Item geigerCounter = MekanismItems.GEIGER_COUNTER.value();
@@ -401,13 +401,6 @@ public class MekanismModelProvider extends BaseModelProvider {
         );
         ItemModel.Unbaked unbaked = ItemModelUtils.specialModel(existingModel(registryObject.asItem()), RenderEnergyCubeItem.Unbaked.INSTANCE);
         blockModels.itemModelOutput.accept(registryObject.asItem(), unbaked);
-    }
-
-    private void plainBlockItemModel(BlockModelGenerators blockModels, BlockRegistryObject<?, ?> registryObject, String name) {
-        blockModels.itemModelOutput.accept(
-              registryObject.asItem(),
-              ItemModelUtils.plainModel(modLocation(name))
-        );
     }
 
     private void registerManualItemModels(ItemModelGenerators itemModels) {

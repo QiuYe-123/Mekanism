@@ -124,7 +124,7 @@
 				"east": {"uv": [2.75, 0, 3, 2.25], "texture": "#all"},
 				"west": {"uv": [2.75, 0, 3, 2.25], "texture": "#all"},
 				"up": {"uv": [3.75, 0.25, 2.75, 0], "texture": "#all"},
-				"down": {"uv": [19.75, 0, 14.75, 1], "texture": "#all"}
+				"down": {"uv": [16, 0, 11, 0.5], "texture": "#all"}
 			}
 		},
 		{
@@ -134,10 +134,7 @@
 			"faces": {
 				"east": {"uv": [0, 0, 5, 5], "texture": "#ports_large_led", "cullface": "east"}
 			},
-			"neoforge_data": {
-				"block_light": 15,
-				"sky_light": 15
-			}
+			"light_emission": 15
 		},
 		{
 			"name": "port_large_east",
@@ -158,10 +155,7 @@
 			"faces": {
 				"west": {"uv": [8, 0, 16, 8], "texture": "#ports_led", "cullface": "west"}
 			},
-			"neoforge_data": {
-				"block_light": 15,
-				"sky_light": 15
-			}
+			"light_emission": 15
 		},
 		{
 			"name": "port_west",
@@ -197,7 +191,7 @@
 			"scale": [0.25, 0.25, 0.25]
 		},
 		"gui": {
-			"rotation": [30, 225, 0],
+			"rotation": [30, -135, 0],
 			"scale": [0.625, 0.625, 0.625]
 		},
 		"fixed": {

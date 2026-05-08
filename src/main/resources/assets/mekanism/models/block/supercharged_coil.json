@@ -1,5 +1,5 @@
 {
-	"parent": "block/cube_all",
+	"parent": "block/block",
 	"textures": {
 		"2": "mekanism:block/models/ports",
 		"3": "mekanism:block/models/ports_led",
@@ -76,10 +76,7 @@
 			"faces": {
 				"down": {"uv": [8, 8, 16, 16], "texture": "#3", "cullface": "down"}
 			},
-			"neoforge_data": {
-				"block_light": 15,
-				"sky_light": 15
-			}
+      "light_emission": 15
 		},
 		{
 			"name": "coil_large",

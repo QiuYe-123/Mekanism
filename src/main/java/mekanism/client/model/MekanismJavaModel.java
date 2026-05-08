@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import mekanism.client.render.RenderTickHandler;
 import mekanism.client.render.lib.Outlines.Line;
 import net.minecraft.client.model.geom.ModelPart;
@@ -17,7 +16,6 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
@@ -25,6 +23,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+//todo - 26.1: review if any of these can be converted back to regular java models - needs rendertype without texture & only single rendertype/light coords
 public abstract class MekanismJavaModel<STATE> /*extends Model<STATE>*/ {
 
     protected final ModelPart root;
@@ -35,15 +34,9 @@ public abstract class MekanismJavaModel<STATE> /*extends Model<STATE>*/ {
         this.allParts = root.getAllParts();
     }
 
-    @Deprecated//TODO - 26.1 remove when unused
-    public MekanismJavaModel(ModelPart root, Function<Identifier, RenderType> renderType) {
-        this(root);
-    }
-
     //TODO - 26.1 outlines??
     public abstract void collect(STATE state, @NotNull PoseStack poseStack, @NotNull SubmitNodeCollector submitNodeCollector, int light, int overlayLight, boolean hasEffect);
 
-    //todo - 26.1: call this in renderer submit methods before calling collect()?
     public void setupAnim(STATE state) {
         this.resetPose();
     }
