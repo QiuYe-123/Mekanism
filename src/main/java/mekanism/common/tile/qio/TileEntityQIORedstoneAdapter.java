@@ -1,6 +1,7 @@
 package mekanism.common.tile.qio;
 
 import java.util.Optional;
+import mekanism.api.RelativeSide;
 import mekanism.api.SerializationConstants;
 import mekanism.common.content.qio.QIOFrequency;
 import mekanism.common.integration.computer.ComputerException;
@@ -28,10 +29,13 @@ import net.minecraft.world.level.redstone.Orientation.SideBias;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.model.data.ModelData;
+import net.neoforged.neoforge.model.data.ModelProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TileEntityQIORedstoneAdapter extends TileEntityQIOComponent {
+
+    public static final ModelProperty<Boolean> EMITTING = new ModelProperty<>();
 
     @Nullable
     private HashedItem itemType = null;
@@ -107,7 +111,8 @@ public class TileEntityQIORedstoneAdapter extends TileEntityQIOComponent {
             needsUpdate = true;
             //Update redstone on sides except the back
             //TODO - 26.1 check Orientation
-            level.updateNeighborsAtExceptFromFacing(getBlockPos(), getBlockState().getBlock(), getOppositeDirection(), Orientation.of(Direction.UP, getDirection(), SideBias.LEFT));
+            Direction frontDirection = getDirection();
+            level.updateNeighborsAtExceptFromFacing(getBlockPos(), getBlockState().getBlock(), getOppositeDirection(), Orientation.of(RelativeSide.TOP.getDirection(frontDirection), frontDirection, SideBias.LEFT));
         }
         return needsUpdate;
     }
@@ -133,11 +138,7 @@ public class TileEntityQIORedstoneAdapter extends TileEntityQIOComponent {
     @NotNull
     @Override
     public ModelData getModelData() {
-        //TODO - 26.1 models
-        /*if (isEmitting) {
-            return ModelData.of(DataBasedModelLoader.EMITTING, null);
-        }*/
-        return super.getModelData();
+        return ModelData.of(EMITTING, this.isEmitting);
     }
 
     @Override
