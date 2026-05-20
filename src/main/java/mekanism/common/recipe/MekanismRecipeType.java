@@ -31,6 +31,7 @@ import mekanism.api.recipes.vanilla_input.SingleChemicalRecipeInput;
 import mekanism.api.recipes.vanilla_input.SingleFluidChemicalRecipeInput;
 import mekanism.api.recipes.vanilla_input.SingleFluidRecipeInput;
 import mekanism.api.recipes.vanilla_input.SingleItemChemicalRecipeInput;
+import mekanism.client.MekanismClient;
 import mekanism.common.Mekanism;
 import mekanism.common.recipe.lookup.cache.IInputRecipeCache;
 import mekanism.common.recipe.lookup.cache.InputRecipeCache.DoubleItem;
@@ -44,6 +45,7 @@ import mekanism.common.recipe.lookup.cache.InputRecipeCache.SingleItem;
 import mekanism.common.recipe.lookup.cache.RotaryInputRecipeCache;
 import mekanism.common.registration.impl.RecipeTypeDeferredRegister;
 import mekanism.common.registration.impl.RecipeTypeRegistryObject;
+import mekanism.common.util.RegistryUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.Identifier;
@@ -59,6 +61,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.Level;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
@@ -191,28 +194,34 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
     @NotNull
     @Override
     public List<RecipeHolder<RECIPE>> getRecipes(@Nullable Level world) {
-        RecipeManager recipeManager = null;
-        if (world instanceof ServerLevel serverLevel) {
-            recipeManager = serverLevel.recipeAccess();
-        } else {
-            MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();
-            if (currentServer != null) {
-                recipeManager = currentServer.getRecipeManager();
+        RecipeMap recipeMap = null;
+        if (!(world instanceof ServerLevel serverLevel)) {
+            //Try to get a fallback world if we are in a context that may not have one
+            //If we are on the client get the client's world, if we are on the server get the current server's world
+            if (FMLEnvironment.getDist().isClient()) {
+                recipeMap = MekanismClient.clientRecipes();
+            } else {
+                MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();
+                if (currentServer != null) {
+                    recipeMap = currentServer.getRecipeManager().recipeMap();
+                }
             }
+        } else {
+            recipeMap = serverLevel.recipeAccess().recipeMap();
         }
-        if (recipeManager == null) {
+        if (recipeMap == null) {
             //If we failed, then return no recipes
             return Collections.emptyList();
         }
-        return getRecipes(recipeManager);
+        return getRecipes(recipeMap);
     }
 
     @NotNull
     @Override
-    public List<RecipeHolder<RECIPE>> getRecipes(@NotNull RecipeManager recipeManager) {
+    public List<RecipeHolder<RECIPE>> getRecipes(RecipeMap recipeMap) {
         if (cachedRecipes.isEmpty()) {
             //Note: This is a fresh immutable list that gets returned
-            Collection<RecipeHolder<RECIPE>> recipes = getRecipesUncached(recipeManager);
+            Collection<RecipeHolder<RECIPE>> recipes = getRecipesUncached(recipeMap);
             //Make the list of cached recipes immutable and filter out any incomplete recipes
             // as there is no reason to potentially look the partial complete piece up if
             // the other portion of the recipe is incomplete
@@ -226,11 +235,10 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
     /**
      * Get a list of recipes directly from the manager
      *
-     * @param recipeManager  The manager to query
+     * @param recipeMap The recipes map
      */
     @NotNull
-    private Collection<RecipeHolder<RECIPE>> getRecipesUncached(@NotNull RecipeManager recipeManager) {
-        RecipeMap recipeMap = recipeManager.recipeMap();
+    private Collection<RecipeHolder<RECIPE>> getRecipesUncached(RecipeMap recipeMap) {
         Collection<RecipeHolder<RECIPE>> recipes = recipeMap.byType(this);
         if (this == SMELTING.get()) {
             //Ensure the recipes can be modified
@@ -244,7 +252,7 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
                     continue;
                 }
                 ItemStackToItemStackRecipe possiblyUnwrapped = WrappedSmelterRecipe.tryUnwrap(smeltingRecipe);
-                ResourceKey<Recipe<?>> generateId = syntheticKey(recipeHolder.id(), "mekanism_generated");
+                ResourceKey<Recipe<?>> generateId = RegistryUtils.syntheticKey(recipeHolder.id(), "mekanism_generated");
                 recipes.add(new RecipeHolder<>(generateId, castRecipe(possiblyUnwrapped)));
 
             }
@@ -260,13 +268,9 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
         return (RECIPE) o;
     }
 
-    private static ResourceKey<Recipe<?>> syntheticKey(ResourceKey<Recipe<?>> key, String prefix) {
-        return ResourceKey.create(key.registryKey(), key.identifier().withPrefix("/" + prefix + "/"));
-    }
-
     private boolean checkMyIncompleteRecipes(RecipeManager recipeManager) {
         boolean incomplete = false;
-        for (RecipeHolder<RECIPE> holder : getRecipesUncached(recipeManager)) {
+        for (RecipeHolder<RECIPE> holder : getRecipesUncached(recipeManager.recipeMap())) {
             if (!holder.value().isIncomplete()) {
                 continue;
             }

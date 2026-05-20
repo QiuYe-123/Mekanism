@@ -154,5 +154,6 @@ public class TileEntityQIOComponent extends TileEntityMekanism implements IQIOFr
         QIOFrequency frequency = computerGetFrequency();
         frequency.setColor(frequency.getColor().getPrevious());
     }
+
     //End methods IComputerTile
 }

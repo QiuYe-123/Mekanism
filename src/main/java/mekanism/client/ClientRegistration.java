@@ -161,10 +161,8 @@ import mekanism.common.registries.MekanismParticleTypes;
 import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.resource.IResource;
 import mekanism.common.resource.PrimaryResource;
-import mekanism.common.tile.qio.TileEntityQIOComponent;
-import mekanism.common.tile.transmitter.TileEntityLogisticalTransporter;
-import mekanism.common.util.WorldUtils;
-import net.minecraft.client.color.block.BlockTintSource;
+import mekanism.common.tile.qio.QIOBlockTintSource;
+import mekanism.common.tile.transmitter.LogisticalTransporterBlockTintSource;
 import net.minecraft.client.color.block.BlockTintSources;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -210,43 +208,6 @@ import org.jetbrains.annotations.NotNull;
 
 @EventBusSubscriber(modid = Mekanism.MODID, value = Dist.CLIENT)
 public class ClientRegistration {
-
-    //todo - 26.1: when this changes, block needs to be marked for re-rendering
-    private static final BlockTintSource QIO_TINT_SOURCE = new BlockTintSource() {
-        @Override
-        public int color(BlockState state) {
-            return -1;
-        }
-
-        @Override
-        public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
-            TileEntityQIOComponent tile = WorldUtils.getTileEntity(TileEntityQIOComponent.class, level, pos);
-            if (tile != null) {
-                EnumColor color = tile.getColor();
-                return color == null ? -1 : color.getPackedColor();
-            }
-            return -1;
-        }
-    };
-
-    private static final BlockTintSource LOGISTICAL_TRANSPORTER_TINT_SOURCE = new BlockTintSource() {
-        @Override
-        public int color(BlockState state) {
-            return -1;
-        }
-
-        @Override
-        public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
-            TileEntityLogisticalTransporter transporter = WorldUtils.getTileEntity(TileEntityLogisticalTransporter.class, level, pos);
-            if (transporter != null) {
-                EnumColor renderColor = transporter.getTransmitter().getColor();
-                if (renderColor != null) {
-                    return renderColor.getPackedColor();
-                }
-            }
-            return -1;
-        }
-    };
 
     @SubscribeEvent
     public static void init(FMLClientSetupEvent event) {
@@ -511,9 +472,9 @@ public class ClientRegistration {
                   return -1;
               }, MekanismBlocks.BASIC_FLUID_TANK, MekanismBlocks.ADVANCED_FLUID_TANK, MekanismBlocks.ELITE_FLUID_TANK, MekanismBlocks.ULTIMATE_FLUID_TANK,
               MekanismBlocks.CREATIVE_FLUID_TANK);
-        ClientRegistrationUtil.registerBlockColorHandler(event, List.of(BlockTintSources.constant(-1), QIO_TINT_SOURCE), MekanismBlocks.QIO_DRIVE_ARRAY, MekanismBlocks.QIO_DASHBOARD, MekanismBlocks.QIO_IMPORTER, MekanismBlocks.QIO_EXPORTER,
+        ClientRegistrationUtil.registerBlockColorHandler(event, List.of(BlockTintSources.constant(-1), QIOBlockTintSource.INSTANCE), MekanismBlocks.QIO_DRIVE_ARRAY, MekanismBlocks.QIO_DASHBOARD, MekanismBlocks.QIO_IMPORTER, MekanismBlocks.QIO_EXPORTER,
               MekanismBlocks.QIO_REDSTONE_ADAPTER);
-        ClientRegistrationUtil.registerBlockColorHandler(event, LOGISTICAL_TRANSPORTER_TINT_SOURCE, MekanismBlocks.BASIC_LOGISTICAL_TRANSPORTER, MekanismBlocks.ADVANCED_LOGISTICAL_TRANSPORTER, MekanismBlocks.ELITE_LOGISTICAL_TRANSPORTER,
+        ClientRegistrationUtil.registerBlockColorHandler(event, LogisticalTransporterBlockTintSource.INSTANCE, MekanismBlocks.BASIC_LOGISTICAL_TRANSPORTER, MekanismBlocks.ADVANCED_LOGISTICAL_TRANSPORTER, MekanismBlocks.ELITE_LOGISTICAL_TRANSPORTER,
               MekanismBlocks.ULTIMATE_LOGISTICAL_TRANSPORTER);
         for (Map.Entry<IResource, BlockRegistryObject<?, ?>> entry : MekanismBlocks.PROCESSED_RESOURCE_BLOCKS.entrySet()) {
             if (entry.getKey() instanceof PrimaryResource primaryResource) {

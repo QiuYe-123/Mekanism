@@ -26,6 +26,7 @@ import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.api.gear.ModuleData;
 import mekanism.api.recipes.MekanismRecipe;
 import mekanism.api.recipes.RotaryRecipe;
+import mekanism.client.MekanismClient;
 import mekanism.client.recipe_viewer.RecipeViewerUtils;
 import mekanism.client.recipe_viewer.emi.recipe.BoilerEmiRecipe;
 import mekanism.client.recipe_viewer.emi.recipe.ChemicalChemicalToChemicalEmiRecipe;
@@ -74,6 +75,7 @@ import mekanism.common.tier.FactoryTier;
 import mekanism.common.tile.machine.TileEntityChemicalOxidizer;
 import mekanism.common.tile.machine.TileEntityNutritionalLiquifier;
 import mekanism.common.util.EnumUtils;
+import mekanism.common.util.RegistryUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
@@ -231,14 +233,15 @@ public class MekanismEmi implements EmiPlugin {
         //Register both methods of rotary condensentrator recipes
         MekanismEmiRecipeCategory condensentratingCategory = addCategory(registry, RecipeViewerRecipeType.CONDENSENTRATING);
         MekanismEmiRecipeCategory decondensentratingCategory = addCategory(registry, RecipeViewerRecipeType.DECONDENSENTRATING);
-        for (RecipeHolder<RotaryRecipe> recipeHolder : MekanismRecipeType.ROTARY.getRecipes(registry.getRecipeManager())) {
+        //todo - 26.1: review recipe access when updating emi
+        for (RecipeHolder<RotaryRecipe> recipeHolder : MekanismRecipeType.ROTARY.getRecipes(MekanismClient.clientRecipes())) {
             RotaryRecipe recipe = recipeHolder.value();
             if (recipe.hasChemicalToFluid()) {
                 if (recipe.hasFluidToChemical()) {
                     //Note: If the recipe is bidirectional, we prefix the recipe id so that they don't clash as duplicates
                     // as we return the proper recipe holder regardless
-                    registry.addRecipe(new RotaryEmiRecipe(condensentratingCategory, RecipeViewerUtils.synthetic(recipeHolder.id(), "condensentrating"), recipeHolder, true));
-                    registry.addRecipe(new RotaryEmiRecipe(decondensentratingCategory, RecipeViewerUtils.synthetic(recipeHolder.id(), "decondensentrating"), recipeHolder, false));
+                    registry.addRecipe(new RotaryEmiRecipe(condensentratingCategory, RegistryUtils.synthetic(recipeHolder.id(), "condensentrating"), recipeHolder, true));
+                    registry.addRecipe(new RotaryEmiRecipe(decondensentratingCategory, RegistryUtils.synthetic(recipeHolder.id(), "decondensentrating"), recipeHolder, false));
                 } else {
                     registry.addRecipe(new RotaryEmiRecipe(condensentratingCategory, recipeHolder.id().identifier(), recipeHolder, true));
                 }
@@ -291,7 +294,8 @@ public class MekanismEmi implements EmiPlugin {
     public static <RECIPE extends MekanismRecipe<?>, TYPE extends IRecipeViewerRecipeType<RECIPE> & IMekanismRecipeTypeProvider<?, RECIPE, ?>> void addCategoryAndRecipes(
           EmiRegistry registry, TYPE recipeType, BiFunction<MekanismEmiRecipeCategory, RecipeHolder<RECIPE>, MekanismEmiRecipe<RECIPE>> recipeCreator) {
         MekanismEmiRecipeCategory category = addCategory(registry, recipeType);
-        for (RecipeHolder<RECIPE> recipe : recipeType.getRecipes(registry.getRecipeManager())) {
+        //todo - 26.1: review recipe access when updating emi
+        for (RecipeHolder<RECIPE> recipe : recipeType.getRecipes(MekanismClient.clientRecipes())) {
             registry.addRecipe(recipeCreator.apply(category, recipe));
         }
     }
