@@ -10,6 +10,7 @@ import mekanism.client.gui.tooltip.TooltipUtils;
 import mekanism.common.inventory.GuiComponents.IDropdownEnum;
 import mekanism.common.registries.MekanismSounds;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.util.Util;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
@@ -88,7 +89,7 @@ public class GuiDropdown<TYPE extends Enum<TYPE> & IDropdownEnum<TYPE>> extends 
     @Override
     public void drawBackground(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(guiGraphics, mouseX, mouseY, partialTicks);
-        renderBackgroundTexture(guiGraphics, getResource(), GuiInnerScreen.SCREEN_SIZE, GuiInnerScreen.SCREEN_SIZE);
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, getResource(), getButtonX(), getButtonY(), getButtonWidth(), getButtonHeight());
 
         int index = getHoveredIndex(mouseX, mouseY);
         if (index != -1) {
@@ -97,14 +98,14 @@ public class GuiDropdown<TYPE extends Enum<TYPE> & IDropdownEnum<TYPE>> extends 
 
         TYPE current = curType.get();
         if (current.getIcon() != null) {
-            guiGraphics.blit(current.getIcon(), relativeX + width - ICON_OFFSET, relativeY + 3, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, current.getIcon(), relativeX + width - ICON_OFFSET, relativeY + 3, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
         }
 
         if (isOpen) {
             for (int i = 0; i < options.length; i++) {
                 Identifier icon = options[i].getIcon();
                 if (icon != null) {
-                    guiGraphics.blit(icon, relativeX + width - ICON_OFFSET, relativeY + ELEMENT_HEIGHT + 2 + 10 * i, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+                    guiGraphics.blit(RenderPipelines.GUI_TEXTURED, icon, relativeX + width - ICON_OFFSET, relativeY + ELEMENT_HEIGHT + 2 + 10 * i, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
                 }
             }
         }

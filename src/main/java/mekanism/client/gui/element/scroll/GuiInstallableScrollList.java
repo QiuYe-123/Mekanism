@@ -6,6 +6,7 @@ import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.render.MekanismRenderer;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -22,9 +23,9 @@ public abstract class GuiInstallableScrollList<TYPE> extends GuiScrollList {
     @Nullable
     protected ScreenRectangle cachedTooltipRect;
 
-    protected GuiInstallableScrollList(IGuiWrapper gui, int x, int y, int height, Identifier background, int backgroundSideSize,
+    protected GuiInstallableScrollList(IGuiWrapper gui, int x, int y, int height, Identifier background,
           Identifier texture, int textureWidth, int textureHeight) {
-        super(gui, x, y, textureWidth + 8, height, textureHeight / 3, background, backgroundSideSize);
+        super(gui, x, y, textureWidth + 8, height, textureHeight / 3, background);
         this.texture = texture;
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
@@ -112,9 +113,9 @@ public abstract class GuiInstallableScrollList<TYPE> extends GuiScrollList {
             }
             EnumColor color = getColor(type);
             if (color != null) {
-                MekanismRenderer.color(guiGraphics, color);
+                MekanismRenderer.color(color);
             }
-            guiGraphics.blit(texture, relativeX + 1, relativeY + 1 + multipliedElement, 0, elementHeight * j, textureWidth,
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture, relativeX + 1, relativeY + 1 + multipliedElement, 0, elementHeight * j, textureWidth,
                   elementHeight, textureWidth, textureHeight);
             if (color != null) {
                 MekanismRenderer.resetColor(guiGraphics);

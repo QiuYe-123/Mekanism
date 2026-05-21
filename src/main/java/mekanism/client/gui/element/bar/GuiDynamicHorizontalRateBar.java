@@ -7,6 +7,7 @@ import mekanism.common.lib.Color.ColorFunction;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
 public class GuiDynamicHorizontalRateBar extends GuiBar<IBarInfoHandler> {
@@ -32,13 +33,13 @@ public class GuiDynamicHorizontalRateBar extends GuiBar<IBarInfoHandler> {
         if (displayInt > 0) {
             for (int i = 0; i < displayInt; i++) {
                 float level = i / (float) (width - 2);
-                MekanismRenderer.color(guiGraphics, colorFunction.getColor(level));
+                MekanismRenderer.color(colorFunction.getColor(level));
                 if (i == 0) {
-                    guiGraphics.blit(getResource(), relativeX + 1, relativeY + 1, 0, 0, 1, texHeight, texWidth, texHeight);
+                    guiGraphics.blit(RenderPipelines.GUI_TEXTURED, getResource(), relativeX + 1, relativeY + 1, 0, 0, 1, texHeight, texWidth, texHeight);
                 } else if (i == displayInt - 1) {
-                    guiGraphics.blit(getResource(), relativeX + 1 + i, relativeY + 1, texWidth - 1, 0, 1, texHeight, texWidth, texHeight);
+                    guiGraphics.blit(RenderPipelines.GUI_TEXTURED, getResource(), relativeX + 1 + i, relativeY + 1, texWidth - 1, 0, 1, texHeight, texWidth, texHeight);
                 } else {
-                    guiGraphics.blit(getResource(), relativeX + 1 + i, relativeY + 1, 1, 0, 1, texHeight, texWidth, texHeight);
+                    guiGraphics.blit(RenderPipelines.GUI_TEXTURED, getResource(), relativeX + 1 + i, relativeY + 1, 1, 0, 1, texHeight, texWidth, texHeight);
                 }
             }
             MekanismRenderer.resetColor(guiGraphics);
