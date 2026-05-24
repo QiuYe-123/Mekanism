@@ -25,7 +25,7 @@ public class JadeLookingAtHelper extends SimpleLookingAtHelper {
             RegistryOps<Tag> registryOps = provider.createSerializationContext(NbtOps.INSTANCE);
             ListTag list = new ListTag(elements.size());
             for (ILookingAtElement element : elements) {
-                DataResult<Tag> encoded = JadeTooltipRenderer.ELEMENT_CODEC.encodeStart(registryOps, element);
+                DataResult<Tag> encoded = JadeElementCodecs.ELEMENT_CODEC.encodeStart(registryOps, element);
                 encoded.ifSuccess(list::add);
                 encoded.ifError(error -> Mekanism.logger.warn("Failed to serialize jade looking at data: {}", error.message()));
             }
