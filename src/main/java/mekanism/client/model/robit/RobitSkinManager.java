@@ -99,7 +99,7 @@ public class RobitSkinManager {
     }
 
     public Vector3fc[] getExtents() {
-        BakeResult defaultModel = getBaked(MekanismRobitSkins.BASE_HOLDER.value(), MekanismRobitSkins.BASE_SKIN_TEXTURE);
+        BakeResult defaultModel = getBaked(MekanismRobitSkins.BASE_SKIN, MekanismRobitSkins.BASE_SKIN_TEXTURE);
         return CuboidItemModelWrapper.computeExtents(defaultModel.model.get(0).getQuads(null));
     }
 
