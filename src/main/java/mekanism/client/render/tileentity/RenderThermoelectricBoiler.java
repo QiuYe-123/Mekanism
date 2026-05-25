@@ -46,13 +46,19 @@ public class RenderThermoelectricBoiler extends MultiblockTileEntityRenderer<Boi
           @Nullable ModelFeatureRenderer.CrumblingOverlay breakProgress) {
         super.extractRenderState(boiler, state, partialTick, cameraPosition, breakProgress);
         BoilerMultiblockData multiblock = boiler.getMultiblock();
-        state.waterScale = multiblock.waterTank.isEmpty() ? 0 :multiblock.prevWaterScale;
-        state.steamScale = multiblock.steamTank.isEmpty() ? 0 :multiblock.prevSteamScale;
+        state.waterScale = multiblock.waterTank.isEmpty() ? 0 : multiblock.prevWaterScale;
+        state.steamScale = multiblock.steamTank.isEmpty() ? 0 : multiblock.prevSteamScale;
+        state.waterData = null;
+        state.waterTexture = null;
+        state.valveTexture = null;
+        state.steamData = null;
+        state.steamTexture = null;
+        state.valves.clear();
         if (multiblock.renderLocation == null || multiblock.upperRenderLocation == null) {
             return;
         }
         int height = multiblock.upperRenderLocation.getY() - 1 - multiblock.renderLocation.getY();
-        if (height > 0) {
+        if (height > 0 && !multiblock.waterTank.isEmpty()) {
             FluidStack fluid = multiblock.waterTank.getFluid();
             state.waterData = RenderData.Builder.create(fluid)
                   .of(multiblock)
@@ -60,13 +66,9 @@ public class RenderThermoelectricBoiler extends MultiblockTileEntityRenderer<Boi
                   .build();
             state.waterTexture = MekanismRenderer.getSinglePicker(MekanismRenderer.getFluidTexture(fluid, MekanismRenderer.FluidTextureType.STILL));
             state.valveTexture = MekanismRenderer.getValveTexture(fluid);
-        } else {
-            state.waterData = null;
-            state.waterTexture = null;
-            state.valveTexture = null;
         }
         int steamHeight = multiblock.renderLocation.getY() + multiblock.height() - 2 - multiblock.upperRenderLocation.getY();
-        if (steamHeight > 0) {
+        if (steamHeight > 0 && !multiblock.steamTank.isEmpty()) {
             ChemicalStack chemicalStack = multiblock.steamTank.getStack();
             state.steamData = RenderData.Builder.create(chemicalStack)
                   .of(multiblock)
@@ -74,10 +76,7 @@ public class RenderThermoelectricBoiler extends MultiblockTileEntityRenderer<Boi
                   .height(steamHeight)
                   .build();
             state.steamTexture = MekanismRenderer.getSinglePicker(MekanismRenderer.getChemicalTexture(chemicalStack));
-        } else {
-            state.steamData = null;
         }
-        state.valves.clear();
         if (state.waterScale > 0 && state.waterData != null) {
             for (IValveHandler.ValveData valve : multiblock.valves) {//todo - 26.1: are these always active? (when not empty) Should they be?
                 state.valves.add(ValveRenderData.get(state.waterData, valve));
