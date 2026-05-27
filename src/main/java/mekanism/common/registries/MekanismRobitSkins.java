@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import mekanism.api.MekanismAPI;
 import mekanism.api.robit.AdvancementBasedRobitSkin;
+import mekanism.api.robit.BasicRobitSkin;
 import mekanism.api.robit.RobitSkin;
 import mekanism.api.robit.RobitSkinSerializationHelper;
 import mekanism.common.Mekanism;
@@ -37,6 +38,7 @@ public class MekanismRobitSkins {
 
     public static final ResourceKey<RobitSkin> BASE = ROBIT_SKINS.dataKey("robit");
     public static final Identifier BASE_SKIN_TEXTURE = Mekanism.rl("robit");
+    public static final RobitSkin BASE_SKIN = new BasicRobitSkin(List.of(BASE_SKIN_TEXTURE, BASE_SKIN_TEXTURE.withSuffix("2")));
     public static final ResourceKey<RobitSkin> ALLAY = ROBIT_SKINS.dataKey("allay");
 
     public static final Holder<RobitSkin> BASE_HOLDER = DeferredHolder.create(BASE);
@@ -72,7 +74,7 @@ public class MekanismRobitSkins {
     public static RobitSkin get(RegistryAccess registryAccess, ResourceKey<RobitSkin> key) {
         Registry<RobitSkin> skinRegistry = getSkinRegistry(registryAccess);
         RobitSkin value = skinRegistry.getValue(key);
-        return value != null ? value : BASE_HOLDER.value();
+        return value != null ? value : skinRegistry.getOrThrow(BASE).value();
     }
 
     public record SkinLookup(ResourceKey<RobitSkin> name, Holder.Reference<RobitSkin> skinHolder) {
