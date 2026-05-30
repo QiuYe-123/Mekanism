@@ -26,6 +26,7 @@ import mekanism.generators.client.render.RenderFusionReactor;
 import mekanism.generators.client.render.RenderIndustrialTurbine;
 import mekanism.generators.client.render.RenderTurbineRotor;
 import mekanism.generators.client.render.RenderWindGenerator;
+import mekanism.generators.client.render.item.RenderWindGeneratorItem;
 import mekanism.generators.common.MekanismGenerators;
 import mekanism.generators.common.registries.GeneratorsBlocks;
 import mekanism.generators.common.registries.GeneratorsContainerTypes;
@@ -42,10 +43,10 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterFluidModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
@@ -57,18 +58,6 @@ public class GeneratorsClientRegistration {
 
     @SubscribeEvent
     public static void init(FMLClientSetupEvent event) {
-        //TODO - 26.1 fluid models
-        /*event.enqueueWork(() -> {
-            //Set fluids to a translucent render layer
-            for (Holder<Fluid> fluid : GeneratorsFluids.FLUIDS.getFluidEntries()) {
-                ItemBlockRenderTypes.setRenderLayer(fluid.value(), RenderType.translucent());
-            }
-        });*/
-
-        //TODO - 26.1 Models
-        // adv solar gen requires to be translated up 1 block, so handle the model separately
-        /*ClientRegistration.addCustomModel(GeneratorsBlocks.ADVANCED_SOLAR_GENERATOR, (orig, evt) -> new TransformedBakedModel<Void>(orig,
-              QuadTransformation.translate(0, 1, 0)));*/
         //TODO: Eventually make use of these custom model wrappers
         //ClientRegistration.addCustomModel(GeneratorsBlocks.FISSION_FUEL_ASSEMBLY, (orig, evt) -> new FuelAssemblyBakedModel(orig, 0.75));
         //ClientRegistration.addCustomModel(GeneratorsBlocks.CONTROL_ROD_ASSEMBLY, (orig, evt) -> new FuelAssemblyBakedModel(orig, 0.375));
@@ -96,12 +85,6 @@ public class GeneratorsClientRegistration {
     public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(ModelWindGenerator.GENERATOR_LAYER, ModelWindGenerator::createLayerDefinition);
         event.registerLayerDefinition(ModelTurbine.TURBINE_LAYER, ModelTurbine::createLayerDefinition);
-    }
-
-    @SubscribeEvent
-    public static void registerClientReloadListeners(AddClientReloadListenersEvent event) {
-        //TOD 26.1 models
-        //event.addListener(RenderWindGeneratorItem.RENDERER);
     }
 
     @SuppressWarnings("Convert2MethodRef")
@@ -141,9 +124,12 @@ public class GeneratorsClientRegistration {
 
     @SubscribeEvent
     public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
-        //TODO - 26.1 models
-        //event.registerItem(new MekRenderProperties(RenderWindGeneratorItem.RENDERER), GeneratorsBlocks.WIND_GENERATOR.getItemHolder());
         ClientRegistrationUtil.registerBlockExtensions(event, GeneratorsBlocks.BLOCKS);
         ClientRegistrationUtil.registerFluidExtensions(event, GeneratorsFluids.FLUIDS);
+    }
+
+    @SubscribeEvent
+    public static void specialItemRenderers(RegisterSpecialModelRendererEvent event) {
+        event.register(MekanismGenerators.rl("wind_generator_model"), RenderWindGeneratorItem.Unbaked.MAP_CODEC);
     }
 }
