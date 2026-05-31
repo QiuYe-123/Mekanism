@@ -1,19 +1,14 @@
 package mekanism.common.integration.lookingat.jade;
 
-import java.util.Optional;
 import mekanism.api.SerializationConstants;
 import mekanism.client.render.IFancyFontRenderer.TextAlignment;
-import mekanism.common.integration.lookingat.ILookingAtElement;
 import mekanism.common.integration.lookingat.LookingAtElement;
+import mekanism.common.integration.lookingat.LookingAtElementType;
 import mekanism.common.integration.lookingat.TextElement;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.RegistryOps;
 import org.jetbrains.annotations.Nullable;
 import snownee.jade.api.Accessor;
 import snownee.jade.api.IComponentProvider;
@@ -32,43 +27,35 @@ public class JadeTooltipRenderer<ACCESSOR extends Accessor<?>> implements ICompo
 
     @Override
     public void appendTooltip(ITooltip tooltip, ACCESSOR accessor, IPluginConfig config) {
-        CompoundTag data = accessor.getServerData();
-        Optional<ListTag> optionalData = data.getList(SerializationConstants.MEK_DATA);
-        if (optionalData.isPresent()) {
-            Component lastText = null;
-            RegistryOps<Tag> registryOps = accessor.getLevel().registryAccess().createSerializationContext(NbtOps.INSTANCE);
-            //Copy the data we need and have from the server and pass it on to the tooltip rendering
-            ListTag list = optionalData.get();
-            for (int i = 0; i < list.size(); i++) {
-                //TODO - 26.1: Make this non capturing if jade doesn't end up switching to value inputs/outputs and we have to stay with using compound tags
-                Optional<ILookingAtElement> lookingAtElement = list.getCompound(i).flatMap(compound -> JadeElementCodecs.ELEMENT_CODEC.parse(registryOps, compound).result());
-                if (lookingAtElement.isEmpty()) {
-                    //Error deserializing, skip it
-                    continue;
-                }
-                ILookingAtElement element = lookingAtElement.get();
-                if (element instanceof TextElement(Component text)) {
-                    if (lastText != null) {//Fallback to printing the last text
-                        tooltip.add(lastText);
+        Tag tag = accessor.getServerData().get(SerializationConstants.MEK_DATA);
+        if (tag != null) {
+            accessor.decodeFromNbt(LookingAtElementType.ELEMENT_LIST_STREAM_CODEC, tag).ifPresent(elements -> {
+                Component lastText = null;
+                //Copy the data we need and have from the server and pass it on to the tooltip rendering
+                for (var element : elements) {
+                    if (element instanceof TextElement(Component text)) {
+                        if (lastText != null) {
+                            tooltip.add(lastText);
+                        }
+                        lastText = text;
+                    } else {
+                        Identifier name = element.getID();
+                        if (config.get(name)) {
+                            tooltip.add(MekElement.create(lastText, (LookingAtElement) element).tag(name));
+                        }
+                        lastText = null;
                     }
-                    lastText = text;
-                } else {
-                    Identifier name = element.getID();
-                    if (config.get(name)) {
-                        tooltip.add(new MekElement(lastText, (LookingAtElement) element).tag(name));
-                    }
-                    lastText = null;
                 }
-            }
-            if (lastText != null) {
-                tooltip.add(lastText);
-            }
+                if (lastText != null) {
+                    tooltip.add(lastText);
+                }
+            });
         }
     }
 
     private static class MekElement extends Element {
 
-        public Element create(@Nullable Component text, LookingAtElement element) {
+        public static Element create(@Nullable Component text, LookingAtElement element) {
             MekElement mekElement = new MekElement(text, element);
             int width = element.getWidth();
             int height = element.getHeight() + 2;
@@ -99,7 +86,7 @@ public class JadeTooltipRenderer<ACCESSOR extends Accessor<?>> implements ICompo
             int x = getX();
             int y = getY();
             if (text != null) {
-                element.drawScrollingString(guiGraphics, text, x,y + 3, TextAlignment.LEFT, 0xFFFFFF, 4, false);
+                element.drawScrollingString(guiGraphics, text, x, y + 3, TextAlignment.LEFT, 0xFFFFFFFF, 4, false);
                 y += 13;
             }
             element.render(guiGraphics, x, y + 1);
