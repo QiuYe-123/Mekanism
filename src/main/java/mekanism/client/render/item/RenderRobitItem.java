@@ -55,7 +55,7 @@ public class RenderRobitItem implements SpecialModelRenderer<BakeResult> {
             ClientLevel level = Minecraft.getInstance().level;
             RobitSkin skin;
             if (level == null) {
-                skin = MekanismRobitSkins.BASE_HOLDER.value();//not sure if this will work tbh, but this shouldn't happen anyway
+                skin = MekanismRobitSkins.BASE_SKIN;
             } else {
                 skin = MekanismRobitSkins.get(level.registryAccess(), skinKey);
             }
