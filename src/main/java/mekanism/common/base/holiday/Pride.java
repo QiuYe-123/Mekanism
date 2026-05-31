@@ -12,7 +12,7 @@ class Pride extends Holiday {
     }
 
     @Override
-    HolidayMessage getMessage(Player player) {
+    public HolidayMessage getMessage(Player player) {
         return null;
     }
 }
