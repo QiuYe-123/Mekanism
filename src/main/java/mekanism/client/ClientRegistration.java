@@ -83,9 +83,11 @@ import mekanism.client.model.ModelJetpack;
 import mekanism.client.model.ModelScubaMask;
 import mekanism.client.model.ModelScubaTank;
 import mekanism.client.model.blockstate.EnergyCubeModel;
+import mekanism.client.model.blockstate.QIODriveArrayBlockStateModel.Unbaked;
 import mekanism.client.model.blockstate.QIORedstoneAdapterModel;
 import mekanism.client.model.blockstate.TransmitterBlockStateModel;
 import mekanism.client.model.energycube.EnergyCubeBaseLoader;
+import mekanism.client.model.item.QIODriveArrayItemModel;
 import mekanism.client.model.itemtint.ColorComponent;
 import mekanism.client.model.itemtint.ColorModulationTint;
 import mekanism.client.model.props.ClientRadiationScale;
@@ -196,6 +198,7 @@ import net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyE
 import net.neoforged.neoforge.client.event.RegisterFluidModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
+import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
@@ -341,6 +344,11 @@ public class ClientRegistration {
     }
 
     @SubscribeEvent
+    public static void registerItemModels(RegisterItemModelsEvent event) {
+        event.register(Mekanism.rl("qio_drive_item"), QIODriveArrayItemModel.Unbaked.MAP_CODEC);
+    }
+
+    @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event) {
         ClientRegistrationUtil.registerScreen(event, MekanismContainerTypes.MODULE_TWEAKER, GuiModuleTweaker::new);
 
@@ -427,6 +435,7 @@ public class ClientRegistration {
         event.registerModel(EnergyCubeModel.Unbaked.ID, EnergyCubeModel.Unbaked.MAP_CODEC);
         event.registerModel(QIORedstoneAdapterModel.Unbaked.ID, QIORedstoneAdapterModel.Unbaked.MAP_CODEC);
         event.registerModel(TransmitterBlockStateModel.Unbaked.ID, TransmitterBlockStateModel.Unbaked.MAP_CODEC);
+        event.registerModel(Mekanism.rl("qio_drive"), Unbaked.MAP_CODEC);
     }
 
     @SubscribeEvent

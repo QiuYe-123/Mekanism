@@ -8,9 +8,11 @@ import java.util.Map;
 import java.util.Optional;
 import mekanism.api.tier.BaseTier;
 import mekanism.client.model.blockstate.EnergyCubeModel;
+import mekanism.client.model.blockstate.QIODriveArrayBlockStateModel;
 import mekanism.client.model.blockstate.QIORedstoneAdapterModel;
 import mekanism.client.model.blockstate.TransmitterBlockStateModel;
 import mekanism.client.model.data.TransmitterModelData.VisualConnectionStatus;
+import mekanism.client.model.item.QIODriveArrayItemModel;
 import mekanism.client.model.itemtint.ColorComponent;
 import mekanism.client.model.itemtint.ColorModulationTint;
 import mekanism.client.model.props.ClientRadiationScale;
@@ -59,6 +61,7 @@ import net.minecraft.client.renderer.block.dispatch.SingleVariant;
 import net.minecraft.client.renderer.block.dispatch.Variant;
 import net.minecraft.client.renderer.block.dispatch.VariantMutator;
 import net.minecraft.client.renderer.block.dispatch.WeightedVariants;
+import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.properties.select.ComponentContents;
 import net.minecraft.client.renderer.item.properties.select.DisplayContext;
@@ -241,7 +244,11 @@ public class MekanismModelProvider extends BaseModelProvider {
                 case ItemRegistryObject<?> item -> existingModel(item);
                 default -> throw new IllegalArgumentException("unknown type");
             };
-            itemModels.itemModelOutput.accept(holder.asItem(), ItemModelUtils.tintedModel(modelLocation, IGNORE_LAYER, ColorComponent.INSTANCE));
+            ItemModel.Unbaked unbaked = ItemModelUtils.tintedModel(modelLocation, IGNORE_LAYER, ColorComponent.INSTANCE);
+            if (holder == MekanismBlocks.QIO_DRIVE_ARRAY) {
+                unbaked = new QIODriveArrayItemModel.Unbaked((CuboidItemModelWrapper.Unbaked) unbaked);
+            }
+            itemModels.itemModelOutput.accept(holder.asItem(), unbaked);
         }
 
         for (ItemRegistryObject<?> registryObject : List.of(MekanismItems.MEKASUIT_HELMET, MekanismItems.MEKASUIT_BODYARMOR, MekanismItems.MEKASUIT_PANTS, MekanismItems.MEKASUIT_BOOTS)) {
@@ -395,6 +402,21 @@ public class MekanismModelProvider extends BaseModelProvider {
                               .select(Direction.EAST, BlockModelGenerators.Y_ROT_270.then(BlockModelGenerators.X_ROT_270)))
             );
             //item model handled above
+        }
+
+        {
+            Block block = MekanismBlocks.QIO_DRIVE_ARRAY.value();
+            MultiVariant offlineVariant = customVariant(new QIODriveArrayBlockStateModel.Unbaked(BlockModelGenerators.plainModel(existingModel("block/qio_drive_array_offline"))));
+            MultiVariant onlineVariant = customVariant(new QIODriveArrayBlockStateModel.Unbaked(BlockModelGenerators.plainModel(existingModel("block/qio_drive_array"))));
+            blockModels.blockStateOutput.accept(
+                  MultiVariantGenerator.dispatch(block)
+                        .with(
+                              PropertyDispatch.initial(AttributeStateActive.activeProperty)
+                                    .select(false, offlineVariant)
+                                    .select(true, onlineVariant)
+                        )
+                        .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING)
+            );
         }
 
         transmitter(blockModels, MekanismBlocks.ADVANCED_LOGISTICAL_TRANSPORTER, "block/transmitter/large/logistical_transporter/advanced", "block/transmitter/large/logistical_transporter/transporter_glass");
@@ -690,7 +712,6 @@ public class MekanismModelProvider extends BaseModelProvider {
         markManualBlockState(MekanismBlocks.PRESSURIZED_REACTION_CHAMBER);
         markManualBlockState(MekanismBlocks.PURIFICATION_CHAMBER);
         markManualBlockState(MekanismBlocks.QIO_DASHBOARD);
-        markManualBlockState(MekanismBlocks.QIO_DRIVE_ARRAY);
         markManualBlockState(MekanismBlocks.QIO_EXPORTER);
         markManualBlockState(MekanismBlocks.QIO_IMPORTER);
         markManualBlockState(MekanismBlocks.QUANTUM_ENTANGLOPORTER);
@@ -759,6 +780,9 @@ public class MekanismModelProvider extends BaseModelProvider {
                 }
                 case EnergyCubeModel.Unbaked energyCube -> {
                     return new EnergyCubeModel.Unbaked(variantMutator.apply(energyCube.tierModel()));
+                }
+                case QIODriveArrayBlockStateModel.Unbaked qio -> {
+                    return new QIODriveArrayBlockStateModel.Unbaked(variantMutator.apply(qio.baseModel()));
                 }
                 default -> throw new IllegalStateException("Don't know how to handle " + toMutate);
             }
