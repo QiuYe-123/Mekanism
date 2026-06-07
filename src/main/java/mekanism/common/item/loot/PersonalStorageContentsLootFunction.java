@@ -43,7 +43,7 @@ public class PersonalStorageContentsLootFunction implements LootItemFunction {
 
     @Override
     public ItemStack apply(ItemStack stack, LootContext lootContext) {
-        BlockEntity blockEntity = lootContext.getParameter(LootContextParams.BLOCK_ENTITY);
+        BlockEntity blockEntity = lootContext.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
         if (blockEntity instanceof TileEntityPersonalStorage personalStorage && !personalStorage.isInventoryEmpty()) {
             List<IInventorySlot> tileSlots = personalStorage.getInventorySlots(null);
             AbstractPersonalStorageItemInventory destInv;

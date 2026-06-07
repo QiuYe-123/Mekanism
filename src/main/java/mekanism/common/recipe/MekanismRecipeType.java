@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import mekanism.api.recipes.ChemicalChemicalToChemicalRecipe;
@@ -192,17 +191,6 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
         return inputCache;
     }
 
-    @Nullable
-    private static RegistryAccess tryGetRegistryAccess() {
-        //Try to get a fallback world if we are in a context that may not have one
-        //If we are on the client get the client's world, if we are on the server get the current server's world
-        if (FMLEnvironment.getDist().isClient()) {
-            Level clientWorld = MekanismClient.tryGetClientWorld();
-            return clientWorld != null ? clientWorld.registryAccess() : null;
-        }
-        return Objects.requireNonNull(ServerLifecycleHooks.getCurrentServer(), "Server not running?").registryAccess();
-    }
-
     @NotNull
     @Override
     public List<RecipeHolder<RECIPE>> getRecipes(@Nullable Level world) {
@@ -255,8 +243,11 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
         if (this == SMELTING.get()) {
             //Ensure the recipes can be modified
             recipes = new ArrayList<>(recipes);
-            for (RecipeHolder<SmeltingRecipe> recipeHolder : recipeMap.byType(RecipeType.SMELTING)) {
-                SmeltingRecipe smeltingRecipe = recipeHolder.value();
+            for (RecipeHolder<?> recipeHolder : recipeMap.byType(RecipeType.SMELTING)) {
+                if (!(recipeHolder.value() instanceof SmeltingRecipe smeltingRecipe)) {
+                    // Some mods register custom recipes under the vanilla smelting type.
+                    continue;
+                }
                 if (smeltingRecipe.input().isEmpty()) {
                     continue;
                 }
