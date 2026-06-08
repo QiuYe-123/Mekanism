@@ -4,20 +4,16 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import mekanism.client.render.MekanismCurioRenderer;
 import mekanism.client.render.armor.ICustomArmor;
-import mekanism.client.render.armor.ISpecialGear;
+import mekanism.client.render.armor.JetpackArmor;
 import mekanism.common.Mekanism;
 import mekanism.common.registries.MekanismItems;
 import mekanism.common.util.ItemAccessUtils;
-import mekanism.common.util.StackUtils;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.equipment.Equippable;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.item.ItemResource;
@@ -32,20 +28,18 @@ import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 public class CuriosIntegration {
 
     public static void addListeners(IEventBus bus) {
-        bus.addListener((FMLClientSetupEvent event) -> registerRenderers(MekanismItems.JETPACK, MekanismItems.ARMORED_JETPACK));
+        bus.addListener((FMLClientSetupEvent event) -> {
+            registerRenderer(MekanismItems.JETPACK, JetpackArmor.JETPACK);
+            registerRenderer(MekanismItems.ARMORED_JETPACK, JetpackArmor.ARMORED_JETPACK);
+        });
     }
 
-    @SafeVarargs
-    private static void registerRenderers(Holder<Item>... items) {
-        for (Holder<Item> holder : items) {
-            Item item = holder.value();
-            Equippable equippable = item.components().get(DataComponents.EQUIPPABLE);
-            if (StackUtils.isRenderableArmor(equippable) && IClientItemExtensions.of(item) instanceof ISpecialGear gear) {
-                ICustomArmor customArmor = gear.gearModel();
-                ICurioRenderer.register(item, () -> new MekanismCurioRenderer(customArmor));
-            } else {
-                Mekanism.logger.warn("Attempted to register Curios renderer for non-special gear item: {}.", holder.getRegisteredName());
-            }
+    private static void registerRenderer(Holder<Item> holder, ICustomArmor customArmor) {
+        Item item = holder.value();
+        if (customArmor == null) {
+            Mekanism.logger.warn("Attempted to register Curios renderer without a custom armor model for item: {}.", holder.getRegisteredName());
+        } else {
+            ICurioRenderer.register(item, () -> new MekanismCurioRenderer(customArmor));
         }
     }
 
