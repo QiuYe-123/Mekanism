@@ -229,8 +229,11 @@ public class MekanismRecipeType<VANILLA_INPUT extends RecipeInput, RECIPE extend
         if (this == SMELTING.get()) {
             //Ensure the recipes can be modified
             recipes = new ArrayList<>(recipes);
-            for (RecipeHolder<SmeltingRecipe> recipeHolder : recipeMap.byType(RecipeType.SMELTING)) {
-                SmeltingRecipe smeltingRecipe = recipeHolder.value();
+            for (RecipeHolder<?> recipeHolder : recipeMap.byType(RecipeType.SMELTING)) {
+                if (!(recipeHolder.value() instanceof SmeltingRecipe smeltingRecipe)) {
+                    // Some mods register custom recipes under the vanilla smelting type.
+                    continue;
+                }
                 if (smeltingRecipe.input().isEmpty()) {
                     continue;
                 }
