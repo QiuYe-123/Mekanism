@@ -1,5 +1,6 @@
 package mekanism.common.item.block.transmitter;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import mekanism.api.text.EnumColor;
 import mekanism.common.MekanismLang;
@@ -16,24 +17,28 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemBlockLogisticalTransporter extends ItemBlockTransporter<TileEntityLogisticalTransporter> {
 
+    private final TransporterTier tier;
+
     public ItemBlockLogisticalTransporter(BlockLargeTransmitter<TileEntityLogisticalTransporter> block, Item.Properties properties) {
+        tier = Objects.requireNonNull(Attribute.getTier(block, TransporterTier.class));
         super(block, properties);
     }
 
     @NotNull
     @Override
     public TransporterTier getTier() {
-        return Attribute.getTier(getBlock(), TransporterTier.class);
+        return tier;
     }
 
     @Override
-    protected void addStats(@NotNull ItemStack stack, @NotNull Item.TooltipContext context, @NotNull TooltipDisplay tooltipDisplay, @NotNull Consumer<Component> tooltipAdder, @NotNull TooltipFlag flag) {
-        super.addStats(stack, context, tooltipDisplay, tooltipAdder, flag);
-        TransporterTier tier = getTier();
+    protected void addStats(@NotNull ItemStack stack, @NotNull ItemAccess itemAccess, @NotNull Item.TooltipContext context, @NotNull TooltipDisplay tooltipDisplay,
+          @NotNull Consumer<Component> tooltipAdder, @NotNull TooltipFlag flag) {
+        super.addStats(stack, itemAccess, context, tooltipDisplay, tooltipAdder, flag);
         //Ensure no one somehow passes in invalid data
         float tickRate = Math.max(context.tickRate(), TickRateManager.MIN_TICKRATE);
         float speed = tier.getSpeed() / (5 * SharedConstants.TICKS_PER_SECOND / tickRate);
