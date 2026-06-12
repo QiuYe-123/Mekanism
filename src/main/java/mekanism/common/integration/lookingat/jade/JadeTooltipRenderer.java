@@ -1,10 +1,7 @@
 package mekanism.common.integration.lookingat.jade;
 
-import java.util.List;
-import java.util.Optional;
 import mekanism.api.SerializationConstants;
 import mekanism.client.render.IFancyFontRenderer.TextAlignment;
-import mekanism.common.integration.lookingat.ILookingAtElement;
 import mekanism.common.integration.lookingat.LookingAtElement;
 import mekanism.common.integration.lookingat.LookingAtElementType;
 import mekanism.common.integration.lookingat.TextElement;
@@ -33,33 +30,27 @@ public class JadeTooltipRenderer<ACCESSOR extends Accessor<?>> implements ICompo
     public void appendTooltip(ITooltip tooltip, ACCESSOR accessor, IPluginConfig config) {
         Tag tag = accessor.getServerData().get(SerializationConstants.MEK_DATA);
         if (tag != null) {
-            Optional<List<ILookingAtElement>> optionalElements = accessor.decodeFromNbt(LookingAtElementType.ELEMENT_LIST_STREAM_CODEC, tag);
-            //noinspection OptionalIsPresent - Capturing lambda
-            if (optionalElements.isPresent()) {
-                appendElements(tooltip, config, optionalElements.get());
-            }
-        }
-    }
-
-    private void appendElements(ITooltip tooltip, IPluginConfig config, List<ILookingAtElement> elements) {
-        Component lastText = null;
-        //Copy the data we need and have from the server and pass it on to the tooltip rendering
-        for (ILookingAtElement element : elements) {
-            if (element instanceof TextElement(Component text)) {
-                if (lastText != null) {//Fallback to printing the last text
+            accessor.decodeFromNbt(LookingAtElementType.ELEMENT_LIST_STREAM_CODEC, tag).ifPresent(elements -> {
+                Component lastText = null;
+                //Copy the data we need and have from the server and pass it on to the tooltip rendering
+                for (var element : elements) {
+                    if (element instanceof TextElement(Component text)) {
+                        if (lastText != null) {
+                            tooltip.add(lastText);
+                        }
+                        lastText = text;
+                    } else {
+                        Identifier name = element.getID();
+                        if (config.get(name)) {
+                            tooltip.add(MekElement.create(lastText, (LookingAtElement) element).tag(name));
+                        }
+                        lastText = null;
+                    }
+                }
+                if (lastText != null) {
                     tooltip.add(lastText);
                 }
-                lastText = text;
-            } else {
-                Identifier name = element.getID();
-                if (config.get(name)) {
-                    tooltip.add(MekElement.create(lastText, (LookingAtElement) element).tag(name));
-                }
-                lastText = null;
-            }
-        }
-        if (lastText != null) {
-            tooltip.add(lastText);
+            });
         }
     }
 

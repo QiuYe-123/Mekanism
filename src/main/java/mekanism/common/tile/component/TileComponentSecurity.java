@@ -21,6 +21,7 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 public class TileComponentSecurity implements ITileComponent {
@@ -88,7 +89,10 @@ public class TileComponentSecurity implements ITileComponent {
     }
 
     @Override
-    public void applyImplicitComponents(DataComponentGetter input) {
+    public void applyImplicitComponents(@NonNull DataComponentGetter input) {
+        if (tile.isRemote()) {
+            return;
+        }
         securityMode = input.getOrDefault(MekanismDataComponents.SECURITY, securityMode);
         UUID owner = input.get(MekanismDataComponents.OWNER);
         if (owner != null) {

@@ -10,6 +10,7 @@ import mekanism.api.security.SecurityMode;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.level.storage.SavedDataStorage;
+import net.neoforged.fml.util.thread.EffectiveSide;
 import org.jspecify.annotations.Nullable;
 
 public class FrequencyControllerManager {
@@ -34,7 +35,12 @@ public class FrequencyControllerManager {
 
     @SuppressWarnings("unchecked")
     public static <FREQ extends Frequency> FrequencyController<FREQ> getController(FrequencyType<FREQ> frequencyType) {
-        return (FrequencyController<FREQ>) controllers.get(frequencyType);
+        FrequencyController<FREQ> controller = (FrequencyController<FREQ>) controllers.get(frequencyType);
+        if (controller == null && EffectiveSide.get().isClient()) {
+            controller = FrequencyController.create(frequencyType);
+            controllers.put(frequencyType, controller);
+        }
+        return controller;
     }
 
     protected static <FREQ extends Frequency> FrequencyLookup<FREQ> createLookup(FrequencyType<FREQ> frequencyType, @Nullable UUID uuid, SecurityMode securityMode, Codec<FrequencyLookup<FREQ>> codec) {
