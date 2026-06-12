@@ -8,17 +8,16 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.common.util.ValueIOSerializable;
-import org.jetbrains.annotations.NotNull;
 
 public interface ITileComponent extends ValueIOSerializable {
 
     String getComponentKey();
 
-    default void read(@NotNull ValueInput input) {
+    default void read(ValueInput input) {
         input.readChild(getComponentKey(), this);
     }
 
-    default void write(@NotNull ValueOutput output) {
+    default void write(ValueOutput output) {
         String key = getComponentKey();
         ValueOutput child = output.child(key);
         serialize(child);
@@ -28,7 +27,7 @@ public interface ITileComponent extends ValueIOSerializable {
         }
     }
 
-    default void applyImplicitComponents(@NotNull DataComponentGetter input) {
+    default void applyImplicitComponents(DataComponentGetter input) {
     }
 
     default void collectImplicitComponents(DataComponentMap.Builder builder) {
@@ -37,24 +36,20 @@ public interface ITileComponent extends ValueIOSerializable {
     default void addRemapEntries(List<DataComponentType<?>> remapEntries) {
     }
 
-    /**
-     * Called when the tile is removed, both permanently and during unloads.
-     */
+    /// Called when the tile is removed, both permanently and during unloads.
     default void invalidate() {
     }
 
-    /**
-     * Called when the tile is permanently removed
-     */
+    /// Called when the tile is permanently removed
     default void removed() {
     }
 
     default void trackForMainContainer(MekanismContainer container) {
     }
 
-    default void addToUpdateTag(@NotNull ValueOutput output) {
+    default void addToUpdateTag(ValueOutput output) {
     }
 
-    default void readFromUpdateTag(@NotNull ValueInput input) {
+    default void readFromUpdateTag(ValueInput input) {
     }
 }

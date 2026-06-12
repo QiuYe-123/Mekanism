@@ -21,7 +21,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.Nullable;
 
 public abstract class TileEntityGenerator extends TileEntityMekanism {
 
@@ -29,11 +30,10 @@ public abstract class TileEntityGenerator extends TileEntityMekanism {
 
     @Nullable
     private List<BlockCapabilityCache<EnergyHandler, @Nullable Direction>> outputCaches;
+    @UnknownNullability//Initialized via getInitialEnergyContainer
     private BasicEnergyContainer energyContainer;
 
-    /**
-     * Generator -- a block that produces energy. It has a certain amount of fuel it can store as well as an output rate.
-     */
+    /// Generator -- a block that produces energy. It has a certain amount of fuel it can store as well as an output rate.
     public TileEntityGenerator(Holder<Block> blockProvider, BlockPos pos, BlockState state) {
         super(blockProvider, pos, state);
     }
@@ -43,14 +43,14 @@ public abstract class TileEntityGenerator extends TileEntityMekanism {
     }
 
     @Override
-    protected @Nullable IEnergyContainerHolder getInitialEnergyContainer(IContentsListener listener) {
+    protected IEnergyContainerHolder getInitialEnergyContainer(IContentsListener listener) {
         energyContainer = BasicEnergyContainer.output(MachineEnergyContainer.validateBlock(this).getStorage(), listener);
         return new BasicEnergyHolder(energyContainer, facingSupplier, getEnergySides());
     }
 
     @Override
-    protected boolean onUpdateServer() {
-        boolean sendUpdatePacket = super.onUpdateServer();
+    protected boolean onUpdateServer(ServerLevel level) {
+        boolean sendUpdatePacket = super.onUpdateServer(level);
         if (canFunction()) {
             //TODO: Maybe even make some generators have a side config/ejector component and move this to the ejector component?
             if (outputCaches == null) {
@@ -59,7 +59,7 @@ public abstract class TileEntityGenerator extends TileEntityMekanism {
                 outputCaches = new ArrayList<>(energySides.size());
                 for (RelativeSide energySide : energySides) {
                     Direction side = energySide.getDirection(direction);
-                    outputCaches.add(Capabilities.ENERGY.createCache((ServerLevel) level, worldPosition.relative(side), side.getOpposite()));
+                    outputCaches.add(Capabilities.ENERGY.createCache(level, worldPosition.relative(side), side.getOpposite()));
                 }
             }
             EnergyUtils.emit(outputCaches, energyContainer, null);

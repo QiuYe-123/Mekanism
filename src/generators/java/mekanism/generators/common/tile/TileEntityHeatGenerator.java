@@ -1,6 +1,7 @@
 package mekanism.generators.common.tile;
 
 import com.google.common.primitives.Ints;
+import java.util.Objects;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.RelativeSide;
@@ -11,14 +12,14 @@ import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.heat.IHeatHandler;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.math.MathUtils;
-import mekanism.common.attachments.containers.type.ContainerType;
-import mekanism.common.attachments.containers.type.IContainerType;
 import mekanism.common.capabilities.fluid.BasicFluidTank;
 import mekanism.common.capabilities.fluid.VariableCapacityFluidTank;
 import mekanism.common.capabilities.heat.BasicHeatCapacitor;
 import mekanism.common.capabilities.heat.CachedAmbientTemperature;
 import mekanism.common.capabilities.holder.container.IContainerHolder;
 import mekanism.common.capabilities.holder.container.MekContainerHelper;
+import mekanism.common.component.containers.type.ContainerType;
+import mekanism.common.component.containers.type.IContainerType;
 import mekanism.common.config.listener.ConfigBasedCachedIntSupplier;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerFluidTankWrapper;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerHeatCapacitorWrapper;
@@ -37,6 +38,7 @@ import mekanism.generators.common.slot.FluidFuelInventorySlot;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,8 +46,8 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.transfer.energy.EnergyHandlerUtil;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.Nullable;
 
 public class TileEntityHeatGenerator extends TileEntityGenerator {
 
@@ -60,9 +62,8 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
         return MathUtils.addClamped(passiveMax, MekanismGeneratorsConfig.generators.heatGeneration.get());
     }, MekanismGeneratorsConfig.generators.heatGeneration, MekanismGeneratorsConfig.generators.heatGenerationLava, MekanismGeneratorsConfig.generators.heatGenerationNether);
 
-    /**
-     * The FluidTank for this generator.
-     */
+    /// The FluidTank for this generator.
+    @UnknownNullability//Initialized via getInitialFluidTanks
     @WrappingComputerMethod(wrapper = ComputerFluidTankWrapper.class, methodNames = {"getLava", "getLavaCapacity", "getLavaNeeded",
                                                                                      "getLavaFilledPercentage"}, docPlaceholder = "lava tank")
     public BasicFluidTank lavaTank;
@@ -70,10 +71,13 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
     private double lastTransferLoss;
     private double lastEnvironmentLoss;
 
+    @UnknownNullability//Initialized via getInitialHeatCapacitors
     @WrappingComputerMethod(wrapper = ComputerHeatCapacitorWrapper.class, methodNames = "getTemperature", docPlaceholder = "generator")
     BasicHeatCapacitor heatCapacitor;
+    @UnknownNullability//Initialized via getInitialInventory
     @WrappingComputerMethod(wrapper = ComputerIInventorySlotWrapper.class, methodNames = "getFuelItem", docPlaceholder = "fuel item slot")
     FluidFuelInventorySlot fuelSlot;
+    @UnknownNullability//Initialized via getInitialInventory
     @WrappingComputerMethod(wrapper = ComputerIInventorySlotWrapper.class, methodNames = "getEnergyItem", docPlaceholder = "energy item slot")
     EnergyInventorySlot energySlot;
 
@@ -81,7 +85,6 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
         super(GeneratorsBlocks.HEAT_GENERATOR, pos, state);
     }
 
-    @NotNull
     @Override
     protected IContainerHolder<IFluidTank> getInitialFluidTanks(IContentsListener listener) {
         MekContainerHelper<IFluidTank> builder = MekContainerHelper.forSide(facingSupplier);
@@ -91,7 +94,6 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
         return builder.build();
     }
 
-    @NotNull
     @Override
     protected IContainerHolder<IInventorySlot> getInitialInventory(IContentsListener listener) {
         MekContainerHelper<IInventorySlot> builder = MekContainerHelper.forSide(facingSupplier);
@@ -103,7 +105,6 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
         return builder.build();
     }
 
-    @NotNull
     @Override
     protected IContainerHolder<IHeatCapacitor> getInitialHeatCapacitors(IContentsListener listener, CachedAmbientTemperature ambientTemperature) {
         MekContainerHelper<IHeatCapacitor> builder = MekContainerHelper.forSide(facingSupplier);
@@ -112,8 +113,8 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
     }
 
     @Override
-    protected boolean onUpdateServer() {
-        boolean sendUpdatePacket = super.onUpdateServer();
+    protected boolean onUpdateServer(ServerLevel level) {
+        boolean sendUpdatePacket = super.onUpdateServer(level);
         energySlot.drainContainerIntoSlot(null);
         fuelSlot.fillOrBurn(null);
         long prev = energyContainer().getAmountAsLong();
@@ -181,10 +182,9 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
         return side == Direction.DOWN ? HeatAPI.DEFAULT_INVERSE_INSULATION : super.getTotalInverseInsulation(side);
     }
 
-    @NotNull
     @Override
     public HeatTransfer simulate() {
-        double ambientTemp = ambientTemperature.getAsDouble();
+        double ambientTemp = Objects.requireNonNull(ambientTemperature, "Tile cannot simulate temperature before initialization").getAsDouble();
         double temp = getTotalTemperature();
         // 1 - Qc / Qh
         double carnotEfficiency = 1 - Math.min(ambientTemp, temp) / Math.max(ambientTemp, temp);
@@ -200,7 +200,7 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
 
     @Nullable
     @Override
-    public IHeatHandler getAdjacent(@NotNull Direction side) {
+    public IHeatHandler getAdjacent(Direction side) {
         return side == Direction.DOWN ? getAdjacentUnchecked(side) : null;
     }
 

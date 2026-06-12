@@ -2,20 +2,18 @@ package mekanism.common.content.gear.shared;
 
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
-import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.api.math.MathUtils;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.registries.MekanismModules;
 import mekanism.common.util.EnergyUtils;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-@ParametersAreNotNullByDefault
 public class ModuleEnergyUnit implements ICustomModule<ModuleEnergyUnit> {
 
     public static long getEnergyCapacity(ItemAccess attachedAccess, LongSupplier base) {

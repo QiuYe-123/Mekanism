@@ -3,13 +3,12 @@ package mekanism.common.tile.multiblock;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.fluid.IFluidTank;
-import mekanism.common.attachments.containers.type.ContainerType;
-import mekanism.common.attachments.containers.type.IContainerType;
+import mekanism.common.component.containers.type.ContainerType;
+import mekanism.common.component.containers.type.IContainerType;
 import mekanism.common.capabilities.holder.container.IContainerHolder;
 import mekanism.common.registries.MekanismBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
 
 public class TileEntityDynamicValve extends TileEntityDynamicTank {
 
@@ -17,13 +16,11 @@ public class TileEntityDynamicValve extends TileEntityDynamicTank {
         super(MekanismBlocks.DYNAMIC_VALVE, pos, state);
     }
 
-    @NotNull
     @Override
     protected IContainerHolder<IFluidTank> getInitialFluidTanks(IContentsListener listener) {
         return _ -> getMultiblock().getValveFluidTanks(getBlockPos());
     }
 
-    @NotNull
     @Override
     public IContainerHolder<IChemicalTank> getInitialChemicalTanks(IContentsListener listener) {
         return _ -> getMultiblock().getChemicalTanks();

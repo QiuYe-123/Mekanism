@@ -2,7 +2,6 @@ package mekanism.client.render.transmitter;
 
 import java.util.Collections;
 import java.util.List;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.EnumColor;
 import mekanism.client.render.RenderResizableCuboid;
 import mekanism.client.render.RenderResizableCuboid.SideRender.SideRenderFlags;
@@ -11,11 +10,11 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.SpriteId;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.CommonColors;
+import org.jspecify.annotations.Nullable;
 import org.joml.Vector3f;
 
 //TODO - 26.1: Do we want to override fillCrashReportCategory to add more details to it?
-@NothingNullByDefault
 public class TransmitterRenderState extends BlockEntityRenderState {
 
     @Nullable
@@ -30,18 +29,18 @@ public class TransmitterRenderState extends BlockEntityRenderState {
 
     public static class ConductorRenderState extends TransmitterRenderState {
 
-        public int tempColor = 0xFFFFFFFF;
+        public int tempColor = CommonColors.WHITE;
     }
 
     public static class PipeRenderState extends BufferedTransmitterRenderState {
 
-        @Nullable
-        public RenderResizableCuboid.TexturePicker fluidTexture;
-        public int fluidTint = 0XFFFFFFFF;
+        public RenderResizableCuboid.@Nullable TexturePicker fluidTexture;
+        public int fluidTint = CommonColors.WHITE;
         public int glow;
         public int stage;
         public boolean[] renderSideModel = new boolean[EnumUtils.DIRECTIONS.length];
-        public @SideRenderFlags byte coreSideRender = 0;
+        @SideRenderFlags
+        public byte coreSideRender = 0;
         public boolean renderBase;
     }
 
@@ -68,6 +67,6 @@ public class TransmitterRenderState extends BlockEntityRenderState {
 
         @Nullable
         public TextureAtlasSprite chemicalTexture;
-        public int chemicalTint = 0XFFFFFF;
+        public int chemicalTint = CommonColors.WHITE;
     }
 }

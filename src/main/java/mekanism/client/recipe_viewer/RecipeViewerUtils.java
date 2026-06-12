@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.ChemicalStackTemplate;
 import mekanism.api.datamaps.IMekanismDataMapTypes;
 import mekanism.api.datamaps.chemical.ChemicalSolidTag;
 import mekanism.api.recipes.ItemStackToChemicalRecipe;
@@ -22,7 +23,7 @@ import mekanism.client.gui.element.bar.GuiBar.IBarInfoHandler;
 import mekanism.client.gui.element.progress.IProgressInfoHandler;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.recipe.IMekanismRecipeTypeProvider;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.MekanismBlocks;
@@ -44,8 +45,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class RecipeViewerUtils {
 
@@ -88,11 +88,11 @@ public class RecipeViewerUtils {
         return (int) (System.currentTimeMillis() / TimeUtil.MILLISECONDS_PER_SECOND % elements.size());
     }
 
-    public static long getCurrent(long[] elements) {
+    public static long getCurrent(int[] elements) {
         return elements[getIndex(elements)];
     }
 
-    public static <T> int getIndex(long[] elements) {
+    public static int getIndex(int[] elements) {
         return (int) (System.currentTimeMillis() / TimeUtil.MILLISECONDS_PER_SECOND % elements.length);
     }
 
@@ -102,7 +102,6 @@ public class RecipeViewerUtils {
         return getStacksFor(chemicals, displayConversions ? MekanismRecipeType.CHEMICAL_CONVERSION : null);
     }
 
-    @NonNull
     private static ContextMap getSlotDisplayContext() {
         return SlotDisplayContext.fromLevel(Minecraft.getInstance().level);
     }
@@ -118,7 +117,7 @@ public class RecipeViewerUtils {
         if (recipeType != null) {
             for (RecipeHolder<? extends ItemStackToChemicalRecipe> recipeHolder : recipeType.getRecipes()) {
                 ItemStackToChemicalRecipe recipe = recipeHolder.value();
-                for (ChemicalStack output : recipe.getOutputDefinition()) {
+                for (ChemicalStackTemplate output : recipe.getOutputDefinition()) {
                     if (anyMatch(supportedTypes, output.typeHolder())) {
                         stacks.addAll(recipe.getInput().getRepresentations(slotDisplayContext));
                         break;

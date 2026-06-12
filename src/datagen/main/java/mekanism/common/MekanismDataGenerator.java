@@ -31,7 +31,6 @@ import mekanism.common.lib.FieldReflectionHelper;
 import mekanism.common.loot.MekanismLootProvider;
 import mekanism.common.recipe.MekRecipeRunner;
 import mekanism.common.recipe.impl.MekanismRecipeProvider;
-import mekanism.common.recipe.ingredients.creator.ItemStackIngredientCreator;
 import mekanism.common.registries.MekanismDatapackRegistryProvider;
 import mekanism.common.tag.MekanismTagProvider;
 import net.minecraft.core.HolderLookup;
@@ -110,10 +109,8 @@ public class MekanismDataGenerator {
         PersistingDisabledProvidersProvider.addDisableableProviders(event, lookupProvider, disabledCompats);
     }
 
-    /**
-     * Used to bootstrap configs to their default values so that if we are querying if things exist we don't have issues with it happening to early or in cases we have
-     * fake tiles.
-     */
+    /// Used to bootstrap configs to their default values so that if we are querying if things exist we don't have issues with it happening to early or in cases we have
+    /// fake tiles.
     @SuppressWarnings("UnstableApiUsage")
     public static void bootstrapConfigs(String modid) {
         for (Set<ModConfig> configs : CONFIG_SETS.getValue(ConfigTracker.INSTANCE).values()) {
@@ -154,10 +151,8 @@ public class MekanismDataGenerator {
         processIMC.runTasks();
     }
 
-    /**
-     * Basically a copy of {@link DataProvider#saveStable(CachedOutput, JsonElement, Path)} but it takes a consumer of the output stream instead of serializes json using
-     * GSON. Use it to write arbitrary files.
-     */
+    /// Basically a copy of [DataProvider#saveStable(CachedOutput, JsonElement, Path)] but it takes a consumer of the output stream instead of serializes json using GSON.
+    /// Use it to write arbitrary files.
     @SuppressWarnings({"UnstableApiUsage", "deprecation"})
     public static CompletableFuture<?> save(CachedOutput cache, IOConsumer<OutputStream> osConsumer, Path path) {
         return CompletableFuture.runAsync(() -> {

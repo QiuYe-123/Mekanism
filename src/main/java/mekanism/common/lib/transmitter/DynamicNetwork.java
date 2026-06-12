@@ -20,8 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.util.thread.EffectiveSide;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class DynamicNetwork<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEPTOR, NETWORK, TRANSMITTER>,
       TRANSMITTER extends Transmitter<ACCEPTOR, NETWORK, TRANSMITTER>> implements INetworkDataHandler, IHasTextComponent {
@@ -137,7 +136,7 @@ public abstract class DynamicNetwork<ACCEPTOR, NETWORK extends DynamicNetwork<AC
         deregister();
     }
 
-    protected void onLastTransmitterRemoved(@NotNull TRANSMITTER triggerTransmitter) {
+    protected void onLastTransmitterRemoved(TRANSMITTER triggerTransmitter) {
     }
 
     protected void removeInvalid(@Nullable TRANSMITTER triggerTransmitter) {
@@ -210,9 +209,7 @@ public abstract class DynamicNetwork<ACCEPTOR, NETWORK extends DynamicNetwork<AC
         return world;
     }
 
-    /**
-     * @apiNote Only called on the server
-     */
+    /// @apiNote Only called on the server
     public void onUpdate() {
     }
 
@@ -263,6 +260,7 @@ public abstract class DynamicNetwork<ACCEPTOR, NETWORK extends DynamicNetwork<AC
         return acceptorCache.hasAcceptor(acceptorPos);
     }
 
+    @Nullable
     public ACCEPTOR getCachedAcceptor(long acceptorPos, Direction side) {
         return acceptorCache.getCachedAcceptor(acceptorPos, side);
     }
@@ -272,7 +270,7 @@ public abstract class DynamicNetwork<ACCEPTOR, NETWORK extends DynamicNetwork<AC
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         } else if (o instanceof DynamicNetwork<?, ?, ?> other) {

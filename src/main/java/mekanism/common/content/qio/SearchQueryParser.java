@@ -20,22 +20,17 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag.Default;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Advanced pattern searching, in use by QIO Item Viewers. Only use on client-side.
- *
- * @author aidancbrady
- */
+/// Advanced pattern searching, in use by QIO Item Viewers. Only use on client-side.
 public class SearchQueryParser {
 
     private static final Set<Character> TERMINATORS = Set.of('|', '(', '\"', '\'');
 
-    /**
-     * @param query Expected to be lower case
-     */
-    public static ISearchQuery parse(String query) {
+    /// @param query Expected to be lower case
+    public static ISearchQuery parse(@Nullable String query) {
         if (query == null || query.isEmpty()) {
             return ISearchQuery.INVALID;
         }
@@ -43,7 +38,7 @@ public class SearchQueryParser {
     }
 
     @VisibleForTesting
-    public static ISearchQuery parseOrdered(String query) {
+    public static ISearchQuery parseOrdered(@Nullable String query) {
         if (query == null || query.isEmpty()) {
             return ISearchQuery.INVALID;
         }
@@ -214,8 +209,8 @@ public class SearchQueryParser {
         },
         MOD_ID('@') {
             @Override
-            public boolean matches(Level level, @Nullable Player player, String key, ItemStack stack) {
-                return MekanismUtils.getModId(level.registryAccess(), stack).toLowerCase(Locale.ROOT).contains(key);
+            public boolean matches(@Nullable Level level, @Nullable Player player, String key, ItemStack stack) {
+                return level != null && MekanismUtils.getModId(level.registryAccess(), stack).toLowerCase(Locale.ROOT).contains(key);
             }
         },
         TOOLTIP('$') {
@@ -252,6 +247,7 @@ public class SearchQueryParser {
             }
         }
 
+        @NullUnmarked//Note: This is NullUnmarked as get is not annotated as nullable: https://github.com/vigna/fastutil/pull/375
         public static QueryType get(char prefix) {
             return charLookupMap.get(prefix);
         }
@@ -266,7 +262,7 @@ public class SearchQueryParser {
             this.prefix = prefix;
         }
 
-        public abstract boolean matches(Level level, @Nullable Player player, String key, ItemStack stack);
+        public abstract boolean matches(@Nullable Level level, @Nullable Player player, String key, ItemStack stack);
     }
 
     public static class SearchQuery implements ISearchQuery {
@@ -275,7 +271,7 @@ public class SearchQueryParser {
         private final Map<QueryType, List<String>> queryStrings = new EnumMap<>(QueryType.class);
 
         @Override
-        public boolean test(Level level, @Nullable Player player, ItemStack stack) {
+        public boolean test(@Nullable Level level, @Nullable Player player, ItemStack stack) {
             for (Map.Entry<QueryType, List<String>> entry : queryStrings.entrySet()) {
                 boolean hasNoMatch = true;
                 for (String key : entry.getValue()) {
@@ -305,7 +301,7 @@ public class SearchQueryParser {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             } else if (o == null || getClass() != o.getClass()) {
@@ -352,7 +348,7 @@ public class SearchQueryParser {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             } else if (o == null || getClass() != o.getClass()) {
@@ -370,7 +366,7 @@ public class SearchQueryParser {
     @FunctionalInterface
     public interface ISearchQuery {
 
-        ISearchQuery INVALID = (level, player, stack) -> false;
+        ISearchQuery INVALID = (_, _, _) -> false;
 
         boolean test(@Nullable Level level, @Nullable Player player, ItemStack stack);
 

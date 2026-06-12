@@ -21,8 +21,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.ValueIOSerializable;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 //TODO - 26.1: rewrite multiblocks to have the MultiblockData ticked here, without a Cache middleman
 // MultiblockData should possibly be renamed MultiblockEntity as it's like a BE, but multi
@@ -33,9 +32,7 @@ public class MultiblockManager<T extends MultiblockData> implements ValueIOSeria
 
     private final MultiblockType<T> multiblockType;
 
-    /**
-     * A map containing references to all multiblock inventory caches.
-     */
+    /// A map containing references to all multiblock inventory caches.
     private final Map<UUID, MultiblockCache<T>> caches = new HashMap<>();
 
     private final Queue<T> multiblocksTicked = new ArrayDeque<>();
@@ -49,9 +46,7 @@ public class MultiblockManager<T extends MultiblockData> implements ValueIOSeria
         return multiblockType;
     }
 
-    /**
-     * Adds a cache as tracked and marks the manager as dirty.
-     */
+    /// Adds a cache as tracked and marks the manager as dirty.
     public void trackCache(UUID id, MultiblockCache<T> cache) {
         caches.put(id, cache);
         //markDirty();
@@ -67,16 +62,14 @@ public class MultiblockManager<T extends MultiblockData> implements ValueIOSeria
         return multiblockType.id().toString();
     }
 
-    public boolean isCompatible(BlockEntity tile) {
+    public boolean isCompatible(@Nullable BlockEntity tile) {
         if (tile instanceof IMultiblock<?> multiblock) {
             return multiblock.getMultiblockType() == this.multiblockType;
         }
         return false;
     }
 
-    /**
-     * Replaces and invalidates all the caches with the given ids with a new cache with the given id.
-     */
+    /// Replaces and invalidates all the caches with the given ids with a new cache with the given id.
     public void replaceCaches(Set<UUID> staleIds, UUID id, MultiblockCache<T> cache) {
         for (UUID staleId : staleIds) {
             caches.remove(staleId);
@@ -105,11 +98,9 @@ public class MultiblockManager<T extends MultiblockData> implements ValueIOSeria
         multiblocksTicked.add(multiblock);
     }
 
-    /**
-     * Grabs a unique inventory ID for a multiblock.
-     *
-     * @return unique inventory ID
-     */
+    /// Grabs a unique inventory ID for a multiblock.
+    ///
+    /// @return unique inventory ID
     public UUID getUniqueInventoryID() {
         return UUID.randomUUID();
     }
@@ -122,11 +113,9 @@ public class MultiblockManager<T extends MultiblockData> implements ValueIOSeria
         return level.getData(type.attachment());
     }
 
-    /**
-     * Bit of a hack, really the multiblock system needs to not have a 'cache' middle-man.
-     * <p></p>
-     * Causes any multiblocks that became dirty after the master ticked to have their contents synced and thus saved (if one occurs after this tick)
-     */
+    /// Bit of a hack, really the multiblock system needs to not have a 'cache' middle-man.
+    ///
+    /// Causes any multiblocks that became dirty after the master ticked to have their contents synced and thus saved (if one occurs after this tick)
     @SubscribeEvent(priority = EventPriority.LOWEST)
     static void endOfTickEvent(ServerTickEvent.Post event) {
         event.getServer().getAllLevels().forEach(level -> {
@@ -139,9 +128,7 @@ public class MultiblockManager<T extends MultiblockData> implements ValueIOSeria
         });
     }
 
-    /**
-     * syncs any multiblocks if they're dirty
-     */
+    /// syncs any multiblocks if they're dirty
     private void endOfTick() {
         T item;
         while ((item = multiblocksTicked.poll()) != null) {
@@ -151,7 +138,7 @@ public class MultiblockManager<T extends MultiblockData> implements ValueIOSeria
 
 
     @Override
-    public void deserialize(@NotNull ValueInput input) {
+    public void deserialize(ValueInput input) {
         ValueInputList list = input.childrenListOrEmpty(SerializationConstants.CACHE);
         for (ValueInput child : list) {
             Optional<UUID> id = child.read(SerializationConstants.INVENTORY_ID, UUIDUtil.LENIENT_CODEC);
@@ -164,7 +151,7 @@ public class MultiblockManager<T extends MultiblockData> implements ValueIOSeria
     }
 
     @Override
-    public void serialize(@NotNull ValueOutput output) {
+    public void serialize(ValueOutput output) {
         ValueOutputList outList = output.childrenList(SerializationConstants.CACHE);
         for (Map.Entry<UUID, MultiblockCache<T>> entry : caches.entrySet()) {
             ValueOutput cacheOutput = outList.addChild();

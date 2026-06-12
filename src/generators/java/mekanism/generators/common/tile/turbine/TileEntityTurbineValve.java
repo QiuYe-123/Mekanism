@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.IChemicalTank;
-import mekanism.common.attachments.containers.type.ContainerType;
-import mekanism.common.attachments.containers.type.IContainerType;
+import mekanism.common.component.containers.type.ContainerType;
+import mekanism.common.component.containers.type.IContainerType;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.holder.container.IContainerHolder;
 import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
@@ -17,8 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class TileEntityTurbineValve extends TileEntityTurbineCasing {
 
@@ -28,14 +27,13 @@ public class TileEntityTurbineValve extends TileEntityTurbineCasing {
         super(GeneratorsBlocks.TURBINE_VALVE, pos, state);
     }
 
-    @NotNull
     @Override
     public IContainerHolder<IChemicalTank> getInitialChemicalTanks(IContentsListener listener) {
         return _ -> getMultiblock().getChemicalTanks();
     }
 
     @Override
-    protected @Nullable IEnergyContainerHolder getInitialEnergyContainer(IContentsListener listener) {
+    protected IEnergyContainerHolder getInitialEnergyContainer(IContentsListener listener) {
         return _ -> getMultiblock().getEnergyContainer();
     }
 

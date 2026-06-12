@@ -21,10 +21,10 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
-import net.minecraft.util.Mth;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Util;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 public class GuiWindow extends GuiTexturedElement implements IGUIWindow {
 
@@ -35,7 +35,9 @@ public class GuiWindow extends GuiTexturedElement implements IGUIWindow {
     private int prevDX, prevDY;
     private boolean pinned;
 
+    @Nullable
     private Consumer<GuiWindow> closeListener;
+    @Nullable
     private Consumer<GuiWindow> reattachListener;
     private final long msOpened;
 
@@ -70,7 +72,7 @@ public class GuiWindow extends GuiTexturedElement implements IGUIWindow {
         msOpened = Util.getMillis();
         if (!isFocusOverlay()) {
             addCloseButton();
-            if (this.windowData.type.canPin()) {
+            if (this.windowData.type().canPin()) {
                 addChild(new GuiPinButton(gui(), relativeX + 16, relativeY + 6, this));
             }
         }
@@ -97,7 +99,7 @@ public class GuiWindow extends GuiTexturedElement implements IGUIWindow {
     }
 
     @Override
-    public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean isDoubleClick) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
         boolean ret = super.mouseClicked(event, isDoubleClick);
         // drag 'safe area'
         if (isMouseOver(event.x(), event.y())) {
@@ -124,12 +126,12 @@ public class GuiWindow extends GuiTexturedElement implements IGUIWindow {
     }
 
     @Override
-    protected void onDrag(@NotNull MouseButtonEvent event, double deltaX, double deltaY) {
+    protected void onDrag(MouseButtonEvent event, double deltaX, double deltaY) {
         super.onDrag(event, deltaX, deltaY);
         if (isDragging()) {
             int newDX = (int) Math.round(event.x() - dragX), newDY = (int) Math.round(event.y() - dragY);
-            int changeX = Mth.clamp(newDX - prevDX, -getX(), minecraft.getWindow().getGuiScaledWidth() - getRight());
-            int changeY = Mth.clamp(newDY - prevDY, -getY(), minecraft.getWindow().getGuiScaledHeight() - getBottom());
+            int changeX = Math.clamp(newDX - prevDX, -getX(), minecraft.getWindow().getGuiScaledWidth() - getRight());
+            int changeY = Math.clamp(newDY - prevDY, -getY(), minecraft.getWindow().getGuiScaledHeight() - getBottom());
             prevDX = newDX;
             prevDY = newDY;
             move(changeX, changeY);
@@ -143,13 +145,13 @@ public class GuiWindow extends GuiTexturedElement implements IGUIWindow {
             MekanismRenderer.renderColorOverlay(guiGraphics, -getGuiLeft(), -getGuiTop(), OVERLAY_COLOR.argb());
         } else {
             //todo - 26.1: check this vs the old. Looks rather strong on top of other windows
-            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, GuiMekanism.SHADOW, relativeX - 3, relativeY - 3, width + 6, height + 6, ARGB.color(0.75F, 0xFFFFFF));
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, GuiMekanism.SHADOW, relativeX - 3, relativeY - 3, width + 6, height + 6, ARGB.color(0.75F, CommonColors.WHITE));
         }
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, getResource(), getButtonX(), getButtonY(), getButtonWidth(), getButtonHeight());
     }
 
     @Override
-    public boolean keyPressed(@NotNull KeyEvent event) {
+    public boolean keyPressed(KeyEvent event) {
         if (super.keyPressed(event)) {
             return true;
         }
@@ -161,7 +163,7 @@ public class GuiWindow extends GuiTexturedElement implements IGUIWindow {
     }
 
     public void setListenerTab(Supplier<? extends GuiElement> elementSupplier) {
-        setTabListeners(window -> elementSupplier.get().active = true, window -> elementSupplier.get().active = false);
+        setTabListeners(_ -> elementSupplier.get().active = true, _ -> elementSupplier.get().active = false);
     }
 
     public void setTabListeners(Consumer<GuiWindow> closeListener, Consumer<GuiWindow> reattachListener) {
@@ -178,7 +180,7 @@ public class GuiWindow extends GuiTexturedElement implements IGUIWindow {
     }
 
     public void renderBlur(GuiGraphicsExtractor guiGraphics) {
-        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, GuiMekanism.BLUR, relativeX, relativeY, width, height, ARGB.color(0.3F, 0xFFFFFF));
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, GuiMekanism.BLUR, relativeX, relativeY, width, height, ARGB.color(0.3F, CommonColors.WHITE));
     }
 
     public final boolean togglePinned(GuiElement toggler, MouseButtonEvent event, boolean isDoubleClick) {
@@ -223,19 +225,15 @@ public class GuiWindow extends GuiTexturedElement implements IGUIWindow {
         }
     }
 
-    /**
-     * @apiNote Only used if not a {@link #isFocusOverlay()}
-     */
+    /// @apiNote Only used if not a [#isFocusOverlay()]
     protected int getTitlePadStart() {
-        if (windowData.type.canPin()) {
+        if (windowData.type().canPin()) {
             return 14 + GuiPinButton.WIDTH;
         }
         return 12;
     }
 
-    /**
-     * @apiNote Only used if not a {@link #isFocusOverlay()}
-     */
+    /// @apiNote Only used if not a [#isFocusOverlay()]
     protected int getTitlePadEnd() {
         return 0;
     }

@@ -11,7 +11,7 @@ import mekanism.client.gui.element.custom.GuiFrequencySelector.IGuiColorFrequenc
 import mekanism.client.gui.element.custom.GuiFrequencySelector.IItemGuiFrequencySelector;
 import mekanism.client.gui.element.custom.GuiTeleporterStatus;
 import mekanism.common.MekanismLang;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.content.teleporter.TeleporterFrequency;
 import mekanism.common.inventory.container.item.PortableTeleporterContainer;
 import mekanism.common.inventory.warning.WarningTracker.WarningType;
@@ -25,12 +25,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContainer> implements IItemGuiFrequencySelector<TeleporterFrequency, PortableTeleporterContainer>,
       IGuiColorFrequencySelector<TeleporterFrequency> {
 
+    @Nullable
     private GuiTeleporterStatus status;
+    @Nullable
     private MekanismButton teleportButton;
 
     public GuiPortableTeleporter(PortableTeleporterContainer container, Inventory inv, Component title) {
@@ -56,7 +58,7 @@ public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContain
                   }
               }, 158, 26)
         ).warning(WarningType.NOT_ENOUGH_ENERGY, () -> menu.getStatus() == TeleporterStatus.NOT_ENOUGH_ENERGY);
-        teleportButton = addRenderableWidget(new TranslationButton(this, 42, 147, 92, 20, MekanismLang.BUTTON_TELEPORT, (element, event, isDoubleClick) -> {
+        teleportButton = addRenderableWidget(new TranslationButton(this, 42, 147, 92, 20, MekanismLang.BUTTON_TELEPORT, (element, _, _) -> {
             GuiPortableTeleporter gui = (GuiPortableTeleporter) element.gui();
             TeleporterFrequency frequency = gui.getFrequency();
             if (frequency != null && gui.menu.getStatus().isReady()) {
@@ -80,12 +82,18 @@ public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContain
 
     @Override
     public void buttonsUpdated() {
-        teleportButton.active = menu.getStatus().isReady() && getFrequency() != null;
+        if (teleportButton != null) {
+            teleportButton.active = menu.getStatus().isReady() && getFrequency() != null;
+        }
     }
 
     @Override
-    protected void drawForegroundText(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
-        renderTitleTextWithOffset(guiGraphics, status.getRelativeRight());
+    protected void drawForegroundText(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+        if (status == null) {
+            renderTitleText(guiGraphics);
+        } else {
+            renderTitleTextWithOffset(guiGraphics, status.getRelativeRight());
+        }
         super.drawForegroundText(guiGraphics, mouseX, mouseY);
     }
 

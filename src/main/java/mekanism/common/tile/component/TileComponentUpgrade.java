@@ -9,8 +9,8 @@ import mekanism.api.AutomationType;
 import mekanism.api.SerializationConstants;
 import mekanism.api.Upgrade;
 import mekanism.api.inventory.IInventorySlot;
-import mekanism.common.attachments.component.UpgradeAware;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.component.UpgradeAware;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.integration.computer.annotation.SyntheticComputerMethod;
 import mekanism.common.inventory.container.MekanismContainer.ISpecificContainerTracker;
@@ -30,30 +30,21 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
 //TODO: Clean this up as a lot of the code can probably be reduced due to the slot knowing some of that information
 public class TileComponentUpgrade implements ITileComponent, ISpecificContainerTracker {
 
-    /**
-     * How long it takes this machine to install an upgrade.
-     */
+    /// How long it takes this machine to install an upgrade.
     private static final int UPGRADE_TICKS_REQUIRED = SharedConstants.TICKS_PER_SECOND;
-    /**
-     * How many upgrade ticks have progressed.
-     */
+    /// How many upgrade ticks have progressed.
     private int upgradeTicks;
-    /**
-     * TileEntity implementing this component.
-     */
+    /// TileEntity implementing this component.
     private final TileEntityMekanism tile;
     @SyntheticComputerMethod(getter = "getInstalledUpgrades")
     private final Map<Upgrade, Integer> upgrades = new EnumMap<>(Upgrade.class);
     private final Set<Upgrade> supported;
-    /**
-     * The inventory slot the upgrade slot of this component occupies.
-     */
+    /// The inventory slot the upgrade slot of this component occupies.
     private final UpgradeInventorySlot upgradeSlot;
     private final UpgradeInventorySlot upgradeOutputSlot;
     private boolean canCheckUpgrades = true;
@@ -119,16 +110,14 @@ public class TileComponentUpgrade implements ITileComponent, ISpecificContainerT
         return upgrades.getOrDefault(upgrade, 0);
     }
 
-    /**
-     * Assumes that it has been checked if the given upgrade is supported or not
-     *
-     * @param upgrade      Upgrade type.
-     * @param maxAvailable Max number of upgrades to install.
-     *
-     * @return Actual number of upgrades installed.
-     *
-     * @apiNote Call from the server
-     */
+    /// Assumes that it has been checked if the given upgrade is supported or not
+    ///
+    /// @param upgrade      Upgrade type.
+    /// @param maxAvailable Max number of upgrades to install.
+    ///
+    /// @return Actual number of upgrades installed.
+    ///
+    /// @apiNote Call from the server
     public int addUpgrades(Upgrade upgrade, int maxAvailable) {
         int installed = getUpgrades(upgrade);
         int toAdd = getUpgradesToAdd(upgrade, installed, maxAvailable);
@@ -184,10 +173,6 @@ public class TileComponentUpgrade implements ITileComponent, ISpecificContainerT
         return supported.contains(upgrade);
     }
 
-    public boolean isUpgradeInstalled(Upgrade upgrade) {
-        return upgrades.containsKey(upgrade);
-    }
-
     public Set<Upgrade> getInstalledTypes() {
         return upgrades.keySet();
     }
@@ -207,7 +192,7 @@ public class TileComponentUpgrade implements ITileComponent, ISpecificContainerT
     }
 
     @Override
-    public void applyImplicitComponents(@NotNull DataComponentGetter input) {
+    public void applyImplicitComponents(DataComponentGetter input) {
         UpgradeAware upgradeAware = input.get(MekanismDataComponents.UPGRADES);
         if (upgradeAware != null) {
             upgrades.clear();
@@ -224,7 +209,7 @@ public class TileComponentUpgrade implements ITileComponent, ISpecificContainerT
     }
 
     @Override
-    public void deserialize(@NotNull ValueInput upgradeInput) {
+    public void deserialize(ValueInput upgradeInput) {
         upgrades.clear();
         upgrades.putAll(Upgrade.buildMap(upgradeInput));
         for (Upgrade upgrade : getSupportedTypes()) {
@@ -235,7 +220,7 @@ public class TileComponentUpgrade implements ITileComponent, ISpecificContainerT
     }
 
     @Override
-    public void serialize(@NotNull ValueOutput upgradeOutput) {
+    public void serialize(ValueOutput upgradeOutput) {
         if (!upgrades.isEmpty()) {
             Upgrade.saveMap(upgrades, upgradeOutput);
         }
@@ -244,7 +229,7 @@ public class TileComponentUpgrade implements ITileComponent, ISpecificContainerT
     }
 
     @Override
-    public void addToUpdateTag(@NotNull ValueOutput output) {
+    public void addToUpdateTag(ValueOutput output) {
         //Note: We only bother to sync how many muffling upgrades we have installed as that is the only thing the client cares about
         if (supports(Upgrade.MUFFLING)) {
             output.putInt(SerializationConstants.MUFFLING_COUNT, upgrades.getOrDefault(Upgrade.MUFFLING, 0));
@@ -252,7 +237,7 @@ public class TileComponentUpgrade implements ITileComponent, ISpecificContainerT
     }
 
     @Override
-    public void readFromUpdateTag(@NotNull ValueInput input) {
+    public void readFromUpdateTag(ValueInput input) {
         if (supports(Upgrade.MUFFLING)) {
             input.getInt(SerializationConstants.MUFFLING_COUNT).ifPresent(amount -> {
                 if (amount == 0) {

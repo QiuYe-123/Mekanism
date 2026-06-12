@@ -24,12 +24,12 @@ public class GuiCraftingWindow extends GuiWindow {
 
     public GuiCraftingWindow(IGuiWrapper gui, int x, int y, QIOItemViewerContainer container, SelectedWindowData windowData) {
         super(gui, x, y, 124, 80, windowData);
-        if (windowData.type != WindowType.CRAFTING) {
+        if (windowData.type() != WindowType.CRAFTING) {
             throw new IllegalArgumentException("Crafting windows must have a crafting window type");
-        } else if (windowData.extraData >= IQIOCraftingWindowHolder.MAX_CRAFTING_WINDOWS) {
+        } else if (windowData.extraData() >= IQIOCraftingWindowHolder.MAX_CRAFTING_WINDOWS) {
             throw new IllegalArgumentException("Crafting window index is too high");
         }
-        this.index = windowData.extraData;
+        this.index = windowData.extraData();
         this.container = container;
         interactionStrategy = InteractionStrategy.ALL;
         slots = new ArrayList<>();
@@ -43,7 +43,7 @@ public class GuiCraftingWindow extends GuiWindow {
         slots.add(addChild(new GuiVirtualSlot(this, SlotType.NORMAL, gui, relativeX + 100, relativeY + 36,
               this.container.getCraftingWindowSlot(this.index, 9))));
         addChild(new MekanismImageButton(gui, relativeX + width - 20, relativeY + height - 20, 14, getButtonLocation("clear_sides"),
-              (element, event, isDoubleClick) -> PacketUtils.sendToServer(new PacketQIOClearCraftingWindow(index, event.hasShiftDown()))))
+              (_, event, _) -> PacketUtils.sendToServer(new PacketQIOClearCraftingWindow(index, event.hasShiftDown()))))
               .setTooltip(MekanismLang.CRAFTING_WINDOW_CLEAR);
     }
 

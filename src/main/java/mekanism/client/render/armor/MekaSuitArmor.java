@@ -58,8 +58,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.event.ModelEvent.BakingCompleted;
 import org.jetbrains.annotations.ApiStatus.Internal;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
 
@@ -82,10 +81,9 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
     private static final QuadTransformation BASE_TRANSFORM = QuadTransformation.list(QuadTransformation.rotate(0, 0, 180), QuadTransformation.translate(-1, 0.5F, 0));
 
     private final LoadingCache<QuickHash, ArmorQuads> cache = CacheBuilder.newBuilder().build(new CacheLoader<>() {
-        @NotNull
         @Override
         @SuppressWarnings("unchecked")
-        public ArmorQuads load(@NotNull QuickHash key) {
+        public ArmorQuads load(QuickHash key) {
             return createQuads((Object2BooleanMap<ModuleModelSpec>) key.objs()[0], (Set<EquipmentSlot>) key.objs()[1], (boolean) key.objs()[2], (boolean) key.objs()[3]);
         }
     });
@@ -101,7 +99,7 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
 
     private static Color getColor(ItemStack stack) {
         IModule<ModuleColorModulationUnit> colorUnit = IModuleHelper.INSTANCE.getModule(stack, MekanismModules.COLOR_MODULATION_UNIT);
-        return colorUnit != null ? colorUnit.getCustomInstance().color() : Color.WHITE;
+        return colorUnit == null ? Color.WHITE : colorUnit.getCustomInstance().color();
     }
 
     public <STATE extends HumanoidRenderState> void renderArm(HumanoidModel<STATE> baseModel, PoseStack poseStack, SubmitNodeCollector nodeCollector, int lightCoords,
@@ -210,7 +208,6 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
         return quads;
     }
 
-    @NotNull
     @Override
     public ICustomArmor gearModel() {
         return this;
@@ -249,6 +246,7 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
             return modelSpec.test(s);
         }
 
+        @Nullable
         public static ModelPos get(String name) {
             name = name.toLowerCase(Locale.ROOT);
             for (ModelPos pos : VALUES) {
@@ -512,9 +510,7 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
     //TODO - 26.1 models - predicate needs to be RenderState based?
     private record ModuleModelSpec(ModuleData<?> module, EquipmentSlot slotType, String name, Predicate<LivingEntity> isActive) {
 
-        /**
-         * Score closest to zero is considered best, negative one for no match at all.
-         */
+        /// Score closest to zero is considered best, negative one for no match at all.
         public int score(String name) {
             return name.indexOf(this.name + "_");
         }
@@ -532,9 +528,7 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
         return part.replaceFirst(OVERRIDDEN_TAG, "").replaceFirst(name + "_", "");
     }
 
-    /**
-     * Call via {@link IModuleHelper#addMekaSuitModuleModelSpec(String, Holder, EquipmentSlot, Predicate)}.
-     */
+    /// Call via [IModuleHelper#addMekaSuitModuleModelSpec(String, Holder, EquipmentSlot, Predicate)].
     @Internal
     public static void registerModule(String name, Holder<ModuleData<?>> moduleData, EquipmentSlot slotType, Predicate<LivingEntity> isActive) {
         moduleModelSpec.put(slotType, moduleData, new ModuleModelSpec(moduleData.value(), slotType, name, isActive));
@@ -641,20 +635,18 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
             parts = parts.isEmpty() ? Collections.emptySet() : Collections.unmodifiableSet(parts);
         }
 
-        @NotNull
         @Override
         public String getModelName() {
             return "mekanism:mekasuit";
         }
 
         @Override
-        public boolean hasMaterial(@NotNull String name) {
+        public boolean hasMaterial(String name) {
             return false;
         }
 
-        @NotNull
         @Override
-        public Material getMaterial(@NotNull String name) {
+        public Material getMaterial(String name) {
             return NO_MATERIAL;
         }
 
@@ -673,14 +665,12 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
             return true;
         }
 
-        @NotNull
         @Override
         @Deprecated
         public ItemTransforms getTransforms() {
             return ItemTransforms.NO_TRANSFORMS;
         }
 
-        @NotNull
         @Override
         public Transformation getRootTransform() {
             return Transformation.identity();
@@ -693,7 +683,7 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
         }
 
         @Override
-        public boolean isComponentVisible(@NotNull String component, boolean fallback) {
+        public boolean isComponentVisible(String component, boolean fallback) {
             //Ignore fallback as we always have a true or false answer
             return parts.contains(component);
         }

@@ -3,7 +3,6 @@ package mekanism.common.util;
 import io.netty.buffer.ByteBuf;
 import java.util.function.IntFunction;
 import mekanism.api.IIncrementalEnum;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.IHasTranslationKey;
 import mekanism.api.text.ILangEntry;
 import mekanism.api.text.TextComponentUtil;
@@ -14,11 +13,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.common.TranslatableEnum;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Code taken from UE and modified to fit Mekanism.
- */
+/// Code taken from UE and modified to fit Mekanism.
 public class UnitDisplayUtils {
     //TODO: Maybe at some point improve on the ITextComponents the two getDisplay methods build, and have them have better translation keys with formats
     // That would improve how well this handles en_ud as currently the order of the number and the unit is not reversed and the unit is not upside down
@@ -30,11 +27,13 @@ public class UnitDisplayUtils {
             return TextComponentUtil.build(existing);
         }
 
+        @Nullable
         @Override
         public Object getSymbol(boolean singular) {
             return null;
         }
 
+        @Nullable
         @Override
         public ILangEntry getLabel(boolean singular) {
             return null;
@@ -132,12 +131,13 @@ public class UnitDisplayUtils {
             return TextComponentUtil.build(existing, getLabel(singular));
         }
 
+        @Nullable
         Object getSymbol(boolean singular);
 
+        @Nullable
         ILangEntry getLabel(boolean singular);
     }
 
-    @NothingNullByDefault
     public enum TemperatureUnit implements IIncrementalEnum<TemperatureUnit>, IHasTranslationKey, Unit, TranslatableEnum {
         KELVIN(MekanismLang.TEMPERATURE_KELVIN, MekanismLang.TEMPERATURE_KELVIN_SHORT, "K", "k", 0, 1),
         CELSIUS(MekanismLang.TEMPERATURE_CELSIUS, MekanismLang.TEMPERATURE_CELSIUS_SHORT, "°C", "c", 273.15, 1),
@@ -182,7 +182,6 @@ public class UnitDisplayUtils {
             return langEntry;
         }
 
-        @NotNull
         @Override
         public Component getTranslatedName() {
             return getLabel(false).translate();
@@ -224,9 +223,7 @@ public class UnitDisplayUtils {
         }
     }
 
-    /**
-     * Metric system of measurement.
-     */
+    /// Metric system of measurement.
     public enum MeasurementUnit {
         FEMTO("Femto", "f", 0.000_000_000_000_001D),
         PICO("Pico", "p", 0.000_000_000_001D),
@@ -243,19 +240,13 @@ public class UnitDisplayUtils {
         ZETTA("Zetta", "Z", 1_000_000_000_000_000_000_000D),
         YOTTA("Yotta", "Y", 1_000_000_000_000_000_000_000_000D);
 
-        /**
-         * long name for the unit
-         */
+        /// long name for the unit
         private final String name;
 
-        /**
-         * short unit version of the unit
-         */
+        /// short unit version of the unit
         private final String symbol;
 
-        /**
-         * Point by which a number is considered to be of this unit
-         */
+        /// Point by which a number is considered to be of this unit
         private final double value;
 
         MeasurementUnit(String name, String symbol, double value) {

@@ -1,6 +1,5 @@
 package mekanism.tools.common.material;
 
-import mekanism.api.annotations.MethodsAreNotNullByDefault;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
@@ -9,7 +8,6 @@ import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.level.block.Block;
 
-@MethodsAreNotNullByDefault
 public interface BaseMekanismMaterial extends IPaxelMaterial {
 
     //begin from ToolMaterial
@@ -102,6 +100,7 @@ public interface BaseMekanismMaterial extends IPaxelMaterial {
 
     int getDurabilityForType(ArmorType type);
 
+    @Override
     default ToolMaterial toToolMaterial() {
         return new ToolMaterial(incorrectBlocksForDrops(), getDurability(), getSpeed(), getAttackDamageBonus(), getEnchantmentValue(), getRepairItems());
     }

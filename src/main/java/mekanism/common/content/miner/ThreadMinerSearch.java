@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import java.util.BitSet;
 import java.util.Locale;
 import java.util.function.IntFunction;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.IHasTextComponent.IHasEnumNameTextComponent;
 import mekanism.api.text.ILangEntry;
 import mekanism.common.MekanismLang;
@@ -34,11 +33,13 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import org.jspecify.annotations.Nullable;
 
 public class ThreadMinerSearch extends Thread {
 
     private final TileEntityDigitalMiner tile;
     private final Long2ObjectMap<BitSet> oresToMine = new Long2ObjectOpenHashMap<>();
+    @Nullable
     private MinerRegionCache chunkCache;
     public State state = State.IDLE;
     public int found = 0;
@@ -116,11 +117,9 @@ public class ThreadMinerSearch extends Thread {
         }
     }
 
-    /**
-     * Special cased vanilla blocks that only have one state actually have the drop and the other one just causes it to break. This includes things like two tall flowers,
-     * beds, and doors. If a data pack modifies the loot table so that the "secondary" block also provides drops those will then be handled by the fallback we have for
-     * collecting any drops that happen from breaking the block.
-     */
+    /// Special cased vanilla blocks that only have one state actually have the drop and the other one just causes it to break. This includes things like two tall
+    /// flowers, beds, and doors. If a data pack modifies the loot table so that the "secondary" block also provides drops those will then be handled by the fallback we
+    /// have for collecting any drops that happen from breaking the block.
     private boolean shouldSkipState(BlockState state) {
         if (state.getBlock() instanceof BedBlock) {
             return state.getValue(BlockStateProperties.BED_PART) == BedPart.FOOT;
@@ -130,7 +129,6 @@ public class ThreadMinerSearch extends Thread {
         return false;
     }
 
-    @NothingNullByDefault
     public enum State implements IHasEnumNameTextComponent, StringRepresentable {
         IDLE(MekanismLang.MINER_IDLE),
         SEARCHING(MekanismLang.MINER_SEARCHING),

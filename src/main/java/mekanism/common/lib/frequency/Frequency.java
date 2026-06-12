@@ -16,9 +16,9 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class Frequency implements IFrequency {
 
@@ -53,12 +53,9 @@ public abstract class Frequency implements IFrequency {
 
     private final FrequencyType<?> frequencyType;
 
-    /**
-     * Owner username is looked up so that we can sync it (and more importantly have it
-     * set in single player when network connections don't serialize and deserialize)
-     *
-     * @param owner Should only be null if we have incomplete data that we are loading.
-     */
+    /// Owner username is looked up so that we can sync it (and more importantly have it set in single player when network connections don't serialize and deserialize)
+    ///
+    /// @param owner Should only be null if we have incomplete data that we are loading.
     protected Frequency(FrequencyType<?> frequencyType, String name, @Nullable UUID owner, SecurityMode securityMode) {
         this(frequencyType, name, owner, MekanismUtils.getLastKnownUsername(owner), securityMode);
     }
@@ -79,17 +76,13 @@ public abstract class Frequency implements IFrequency {
         return removed;
     }
 
-    /**
-     * @return {@code true} if persistent data was changed by deactivating the block and the frequency needs to be saved.
-     */
-    public boolean onDeactivate(BlockEntity tile) {
+    /// @return `true` if persistent data was changed by deactivating the block and the frequency needs to be saved.
+    public boolean onDeactivate(Level level, BlockEntity tile) {
         return false;
     }
 
-    /**
-     * @return {@code true} if persistent data was changed by updating the block and the frequency needs to be saved.
-     */
-    public boolean update(BlockEntity tile) {
+    /// @return `true` if persistent data was changed by updating the block and the frequency needs to be saved.
+    public boolean update(Level level, BlockEntity tile) {
         return false;
     }
 
@@ -137,15 +130,12 @@ public abstract class Frequency implements IFrequency {
         return Objects.equals(ownerUUID, toCheck);
     }
 
-    @NotNull
     public String getOwnerName() {
         return ownerName;
     }
 
-    /**
-     * This is the hashCode that is used for determining if a frequency is dirty. Override this if your frequency type has more things that may mean it needs to be
-     * re-synced.
-     */
+    /// This is the hashCode that is used for determining if a frequency is dirty. Override this if your frequency type has more things that may mean it needs to be
+    /// re-synced.
     public int getSyncHash() {
         return hashCode();
     }
@@ -158,13 +148,13 @@ public abstract class Frequency implements IFrequency {
             code = 31 * code + ownerUUID.hashCode();
         }
         if (frequencyType != FrequencyTypes.SECURITY) {
-            code = 31 * code + (securityMode.ordinal());
+            code = 31 * code + securityMode.ordinal();
         }
         return code;
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

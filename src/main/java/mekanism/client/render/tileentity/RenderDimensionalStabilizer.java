@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.RenderResizableCuboid;
 import mekanism.client.render.RenderResizableCuboid.FaceDisplay;
@@ -31,9 +30,8 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class RenderDimensionalStabilizer extends MekanismTileEntityRenderer<TileEntityDimensionalStabilizer, StabilizerRenderState> {
     
     //TODO: At some point experiment with different colors to try and improve rendering of it when in a checkerboard pattern
@@ -55,7 +53,7 @@ public class RenderDimensionalStabilizer extends MekanismTileEntityRenderer<Tile
 
     @Override
     public void extractRenderState(TileEntityDimensionalStabilizer stabilizer, StabilizerRenderState state, float partialTick, Vec3 cameraPosition,
-          @Nullable ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+          ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         super.extractRenderState(stabilizer, state, partialTick, cameraPosition, breakProgress);
         //Calculate the different sides that should be rendered, as a 3D array. The last parameter is of length 5 to support the four cardinal directions
         // PLUS a marker for if the chunk is loaded and should be rendered at all. As if a chunk is surrounded on all sides by other chunks, then none of
@@ -180,14 +178,12 @@ public class RenderDimensionalStabilizer extends MekanismTileEntityRenderer<Tile
         return super.getRenderBoundingBox(tile);
     }
 
-    /**
-     * Combines the sides that should be rendered for each chunk's position into a list of pieces that should be rendered. This allows for doing less draw calls and
-     * overall better performance.
-     *
-     * @param allRenderSides 3D array of ROW, COLUMN, RENDER
-     *
-     * @return List of render pieces.
-     */
+    /// Combines the sides that should be rendered for each chunk's position into a list of pieces that should be rendered. This allows for doing less draw calls and
+    /// overall better performance.
+    ///
+    /// @param allRenderSides 3D array of ROW, COLUMN, RENDER
+    ///
+    /// @return List of render pieces.
     private List<RenderPiece> calculateRenderPieces(boolean[][][] allRenderSides) {
         //Keep track of the minimal amount of data that is needed to match in order to merge two column pieces across rows
         record MinimalColumnPieceData(int z, int zLength, boolean renderNorth, boolean renderSouth) {
@@ -261,7 +257,8 @@ public class RenderDimensionalStabilizer extends MekanismTileEntityRenderer<Tile
 
     public record RenderPiece(int x, int xLength, int z, int zLength, boolean renderNorth, boolean renderSouth, boolean renderEast, boolean renderWest) {
 
-        public @SideRender.SideRenderFlags byte sidesToRender() {
+        @SideRender.SideRenderFlags
+        public byte sidesToRender() {
             return RenderResizableCuboid.SideRender.from(false, false, renderNorth, renderSouth, renderWest, renderEast);
         }
     }

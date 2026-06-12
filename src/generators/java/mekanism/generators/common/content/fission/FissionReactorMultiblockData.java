@@ -19,12 +19,12 @@ import mekanism.api.math.MathUtils;
 import mekanism.api.radiation.IRadiationManager;
 import mekanism.api.resource.IResourceContainer;
 import mekanism.api.resource.LargeResourceStack;
-import mekanism.common.attachments.containers.type.ContainerType;
 import mekanism.common.capabilities.chemical.VariableCapacityChemicalTank;
 import mekanism.common.capabilities.fluid.VariableCapacityFluidTank;
 import mekanism.common.capabilities.heat.VariableHeatCapacitor;
 import mekanism.common.capabilities.merged.MergedTank;
 import mekanism.common.capabilities.merged.MergedTank.CurrentType;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.content.boiler.BoilerMultiblockData;
 import mekanism.common.integration.computer.ComputerException;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerChemicalTankWrapper;
@@ -67,8 +67,7 @@ import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.resource.Resource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class FissionReactorMultiblockData extends MultiblockData implements IValveHandler {
 
@@ -142,6 +141,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
     private long heatedCoolantCapacity;
     private long fuelCapacity;
 
+    @Nullable
     private AABB hotZone;
 
     public float prevCoolantScale;
@@ -267,7 +267,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
     }
 
     @Override
-    public void readUpdateTag(@NotNull ValueInput input) {
+    public void readUpdateTag(ValueInput input) {
         super.readUpdateTag(input);
         prevCoolantScale = input.getFloatOr(SerializationConstants.SCALE, prevCoolantScale);
         prevFuelScale = input.getFloatOr(SerializationConstants.SCALE_ALT, prevFuelScale);
@@ -286,7 +286,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
     }
 
     @Override
-    public void writeUpdateTag(@NotNull ValueOutput output) {
+    public void writeUpdateTag(ValueOutput output) {
         super.writeUpdateTag(output);
         output.putFloat(SerializationConstants.SCALE, prevCoolantScale);
         output.putFloat(SerializationConstants.SCALE_ALT, prevFuelScale);
@@ -370,16 +370,14 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
             //Reset the heat to the default of the heat capacitor
             heatCapacitor.setHeat(heatCapacitor.getHeatCapacity() * biomeAmbientTemp);
             //Force sync the update to the cache that corresponds to this multiblock
-            MultiblockCache<FissionReactorMultiblockData> cache = MultiblockManager.get(getLevel(), MekanismGeneratorsMultiblocks.FISSION_REACTOR).getCache(inventoryID);
+            MultiblockCache<FissionReactorMultiblockData> cache = MultiblockManager.get(world, MekanismGeneratorsMultiblocks.FISSION_REACTOR).getCache(inventoryID);
             if (cache != null) {
                 cache.sync(this);
             }
         }
     }
 
-    /**
-     * @apiNote Assumes radiation is enabled instead of checking and returning zero if it is not.
-     */
+    /// @apiNote Assumes radiation is enabled instead of checking and returning zero if it is not.
     private double getWasteTankRadioactivity(boolean dump) {
         ChemicalResource wasteType = wasteTank.resource();
         double wasteRadioactivity;
@@ -401,9 +399,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         return wasteRadioactivity * (stored + partialWaste);
     }
 
-    /**
-     * @apiNote Assumes radiation is enabled instead of checking and returning zero if it is not.
-     */
+    /// @apiNote Assumes radiation is enabled instead of checking and returning zero if it is not.
     private double getTankRadioactivityAndDump(IChemicalTank tank) {
         if (!tank.isEmpty()) {
             double radioactivity = tank.resource().getRadioactivity() * tank.amountAsLong();
@@ -474,7 +470,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
     }
 
     private int clampCoolantHeated(double heated, int stored) {
-        return Mth.clamp(MathUtils.clampToInt(heated), 0, stored);
+        return Math.clamp(MathUtils.clampToInt(heated), 0, stored);
     }
 
     private void burnFuel(Level world) {
@@ -515,13 +511,13 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
     }
 
     private void radiateEntities(Level world) {
-        if (RadiationManager.isGlobalRadiationEnabled() && isBurning() && world.getRandom().nextInt() % SharedConstants.TICKS_PER_SECOND == 0) {
+        if (hotZone != null && RadiationManager.isGlobalRadiationEnabled() && isBurning() && world.getRandom().nextInt() % SharedConstants.TICKS_PER_SECOND == 0) {
             double wasteRadiation = getWasteTankRadioactivity(false) / 3_600F; // divide down to Sv/s
             double magnitude = lastBurnRate + wasteRadiation;
             if (magnitude <= IRadiationManager.INSTANCE.baselineRadiation()) {
                 return;
             }
-            List<LivingEntity> entitiesToRadiate = getLevel().getEntitiesOfClass(LivingEntity.class, hotZone);
+            List<LivingEntity> entitiesToRadiate = world.getEntitiesOfClass(LivingEntity.class, hotZone);
             if (!entitiesToRadiate.isEmpty()) {
                 IRadiationManager radiationManager = IRadiationManager.INSTANCE;
                 for (LivingEntity entity : entitiesToRadiate) {
@@ -611,7 +607,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
     }
 
     public void setRateLimit(double rate) {
-        rate = Mth.clamp(rate, 0, getMaxBurnRate());
+        rate = Math.clamp(rate, 0, getMaxBurnRate());
         if (!Mth.equal(rateLimit, rate)) {
             rateLimit = rate;
             markDirty();

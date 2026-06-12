@@ -7,11 +7,14 @@ import java.net.SocketException;
 import java.util.Set;
 import mekanism.additions.common.config.MekanismAdditionsConfig;
 import mekanism.common.Mekanism;
+import org.jspecify.annotations.Nullable;
 
 public class VoiceServerManager {
 
     private final Set<VoiceConnection> connections = new ObjectOpenHashSet<>();
+    @Nullable
     private ServerSocket serverSocket;
+    @Nullable
     private Thread listenThread;
     private boolean foundLocal = false;
     private boolean running;
@@ -22,22 +25,26 @@ public class VoiceServerManager {
             running = true;
             serverSocket = new ServerSocket(MekanismAdditionsConfig.additions.voicePort.get());
             (listenThread = new ListenThread()).start();
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
     }
 
     public void stop() {
         try {
             Mekanism.logger.info("VoiceServer: Shutting down server...");
-            try {
-                listenThread.interrupt();
-            } catch (Exception ignored) {
+            if (listenThread != null) {
+                try {
+                    listenThread.interrupt();
+                } catch (Exception _) {
+                }
             }
             foundLocal = false;
-            try {
-                serverSocket.close();
-                serverSocket = null;
-            } catch (Exception ignored) {
+            if (serverSocket != null) {
+                try {
+                    serverSocket.close();
+                    serverSocket = null;
+                } catch (Exception _) {
+                }
             }
         } catch (Exception e) {
             Mekanism.logger.error("VoiceServer: Error while shutting down server.", e);
@@ -88,7 +95,7 @@ public class VoiceServerManager {
                     connection.start();
                     connections.add(connection);
                     Mekanism.logger.info("VoiceServer: Accepted new connection.");
-                } catch (SocketException | NullPointerException ignored) {
+                } catch (SocketException | NullPointerException _) {
                 } catch (Exception e) {
                     Mekanism.logger.error("VoiceServer: Error while accepting connection.", e);
                 }

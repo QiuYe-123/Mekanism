@@ -16,14 +16,14 @@ public class EmiStackUnderMouseProvider implements EmiStackProvider<Screen> {
     @Override
     public EmiStackInteraction getStackAt(Screen screen, int x, int y) {
         if (screen instanceof GuiMekanism<?> gui) {
-            return GuiElementHandler.getClickableIngredientUnderMouse(gui, x, y, (helper, ingredient) -> {
+            return GuiElementHandler.getClickableIngredientUnderMouse(gui, x, y, (_, ingredient) -> {
                 EmiStack emiStack;
                 switch (ingredient) {
                     case ItemStack stack -> emiStack = EmiStack.of(stack);
                     case FluidStack stack -> emiStack = NeoForgeEmiStack.of(stack);
                     case ChemicalStack stack -> emiStack = new ChemicalEmiStack(stack);
                     default -> {
-                        return null;
+                        return EmiStackInteraction.EMPTY;
                     }
                 }
                 return new EmiStackInteraction(emiStack, null, false);

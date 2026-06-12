@@ -3,8 +3,6 @@ package mekanism.common.integration.framedblocks;
 import io.github.xfacthd.framedblocks.api.camo.CamoContentClientHandler;
 import io.github.xfacthd.framedblocks.api.camo.resource.ResourceCamoContentClientHandler;
 import it.unimi.dsi.fastutil.ints.IntList;
-import mekanism.api.annotations.MethodsAreNotNullByDefault;
-import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.chemical.ChemicalResource;
 import mekanism.client.render.MekanismRenderer;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -12,10 +10,9 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.item.ItemStack;
 
-@ParametersAreNotNullByDefault
-@MethodsAreNotNullByDefault
 final class ChemicalCamoClientHandler extends ResourceCamoContentClientHandler<ChemicalResource, ChemicalCamoContent> {
 
     static final CamoContentClientHandler<ChemicalCamoContent> INSTANCE = new ChemicalCamoClientHandler();
@@ -27,8 +24,7 @@ final class ChemicalCamoClientHandler extends ResourceCamoContentClientHandler<C
         ChemicalResource resource = chemicalCamoContent.getResource();
         //TODO - 26.1: Should we force translucency?
         Material.Baked stillMaterial = new Material.Baked(MekanismRenderer.getChemicalTexture(resource), false);
-        //TODO - 26.1: Check if we define alpha for chemicals is defined. We might want to enforce alpha to be specified when we used to not
-        return new ResourceModelSpec(stillMaterial, null, resource.getChemicalTint() != 0XFFFFFFFF, null);
+        return new ResourceModelSpec(stillMaterial, null, resource.getChemicalTint() != CommonColors.WHITE, null);
     }
 
     @Override

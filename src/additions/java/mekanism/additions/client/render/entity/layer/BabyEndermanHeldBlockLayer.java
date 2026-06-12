@@ -9,15 +9,14 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.EndermanRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import org.jspecify.annotations.NullMarked;
 
-@NullMarked
 public class BabyEndermanHeldBlockLayer extends RenderLayer<EndermanRenderState, EndermanModel<EndermanRenderState>> {
 
     public BabyEndermanHeldBlockLayer(RenderLayerParent<EndermanRenderState, EndermanModel<EndermanRenderState>> renderer) {
         super(renderer);
     }
 
+    @Override
     public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, EndermanRenderState state, float yRot, float xRot) {
         BlockModelRenderState carriedBlock = state.carriedBlock;
         if (!carriedBlock.isEmpty()) {

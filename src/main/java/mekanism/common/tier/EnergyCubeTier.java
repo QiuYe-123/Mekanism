@@ -1,14 +1,12 @@
 package mekanism.common.tier;
 
 import java.util.Locale;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.tier.BaseTier;
 import mekanism.common.config.value.CachedIntValue;
 import mekanism.common.config.value.CachedLongValue;
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public enum EnergyCubeTier implements IStorageTier, StringRepresentable {
     BASIC(BaseTier.BASIC, 4_000_000L, 4_000),
     ADVANCED(BaseTier.ADVANCED, 16_000_000L, 16_000),
@@ -58,9 +56,7 @@ public enum EnergyCubeTier implements IStorageTier, StringRepresentable {
         return baseTransferRate;
     }
 
-    /**
-     * ONLY CALL THIS FROM TierConfig. It is used to give the EnergyCubeTier a reference to the actual config value object
-     */
+    /// ONLY CALL THIS FROM TierConfig. It is used to give the EnergyCubeTier a reference to the actual config value object
     public void setConfigReference(CachedLongValue capacityReference, CachedIntValue transferRateReference) {
         this.capacityReference = capacityReference;
         this.transferRateReference = transferRateReference;

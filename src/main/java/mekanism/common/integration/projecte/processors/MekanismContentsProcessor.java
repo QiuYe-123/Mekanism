@@ -13,8 +13,8 @@ import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.api.gear.ModuleData;
 import mekanism.api.resource.LargeResourceStack;
-import mekanism.common.attachments.component.UpgradeAware;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.component.UpgradeAware;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.config.MekanismConfigTranslations;
 import mekanism.common.lib.inventory.personalstorage.AbstractPersonalStorageItemInventory;
 import mekanism.common.lib.inventory.personalstorage.PersonalStorageManager;
@@ -28,8 +28,7 @@ import moze_intel.projecte.api.components.IDataComponentProcessor;
 import moze_intel.projecte.api.proxy.IEMCProxy;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.item.ItemResource;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 @DataComponentProcessor
@@ -55,7 +54,7 @@ public class MekanismContentsProcessor implements IDataComponentProcessor {
 
     @Override
     @Range(from = 0, to = Long.MAX_VALUE)
-    public long recalculateEMC(@NotNull ItemInfo info, @Range(from = 1, to = Long.MAX_VALUE) long currentEMC) throws ArithmeticException {
+    public long recalculateEMC(ItemInfo info, @Range(from = 1, to = Long.MAX_VALUE) long currentEMC) throws ArithmeticException {
         IEMCProxy emcProxy = IEMCProxy.INSTANCE;
         //TODO: ItemInfo will probably just become an ItemResource natively, but for now we just build a resource from it
         ItemAccess itemAccess = ItemAccessUtils.sideEffectFreeAccess(ItemResource.of(info.getItem(), info.getComponentsPatch()));

@@ -3,7 +3,6 @@ package mekanism.api.recipes.basic;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.recipes.CombinerRecipe;
 import mekanism.api.recipes.MekanismRecipeSerializers;
 import mekanism.api.recipes.ingredients.ItemStackIngredient;
@@ -12,19 +11,17 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class BasicCombinerRecipe extends CombinerRecipe {
 
     protected final ItemStackIngredient mainInput;
     protected final ItemStackIngredient extraInput;
     protected final ItemStackTemplate output;
 
-    /**
-     * @param mainInput  Main input.
-     * @param extraInput Secondary/extra input.
-     * @param output     Output.
-     */
+    /// @param mainInput  Main input.
+    /// @param extraInput Secondary/extra input.
+    /// @param output     Output.
     public BasicCombinerRecipe(ItemStackIngredient mainInput, ItemStackIngredient extraInput, ItemStackTemplate output) {
         this.mainInput = Objects.requireNonNull(mainInput, "Main input cannot be null.");
         this.extraInput = Objects.requireNonNull(extraInput, "Secondary/Extra input cannot be null.");
@@ -63,7 +60,7 @@ public class BasicCombinerRecipe extends CombinerRecipe {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         } else if (o == null || getClass() != o.getClass()) {

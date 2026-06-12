@@ -18,12 +18,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Used for informing the server that a click happened in a GUI and the gui window needs to change
- */
+/// Used for informing the server that a click happened in a GUI and the gui window needs to change
 public record PacketEntityButtonPress(ClickedEntityButton buttonClicked, int entityID) implements IMekanismPacket {
 
     public static final CustomPacketPayload.Type<PacketEntityButtonPress> TYPE = new CustomPacketPayload.Type<>(Mekanism.rl("entity_button"));
@@ -37,7 +34,6 @@ public record PacketEntityButtonPress(ClickedEntityButton buttonClicked, int ent
         this(buttonClicked, entity.getId());
     }
 
-    @NotNull
     @Override
     public CustomPacketPayload.Type<PacketEntityButtonPress> type() {
         return TYPE;

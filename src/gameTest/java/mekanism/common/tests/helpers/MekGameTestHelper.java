@@ -7,7 +7,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.function.Function;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -43,7 +42,6 @@ import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.testframework.gametest.ExtendedGameTestHelper;
 
-@NothingNullByDefault
 public class MekGameTestHelper extends ExtendedGameTestHelper {
 
     public static final int INACCESSIBLE_LEVEL = ChunkMap.MAX_VIEW_DISTANCE + 1;
@@ -106,9 +104,8 @@ public class MekGameTestHelper extends ExtendedGameTestHelper {
         assertContainerContains(new BlockPos(x, y, z), item, count);
     }
 
-    /**
-     * This is similar and based off of vanilla's assertContainerContains, except supports checking for a specific amount, and checking blocks that expose item handlers.
-     */
+    /// This is similar and based off of vanilla's assertContainerContains, except supports checking for a specific amount, and checking blocks that expose item
+    /// handlers.
     public void assertContainerContains(BlockPos relativePos, Item item, int count) {
         //TODO: Do we want to make a PR to Neo that adds this overload, even if it is as simple as only checking the count
         // and doesn't also add support for checking item handlers?
@@ -136,9 +133,7 @@ public class MekGameTestHelper extends ExtendedGameTestHelper {
         }
     }
 
-    /**
-     * Adds support for validating that item handlers are empty.
-     */
+    /// Adds support for validating that item handlers are empty.
     @Override
     public void assertContainerEmpty(BlockPos relativePos) {
         BlockEntity blockentity = getLevel().getBlockEntity(absolutePos(relativePos));
@@ -166,9 +161,7 @@ public class MekGameTestHelper extends ExtendedGameTestHelper {
         return player;
     }
 
-    /**
-     * Adds support for providing a more accurate/useful Vec3 location in the hit result.
-     */
+    /// Adds support for providing a more accurate/useful Vec3 location in the hit result.
     @Override
     public void useOn(BlockPos relativePos, ItemStack item, Player player, Direction direction) {
         useOn(relativePos, item, player, direction, 1);
@@ -183,9 +176,7 @@ public class MekGameTestHelper extends ExtendedGameTestHelper {
         }
     }
 
-    /**
-     * Adds support for providing a more accurate/useful Vec3 location in the hit result.
-     */
+    /// Adds support for providing a more accurate/useful Vec3 location in the hit result.
     @Override
     public void useBlock(BlockPos relativePos, Player player, ItemStack item, Direction direction) {
         player.setItemInHand(InteractionHand.MAIN_HAND, item);

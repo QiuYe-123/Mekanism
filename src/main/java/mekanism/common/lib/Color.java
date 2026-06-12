@@ -2,6 +2,7 @@ package mekanism.common.lib;
 
 import mekanism.common.util.StatUtils;
 import net.minecraft.util.ARGB;
+import org.jspecify.annotations.Nullable;
 
 public class Color {
 
@@ -94,14 +95,12 @@ public class Color {
         return new int[]{r(), g(), b()};
     }
 
-    /**
-     * Blends this color into another, by a given scale.
-     *
-     * @param to    color to blend with
-     * @param scale a scale (0 -> 1) defining the effect of the second color
-     *
-     * @return blended color
-     */
+    /// Blends this color into another, by a given scale.
+    ///
+    /// @param to    color to blend with
+    /// @param scale a scale (0 -> 1) defining the effect of the second color
+    ///
+    /// @return blended color
     public Color blend(Color to, double scale) {
         return rgbad(r + (to.r - r) * scale,
               g + (to.g - g) * scale,
@@ -227,12 +226,8 @@ public class Color {
         return ret;
     }
 
-    public static int packOpaque(int rgb) {
-        return rgb | 0xFF000000;
-    }
-
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == this) {
             return true;
         }

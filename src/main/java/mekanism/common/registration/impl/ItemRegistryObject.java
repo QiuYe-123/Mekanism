@@ -8,10 +8,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.IHasTranslationKey;
-import mekanism.common.attachments.IAttachmentAware;
-import mekanism.common.attachments.containers.creator.IContainerCreator;
-import mekanism.common.attachments.containers.type.CapableContainerType;
-import mekanism.common.attachments.containers.type.IContainerType;
+import mekanism.common.component.IComponentAware;
+import mekanism.common.component.containers.creator.IContainerCreator;
+import mekanism.common.component.containers.type.CapableContainerType;
+import mekanism.common.component.containers.type.IContainerType;
 import mekanism.common.capabilities.ICapabilityAware;
 import mekanism.common.config.IMekanismConfig;
 import mekanism.common.registration.MekanismDeferredHolder;
@@ -27,8 +27,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.util.ValueIOSerializable;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import org.jetbrains.annotations.ApiStatus.Internal;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ItemRegistryObject<ITEM extends Item> extends MekanismDeferredHolder<Item, ITEM> implements ItemLike, IHasTextComponent, IHasTranslationKey {
 
@@ -41,7 +40,6 @@ public class ItemRegistryObject<ITEM extends Item> extends MekanismDeferredHolde
         super(key);
     }
 
-    @NotNull
     @Override
     public ITEM asItem() {
         return value();
@@ -72,13 +70,11 @@ public class ItemRegistryObject<ITEM extends Item> extends MekanismDeferredHolde
         return resource.is(get());
     }
 
-    @NotNull
     @Override
     public String getTranslationKey() {
         return value().getDescriptionId();
     }
 
-    @NotNull
     @Override
     public Component getTextComponent() {
         return value().getName(asStack());
@@ -132,8 +128,8 @@ public class ItemRegistryObject<ITEM extends Item> extends MekanismDeferredHolde
     @SuppressWarnings({"unchecked", "rawtypes"})
     void attachDefaultContainers(IEventBus eventBus) {
         ITEM item = get();
-        if (item instanceof IAttachmentAware attachmentAware) {
-            attachmentAware.attachAttachments(eventBus);
+        if (item instanceof IComponentAware attachmentAware) {
+            attachmentAware.addComponents(eventBus);
         }
         if (defaultCreators != null) {
             for (Map.Entry<IContainerType<?, ?>, Supplier<? extends IContainerCreator<?, ?>>> entry : defaultCreators.entrySet()) {

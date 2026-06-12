@@ -1,7 +1,6 @@
 package mekanism.common.content.gear.mekasuit;
 
 import java.util.Map;
-import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.chemical.ChemicalResource;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IModule;
@@ -32,7 +31,6 @@ import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-@ParametersAreNotNullByDefault
 public record ModuleElectrolyticBreathingUnit(boolean fillHeld) implements ICustomModule<ModuleElectrolyticBreathingUnit> {
 
     public static final Identifier FILL_HELD = Mekanism.rl("breathing.held");
@@ -93,13 +91,11 @@ public record ModuleElectrolyticBreathingUnit(boolean fillHeld) implements ICust
         }
     }
 
-    /**
-     * Checks whether the given chestplate should be filled with hydrogen, if it can store hydrogen. Does not check whether the chestplate can store hydrogen.
-     *
-     * @param chest the chestplate to check
-     *
-     * @return whether the given chestplate should be filled with hydrogen.
-     */
+    /// Checks whether the given chestplate should be filled with hydrogen, if it can store hydrogen. Does not check whether the chestplate can store hydrogen.
+    ///
+    /// @param chest the chestplate to check
+    ///
+    /// @return whether the given chestplate should be filled with hydrogen.
     private <ITEM extends TypedInstance<Item> & DataComponentGetter> boolean checkChestPlate(ITEM chest) {
         if (chest.is(MekanismItems.MEKASUIT_BODYARMOR)) {
             return IModuleHelper.INSTANCE.getModule(chest, MekanismModules.JETPACK_UNIT) != null;

@@ -11,7 +11,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.level.storage.SavedDataStorage;
 import net.neoforged.fml.util.thread.EffectiveSide;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 public class FrequencyControllerManager {
@@ -44,7 +43,7 @@ public class FrequencyControllerManager {
         return controller;
     }
 
-    protected static <FREQ extends Frequency> @NonNull FrequencyLookup<FREQ> createLookup(FrequencyType<FREQ> frequencyType, UUID uuid, SecurityMode securityMode, Codec<FrequencyLookup<FREQ>> codec) {
+    protected static <FREQ extends Frequency> FrequencyLookup<FREQ> createLookup(FrequencyType<FREQ> frequencyType, @Nullable UUID uuid, SecurityMode securityMode, Codec<FrequencyLookup<FREQ>> codec) {
         FrequencyLookup<FREQ> lookup;
         if (dataStorage == null) {
             //assume client - TODO - 26.1 - does this even get called on the client? seems not

@@ -22,8 +22,8 @@ import mekanism.api.fluid.IFluidTank;
 import mekanism.api.heat.HeatAPI;
 import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.inventory.IInventorySlot;
-import mekanism.common.attachments.containers.type.ContainerType;
 import mekanism.common.capabilities.heat.ITileHeatHandler;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
 import mekanism.common.lib.math.voxel.IShape;
@@ -40,31 +40,31 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.redstone.Redstone;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IContentsListener {
 
     public Set<BlockPos> locations = new ObjectOpenHashSet<>();
-    /**
-     * @apiNote This set is only used for purposes of caching all known valid inner blocks of a multiblock structure, for use in checking if we need to revalidate the
-     * multiblock when something changes, cases we want to skip are inner nodes just changing state (for example, super heating elements being activated) This set is not
-     * synced or checked anywhere (for things like equals) as it is only used on the server and isn't part of the structure's information. It also is not the most
-     * accurate of checks that get done against this as there is no way to tell if the state actually changed or if the block changed entirely, but assuming no one is
-     * replacing the blocks inside a multiblock (which is unsupported) it will handle it fine, and we can easily special-case it becoming air as having been "broken"
-     */
+    /// @apiNote This set is only used for purposes of caching all known valid inner blocks of a multiblock structure, for use in checking if we need to revalidate the
+    /// multiblock when something changes, cases we want to skip are inner nodes just changing state (for example, super heating elements being activated) This set is not
+    /// synced or checked anywhere (for things like equals) as it is only used on the server and isn't part of the structure's information. It also is not the most
+    /// accurate of checks that get done against this as there is no way to tell if the state actually changed or if the block changed entirely, but assuming no one is
+    /// replacing the blocks inside a multiblock (which is unsupported) it will handle it fine, and we can easily special-case it becoming air as having been "broken"
     public Set<BlockPos> internalLocations = new ObjectOpenHashSet<>();
     public Map<BlockPos, ValveData> valves = new HashMap<>();
 
     @ContainerSync(getter = "getVolume", setter = "setVolume")
     private int volume;
 
+    @Nullable
     public UUID inventoryID;
 
     public boolean hasMaster;
@@ -81,32 +81,30 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
 
     private int currentRedstoneLevel = Redstone.SIGNAL_NONE;
 
-    private final BooleanSupplier remoteSupplier;
-    private final Supplier<Level> worldSupplier;
+    private final Supplier<@Nullable Level> worldSupplier;
 
     protected final List<IInventorySlot> inventorySlots = new ArrayList<>();
     protected final List<IFluidTank> fluidTanks = new ArrayList<>();
     protected final List<IChemicalTank> chemicalTanks = new ArrayList<>();
     protected final List<IHeatCapacitor> heatCapacitors = new ArrayList<>();
 
-    private final BiPredicate<Object, @NotNull AutomationType> formedBiPred = (_, _) -> isFormed();
-    private final BiPredicate<Object, @NotNull AutomationType> notExternalFormedBiPred = (_, automationType) -> !automationType.isExternal() && isFormed();
+    private final BiPredicate<Object, AutomationType> formedBiPred = (_, _) -> isFormed();
+    private final BiPredicate<Object, AutomationType> notExternalFormedBiPred = (_, automationType) -> !automationType.isExternal() && isFormed();
 
     private boolean dirty;
 
     public MultiblockData(BlockEntity tile) {
-        remoteSupplier = () -> tile.getLevel().isClientSide();
         worldSupplier = tile::getLevel;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> BiPredicate<T, @NotNull AutomationType> formedBiPred() {
-        return (BiPredicate<T, @NotNull AutomationType>) formedBiPred;
+    public <T> BiPredicate<T, AutomationType> formedBiPred() {
+        return (BiPredicate<T, AutomationType>) formedBiPred;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> BiPredicate<T, @NotNull AutomationType> notExternalFormedBiPred() {
-        return (BiPredicate<T, @NotNull AutomationType>) notExternalFormedBiPred;
+    public <T> BiPredicate<T, AutomationType> notExternalFormedBiPred() {
+        return (BiPredicate<T, AutomationType>) notExternalFormedBiPred;
     }
 
     protected IContentsListener createSaveAndComparator() {
@@ -116,8 +114,9 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
     protected IContentsListener createSaveAndComparator(IContentsListener contentsListener) {
         return () -> {
             contentsListener.onContentsChanged();
-            if (!isRemote()) {
-                markDirtyComparator(getLevel());
+            Level level = getLevel();
+            if (level != null && !level.isClientSide()) {
+                markDirtyComparator(level);
             }
         };
     }
@@ -134,19 +133,15 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         dirty = true;
     }
 
-    /**
-     * Returns true if the multiblock's gui can be accessed via structural multiblocks, false otherwise. An example this may be false for would be on a thermal
-     * evaporation plant.
-     */
+    /// Returns true if the multiblock's gui can be accessed via structural multiblocks, false otherwise. An example this may be false for would be on a thermal
+    /// evaporation plant.
     public boolean allowsStructuralGuiAccess(TileEntityStructuralMultiblock multiblock) {
         return true;
     }
 
-    /**
-     * Tick the multiblock.
-     *
-     * @return if we need an update packet
-     */
+    /// Tick the multiblock.
+    ///
+    /// @return if we need an update packet
     public boolean tick(ServerLevel world) {
         boolean needsPacket = false;
         for (ValveData data : valves.values()) {
@@ -183,7 +178,7 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         return sum / positions.length;
     }
 
-    public boolean setShape(IShape shape) {
+    public boolean setShape(@Nullable IShape shape) {
         if (shape instanceof VoxelCuboid cuboid) {
             bounds = cuboid;
             renderLocation = cuboid.getMinPos().relative(Direction.UP);
@@ -197,7 +192,7 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         for (BlockPos pos : internalLocations) {
             BlockEntity tile = WorldUtils.getTileEntity(world, pos);
             if (tile instanceof IInternalMultiblock internalMultiblock) {
-                internalMultiblock.setMultiblock(this);
+                internalMultiblock.setMultiblock(world, this);
             }
         }
         for (BlockPos pos : locations) {
@@ -231,9 +226,11 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
     }
 
     protected boolean isRemote() {
-        return remoteSupplier.getAsBoolean();
+        Level level = getLevel();
+        return level == null || level.isClientSide();
     }
 
+    @Nullable
     public Level getLevel() {
         return worldSupplier.get();
     }
@@ -242,11 +239,11 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         return true;
     }
 
-    public void remove(Level world, Structure oldStructure) {
+    public void remove(LevelReader world, Structure oldStructure) {
         for (BlockPos pos : internalLocations) {
             BlockEntity tile = WorldUtils.getTileEntity(world, pos);
             if (tile instanceof IInternalMultiblock internalMultiblock) {
-                internalMultiblock.setMultiblock(null);
+                internalMultiblock.setMultiblock(world, null);
             }
         }
         for (BlockPos pos : locations) {
@@ -263,7 +260,7 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
     public void meltdownHappened(Level world) {
     }
 
-    public void readUpdateTag(@NotNull ValueInput input) {
+    public void readUpdateTag(ValueInput input) {
         input.getInt(SerializationConstants.VOLUME).ifPresent(this::setVolume);
         input.read(SerializationConstants.RENDER_LOCATION, BlockPos.CODEC).ifPresent(value -> renderLocation = value);
         Optional<BlockPos> minPos = input.read(SerializationConstants.MIN, BlockPos.CODEC);
@@ -274,7 +271,7 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         inventoryID = input.read(SerializationConstants.INVENTORY_ID, UUIDUtil.CODEC).orElse(null);
     }
 
-    public void writeUpdateTag(@NotNull ValueOutput output) {
+    public void writeUpdateTag(ValueOutput output) {
         output.putInt(SerializationConstants.VOLUME, getVolume());
         //In theory this shouldn't be null here but check it anyway
         output.storeNullable(SerializationConstants.RENDER_LOCATION, BlockPos.CODEC, renderLocation);
@@ -312,12 +309,11 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         return bounds;
     }
 
-    /**
-     * Checks if this multiblock is formed and the given position is insides the bounds of this multiblock
-     */
-    public <T extends MultiblockData> boolean isPositionInsideBounds(@NotNull Structure structure, @NotNull BlockPos pos) {
+    /// Checks if this multiblock is formed and the given position is insides the bounds of this multiblock
+    public <T extends MultiblockData> boolean isPositionInsideBounds(Structure structure, BlockGetter level, BlockPos pos) {
         if (isFormed()) {
-            CuboidRelative relativeLocation = getBounds().getRelativeLocation(pos);
+            VoxelCuboid bounds = getBounds();
+            CuboidRelative relativeLocation = bounds.getRelativeLocation(pos);
             if (relativeLocation == CuboidRelative.INSIDE) {
                 return true;
             } else if (relativeLocation.isWall()) {
@@ -327,9 +323,9 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
                 if (manager != null && multiblockType != null) {
                     IStructureValidator<T> validator = multiblockType.createValidator();
                     if (validator instanceof CuboidStructureValidator<T> cuboidValidator) {
-                        validator.init(getLevel(), manager, multiblockType, structure);
-                        cuboidValidator.loadCuboid(getBounds());
-                        return cuboidValidator.getStructureRequirement(pos) == StructureRequirement.INNER;
+                        validator.init(level, manager, multiblockType, structure);
+                        cuboidValidator.loadCuboid(bounds);
+                        return cuboidValidator.getStructureRequirement(pos, bounds) == StructureRequirement.INNER;
                     }
                 }
             }
@@ -337,15 +333,13 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         return false;
     }
 
-    /**
-     * Checks if this multiblock is formed and the given position is insides the bounds of this multiblock
-     */
-    public boolean isPositionOutsideBounds(@NotNull BlockPos pos) {
+    /// Checks if this multiblock is formed and the given position is insides the bounds of this multiblock
+    public boolean isPositionOutsideBounds(BlockPos pos) {
         return isFormed() && getBounds().getRelativeLocation(pos) == CuboidRelative.OUTSIDE;
     }
 
     @Nullable
-    public Direction getOutsideSide(@NotNull BlockPos pos) {
+    public Direction getOutsideSide(BlockPos pos) {
         if (isFormed()) {
             VoxelCuboid bounds = getBounds();
             BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
@@ -359,13 +353,11 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         return null;
     }
 
-    @NotNull
     @Override
     public List<IInventorySlot> getInventorySlots() {
         return isFormed() || isRemote() ? inventorySlots : Collections.emptyList();
     }
 
-    @NotNull
     @Override
     public List<IFluidTank> getFluidTanks() {
         return isFormed() || isRemote() ? fluidTanks : Collections.emptyList();
@@ -390,7 +382,6 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         return Collections.emptyList();
     }
 
-    @NotNull
     @Override
     public List<IChemicalTank> getChemicalTanks() {
         return isFormed() || isRemote() ? chemicalTanks : Collections.emptyList();
@@ -407,9 +398,8 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         return isFormed() || isRemote() ? energyContainer() : null;
     }
 
-    @NotNull
     @Override
-    public List<IHeatCapacitor> getHeatCapacitors(Direction side) {
+    public List<IHeatCapacitor> getHeatCapacitors(@Nullable Direction side) {
         return isFormed() || isRemote() ? heatCapacitors : Collections.emptyList();
     }
 
@@ -436,7 +426,7 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null || obj.getClass() != getClass()) {
             return false;
         }
@@ -501,11 +491,11 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         return currentRedstoneLevel;
     }
 
-    protected <CACHE> List<CACHE> getActiveOutputs(List<? extends OutputTarget<CACHE, Void>> outputs) {
+    protected <CACHE> List<CACHE> getActiveOutputs(List<? extends OutputTarget<CACHE, @Nullable Void>> outputs) {
         return getActiveOutputs(outputs, null);
     }
 
-    protected <CACHE, DATA> List<CACHE> getActiveOutputs(List<? extends OutputTarget<CACHE, DATA>> outputs, DATA data) {
+    protected <CACHE, DATA extends @Nullable Object> List<CACHE> getActiveOutputs(List<? extends OutputTarget<CACHE, DATA>> outputs, DATA data) {
         if (outputs.isEmpty()) {
             return Collections.emptyList();
         }
@@ -519,10 +509,10 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         return targets;
     }
 
-    public record CapabilityOutputTarget<TYPE>(BlockCapabilityCache<TYPE, @Nullable Direction> cache, BooleanSupplier isActive) implements OutputTarget<BlockCapabilityCache<TYPE, @Nullable Direction>, Void> {
+    public record CapabilityOutputTarget<TYPE>(BlockCapabilityCache<TYPE, @Nullable Direction> cache, BooleanSupplier isActive) implements OutputTarget<BlockCapabilityCache<TYPE, @Nullable Direction>, @Nullable Void> {
 
         @Override
-        public boolean canOutput(Void unused) {
+        public boolean canOutput(@Nullable Void unused) {
             return isActive.getAsBoolean();
         }
     }
@@ -535,7 +525,7 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         }
     }
 
-    protected interface OutputTarget<CACHE, DATA> {
+    protected interface OutputTarget<CACHE, DATA extends @Nullable Object> {
 
         CACHE cache();
 

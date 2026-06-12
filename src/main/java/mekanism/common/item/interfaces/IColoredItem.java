@@ -1,12 +1,12 @@
 package mekanism.common.item.interfaces;
 
-import mekanism.common.attachments.FrequencyAware;
+import mekanism.common.component.FrequencyAware;
 import mekanism.common.lib.frequency.Frequency;
 import mekanism.common.lib.frequency.IColorableFrequency;
 import mekanism.common.registries.MekanismDataComponents;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface IColoredItem {
 

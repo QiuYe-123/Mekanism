@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.ChemicalStackTemplate;
 import mekanism.api.recipes.MekanismRecipeSerializers;
 import mekanism.api.recipes.PressurizedReactionRecipe;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
@@ -17,9 +17,8 @@ import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class BasicPressurizedReactionRecipe extends PressurizedReactionRecipe {
 
     protected final ItemStackIngredient inputSolid;
@@ -29,21 +28,20 @@ public class BasicPressurizedReactionRecipe extends PressurizedReactionRecipe {
     protected final int duration;
     @Nullable
     protected final ItemStackTemplate outputItem;
-    protected final ChemicalStack outputChemical;
+    @Nullable
+    protected final ChemicalStackTemplate outputChemical;
 
-    /**
-     * @param inputSolid     Item input.
-     * @param inputFluid     Fluid input.
-     * @param inputChemical       Chemical input.
-     * @param energyRequired Amount of "extra" energy this recipe requires, compared to the base energy requirements of the machine performing the recipe.
-     * @param duration       Base duration in ticks that this recipe takes to complete. Must be greater than zero.
-     * @param outputItem     Item output.
-     * @param outputChemical      Chemical output.
-     *
-     * @apiNote At least one output must not be empty.
-     */
+    /// @param inputSolid     Item input.
+    /// @param inputFluid     Fluid input.
+    /// @param inputChemical  Chemical input.
+    /// @param energyRequired Amount of "extra" energy this recipe requires, compared to the base energy requirements of the machine performing the recipe.
+    /// @param duration       Base duration in ticks that this recipe takes to complete. Must be greater than zero.
+    /// @param outputItem     Item output.
+    /// @param outputChemical Chemical output.
+    ///
+    /// @apiNote At least one output must not be empty.
     public BasicPressurizedReactionRecipe(ItemStackIngredient inputSolid, FluidStackIngredient inputFluid, ChemicalStackIngredient inputChemical,
-          int energyRequired, int duration, @Nullable ItemStackTemplate outputItem, ChemicalStack outputChemical) {
+          int energyRequired, int duration, @Nullable ItemStackTemplate outputItem, @Nullable ChemicalStackTemplate outputChemical) {
         this.inputSolid = Objects.requireNonNull(inputSolid, "Item input cannot be null.");
         this.inputFluid = Objects.requireNonNull(inputFluid, "Fluid input cannot be null.");
         this.inputChemical = Objects.requireNonNull(inputChemical, "Chemical input cannot be null.");
@@ -54,17 +52,16 @@ public class BasicPressurizedReactionRecipe extends PressurizedReactionRecipe {
             throw new IllegalArgumentException("Duration must be positive.");
         }
         this.duration = duration;
-        Objects.requireNonNull(outputChemical, "Chemical output cannot be null.");
-        if (outputItem == null && outputChemical.isEmpty()) {
+        if (outputItem == null && outputChemical == null) {
             throw new IllegalArgumentException("At least one output must not be empty.");
         }
         this.outputItem = outputItem;
-        this.outputChemical = outputChemical.copy();
+        this.outputChemical = outputChemical;
     }
 
     public BasicPressurizedReactionRecipe(ItemStackIngredient inputSolid, FluidStackIngredient inputFluid, ChemicalStackIngredient inputChemical,
-          int energyRequired, int duration, Optional<ItemStackTemplate> outputItem, ChemicalStack outputChemical) {
-        this(inputSolid, inputFluid, inputChemical, energyRequired, duration, outputItem.orElse(null), outputChemical);
+          int energyRequired, int duration, Optional<ItemStackTemplate> outputItem, Optional<ChemicalStackTemplate> outputChemical) {
+        this(inputSolid, inputFluid, inputChemical, energyRequired, duration, outputItem.orElse(null), outputChemical.orElse(null));
     }
 
     @Override
@@ -105,7 +102,7 @@ public class BasicPressurizedReactionRecipe extends PressurizedReactionRecipe {
     @Override
     @Contract(value = "_, _, _ -> new", pure = true)
     public PressurizedReactionRecipeOutput getOutput(ItemStack solid, FluidStack liquid, ChemicalStack chemical) {
-        return new PressurizedReactionRecipeOutput(this.outputItem, this.outputChemical.copy());
+        return new PressurizedReactionRecipeOutput(this.outputItem, this.outputChemical);
     }
 
     @Nullable
@@ -117,7 +114,12 @@ public class BasicPressurizedReactionRecipe extends PressurizedReactionRecipe {
         return Optional.ofNullable(outputItem);
     }
 
-    public ChemicalStack getOutputChemical() {
+    public Optional<ChemicalStackTemplate> getOutputChemicalOptional() {
+        return Optional.ofNullable(outputChemical);
+    }
+
+    @Nullable
+    public ChemicalStackTemplate getOutputChemical() {
         return outputChemical;
     }
 
@@ -127,7 +129,7 @@ public class BasicPressurizedReactionRecipe extends PressurizedReactionRecipe {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         } else if (o == null || getClass() != o.getClass()) {
@@ -135,7 +137,7 @@ public class BasicPressurizedReactionRecipe extends PressurizedReactionRecipe {
         }
         BasicPressurizedReactionRecipe other = (BasicPressurizedReactionRecipe) o;
         return energyRequired == other.energyRequired && duration == other.duration && inputSolid.equals(other.inputSolid) && inputFluid.equals(other.inputFluid) &&
-               inputChemical.equals(other.inputChemical) && Objects.equals(outputItem, other.outputItem) && outputChemical.equals(other.outputChemical);
+               inputChemical.equals(other.inputChemical) && Objects.equals(outputItem, other.outputItem) && Objects.equals(outputChemical, other.outputChemical);
     }
 
     @Override
@@ -145,7 +147,9 @@ public class BasicPressurizedReactionRecipe extends PressurizedReactionRecipe {
         result = 31 * result + inputChemical.hashCode();
         result = 31 * result + energyRequired;
         result = 31 * result + duration;
-        result = 31 * result + outputChemical.hashCode();
+        if (outputChemical != null) {
+            result = 31 * result + outputChemical.hashCode();
+        }
         if (outputItem != null) {
             result = 31 * result + outputItem.hashCode();
         }

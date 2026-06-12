@@ -21,14 +21,8 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Block class for handling multiple energy cube block IDs. 0: Basic Energy Cube 1: Advanced Energy Cube 2: Elite Energy Cube 3: Ultimate Energy Cube 4: Creative Energy
- * Cube
- *
- * @author AidanBrady
- */
 public class BlockEnergyCube extends BlockTileModel<TileEntityEnergyCube, Machine<TileEntityEnergyCube>> {
 
     private static final VoxelShape[] bounds = new VoxelShape[256];
@@ -119,9 +113,7 @@ public class BlockEnergyCube extends BlockTileModel<TileEntityEnergyCube, Machin
         }
     }
 
-    /**
-     * 0 for an input is equivalent to false, 1 is equivalent to true
-     */
+    /// 0 for an input is equivalent to false, 1 is equivalent to true
     private static int getIndex(int top, int bottom, int front, int back, int left, int right, boolean rotateVertical, boolean rotateHorizontal) {
         return ((((((top | bottom << 1) | front << 2) | back << 3) | left << 4) | right << 5) | (rotateVertical ? 1 : 0) << 6) | (rotateHorizontal ? 1 : 0) << 7;
     }
@@ -134,15 +126,14 @@ public class BlockEnergyCube extends BlockTileModel<TileEntityEnergyCube, Machin
     }
 
     @Override
-    protected boolean isPathfindable(@NotNull BlockState state, @NotNull PathComputationType pathType) {
+    protected boolean isPathfindable(BlockState state, PathComputationType pathType) {
         //If we have a custom shape which means we are not a full block then mark that movement is not
         // allowed through this block it is not a full block. Otherwise, use the normal handling for if movement is allowed
         return false;
     }
 
-    @NotNull
     @Override
-    protected VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull CollisionContext context) {
+    protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         TileEntityEnergyCube energyCube = WorldUtils.getTileEntity(TileEntityEnergyCube.class, world, pos, true);
         int index;
         if (energyCube == null) {
@@ -170,10 +161,12 @@ public class BlockEnergyCube extends BlockTileModel<TileEntityEnergyCube, Machin
         return bounds[index];
     }
 
-    /**
-     * @return 1 if the side is enabled, 0 otherwise
-     */
-    private static int isSideEnabled(ConfigInfo energyConfig, Direction facing, Direction side) {
+    /// @return 1 if the side is enabled, 0 otherwise
+    private static int isSideEnabled(ConfigInfo energyConfig, @Nullable Direction facing, Direction side) {
+        if (facing == null) {
+            //If something went wrong, and we don't have a facing direction return nothing is enabled
+            return 0;
+        }
         ISlotInfo slotInfo = energyConfig.getSlotInfo(RelativeSide.fromDirections(facing, side));
         return slotInfo != null && slotInfo.isEnabled() ? 1 : 0;
     }

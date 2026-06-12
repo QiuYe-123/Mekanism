@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import mekanism.api.recipes.MekanismRecipe;
 import mekanism.api.recipes.ingredients.InputIngredient;
+import mekanism.common.Mekanism;
 import net.minecraft.core.Holder;
 import net.minecraft.core.TypedInstance;
 import net.minecraft.core.component.DataComponentHolder;
@@ -19,18 +20,14 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.common.util.strategy.BasicStrategy;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Extended input cache that implements the backend handling to allow for both the basic key based input lookup that {@link BaseInputCache} provides, and also a more
- * advanced mapping that is Data Component based.
- */
+/// Extended input cache that implements the backend handling to allow for both the basic key based input lookup that [BaseInputCache] provides, and also a more advanced
+/// mapping that is Data Component based.
 public abstract class ComponentSensitiveInputCache<KEY, INPUT extends TypedInstance<KEY> & DataComponentHolder, INGREDIENT extends InputIngredient<KEY, INPUT>, RECIPE extends MekanismRecipe<?>>
       extends BaseInputCache<KEY, INPUT, INGREDIENT, RECIPE> {
 
-    /**
-     * Map of ResourceKey to Map of components to lists.
-     */
+    /// Map of ResourceKey to Map of components to lists.
     //TODO - 26.1 can this use a Reference map now that it uses ResourceKey?
     private final Map<ResourceKey<KEY>, Map<DataComponentMap, List<RECIPE>>> componentInputCache = new HashMap<>();
 
@@ -40,9 +37,7 @@ public abstract class ComponentSensitiveInputCache<KEY, INPUT extends TypedInsta
         componentInputCache.clear();
     }
 
-    /**
-     * @implNote Checks the more specific Data Component based cache before checking the more generic base type.
-     */
+    /// @implNote Checks the more specific Data Component based cache before checking the more generic base type.
     @Override
     public boolean contains(TypedInstance<KEY> input) {
         return super.contains(input) || (input instanceof DataComponentHolder dCH && componentCacheContains(input, dCH));
@@ -56,9 +51,7 @@ public abstract class ComponentSensitiveInputCache<KEY, INPUT extends TypedInsta
         return holderMatch != null && holderMatch.containsKey(asDCHolder.getComponents());
     }
 
-    /**
-     * @implNote Checks the more specific Data Component based cache before checking the more generic base type.
-     */
+    /// @implNote Checks the more specific Data Component based cache before checking the more generic base type.
     @Override
     public Iterable<RECIPE> getRecipes(TypedInstance<KEY> input) {
         if (componentInputCache.isEmpty() || !(input instanceof DataComponentHolder dataComponentHolder)) {
@@ -84,16 +77,17 @@ public abstract class ComponentSensitiveInputCache<KEY, INPUT extends TypedInsta
         return holderMatches.get(asDCHolder.getComponents());
     }
 
-    /**
-     * Adds a given recipe to the input cache using the corresponding Data Component based key.
-     * Works for EXACT matches only.
-     *
-     * @param inputHolder Holder representing the KEY
-     * @param patch       The component patch to apply against inputHolder for storing in the index
-     * @param recipe      Recipe to add.
-     */
-    protected void addNbtInputCache(Holder<KEY> inputHolder, DataComponentPatch patch, RECIPE recipe) {
+    /// Adds a given recipe to the input cache using the corresponding Data Component based key. Works for EXACT matches only.
+    ///
+    /// @param inputHolder Holder representing the KEY
+    /// @param patch       The component patch to apply against inputHolder for storing in the index
+    /// @param recipe      Recipe to add.
+    protected void addComponentInputCache(Holder<KEY> inputHolder, DataComponentPatch patch, RECIPE recipe) {
         ResourceKey<KEY> key = inputHolder.getKey();
+        if (key == null) {
+            Mekanism.logger.warn("Component Input Cache received a direct holder");
+            return;
+        }
         DataComponentMap components = PatchedDataComponentMap.fromPatch(inputHolder.components(), patch);
         var holderMatch = componentInputCache.get(key);
         if (holderMatch == null) {

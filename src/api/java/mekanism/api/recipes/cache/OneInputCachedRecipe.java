@@ -5,19 +5,15 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.recipes.SingleInputRecipe;
 import mekanism.api.recipes.ingredients.InputIngredient;
 import mekanism.api.recipes.inputs.IInputHandler;
 import mekanism.api.recipes.outputs.IOutputHandler;
 import net.minecraft.core.TypedInstance;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Base class to help implement handling of recipes with one input.
- */
-@NothingNullByDefault
+/// Base class to help implement handling of recipes with one input.
 public class OneInputCachedRecipe<HOLDER, INPUT extends TypedInstance<HOLDER>, INGREDIENT extends InputIngredient<HOLDER, INPUT>, OUTPUT,
       RECIPE extends SingleInputRecipe<HOLDER, INPUT, INGREDIENT, ?, OUTPUT>> extends CachedRecipe<RECIPE> {
 
@@ -34,13 +30,11 @@ public class OneInputCachedRecipe<HOLDER, INPUT extends TypedInstance<HOLDER>, I
     @Nullable
     private OUTPUT output;
 
-    /**
-     * @param recipe           Recipe.
-     * @param recheckAllErrors Returns {@code true} if processing should be continued even if an error is hit in order to gather all the errors. It is recommended to not
-     *                         do this every tick or if there is no one viewing recipes.
-     * @param inputHandler     Input handler.
-     * @param outputHandler    Output handler.
-     */
+    /// @param recipe           Recipe.
+    /// @param recheckAllErrors Returns `true` if processing should be continued even if an error is hit in order to gather all the errors. It is recommended to not do
+    /// do this every tick or if there is no one viewing recipes.
+    /// @param inputHandler     Input handler.
+    /// @param outputHandler    Output handler.
     public OneInputCachedRecipe(RECIPE recipe, BooleanSupplier recheckAllErrors, IInputHandler<HOLDER, INPUT> inputHandler, IOutputHandler<OUTPUT> outputHandler) {
         super(recipe, recheckAllErrors);
         this.inputHandler = Objects.requireNonNull(inputHandler, "Input handler cannot be null.");

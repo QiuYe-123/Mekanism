@@ -12,11 +12,11 @@ import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.math.MathUtils;
 import mekanism.api.resource.LargeResourceStack;
-import mekanism.common.attachments.containers.type.ContainerType;
-import mekanism.common.attachments.containers.type.IContainerType;
 import mekanism.common.capabilities.chemical.VariableCapacityChemicalTank;
 import mekanism.common.capabilities.holder.container.IContainerHolder;
 import mekanism.common.capabilities.holder.container.MekContainerHelper;
+import mekanism.common.component.containers.type.ContainerType;
+import mekanism.common.component.containers.type.IContainerType;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerChemicalTankWrapper;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerIInventorySlotWrapper;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
@@ -29,28 +29,30 @@ import mekanism.common.inventory.slot.EnergyInventorySlot;
 import mekanism.generators.common.config.MekanismGeneratorsConfig;
 import mekanism.generators.common.registries.GeneratorsBlocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.Nullable;
 
 public class TileEntityGasGenerator extends TileEntityGenerator {
 
     public static final Predicate<ChemicalResource> HAS_FUEL = chemical -> chemical.getData(IMekanismDataMapTypes.INSTANCE.chemicalFuel()) != null;
 
-    /**
-     * The tank this block is storing fuel in.
-     */
+    /// The tank this block is storing fuel in.
+    @UnknownNullability//Initialized via getInitialChemicalTanks
     @WrappingComputerMethod(wrapper = ComputerChemicalTankWrapper.class, methodNames = {"getFuel", "getFuelCapacity", "getFuelNeeded",
                                                                                         "getFuelFilledPercentage"}, docPlaceholder = "fuel tank")
-    public FuelTank fuelTank;
+    FuelTank fuelTank;
     @Nullable
     private ChemicalFuel cachedFuel = null;
     private int gasUsedLastTick;
 
+    @UnknownNullability//Initialized via getInitialInventory
     @WrappingComputerMethod(wrapper = ComputerIInventorySlotWrapper.class, methodNames = "getFuelItem", docPlaceholder = "fuel item slot")
     ChemicalInventorySlot fuelSlot;
+    @UnknownNullability//Initialized via getInitialInventory
     @WrappingComputerMethod(wrapper = ComputerIInventorySlotWrapper.class, methodNames = "getEnergyItem", docPlaceholder = "energy item slot")
     EnergyInventorySlot energySlot;
 
@@ -58,7 +60,6 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
         super(GeneratorsBlocks.GAS_BURNING_GENERATOR, pos, state);
     }
 
-    @NotNull
     @Override
     public IContainerHolder<IChemicalTank> getInitialChemicalTanks(IContentsListener listener) {
         MekContainerHelper<IChemicalTank> builder = MekContainerHelper.forSide(facingSupplier);
@@ -66,7 +67,6 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
         return builder.build();
     }
 
-    @NotNull
     @Override
     protected IContainerHolder<IInventorySlot> getInitialInventory(IContentsListener listener) {
         MekContainerHelper<IInventorySlot> builder = MekContainerHelper.forSide(facingSupplier);
@@ -78,8 +78,8 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
     }
 
     @Override
-    protected boolean onUpdateServer() {
-        boolean sendUpdatePacket = super.onUpdateServer();
+    protected boolean onUpdateServer(ServerLevel level) {
+        boolean sendUpdatePacket = super.onUpdateServer(level);
         energySlot.drainContainerIntoSlot(null);
         fuelSlot.fillTankFromSlot(null);
         gasUsedLastTick = 0;
@@ -114,6 +114,10 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
 
         setActive(gasUsedLastTick != 0);
         return sendUpdatePacket;
+    }
+
+    public IChemicalTank getFuelTank() {
+        return fuelTank;
     }
 
     @ComputerMethod(nameOverride = "getBurnRate")
@@ -160,7 +164,7 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
         }
 
         @Override
-        protected void onContentsChanged(@NotNull LargeResourceStack<ChemicalResource> originalState) {
+        protected void onContentsChanged(LargeResourceStack<ChemicalResource> originalState) {
             super.onContentsChanged(originalState);
             ChemicalResource newType = resource();
             if (!newType.isEmpty() && !originalState.matches(newType)) {

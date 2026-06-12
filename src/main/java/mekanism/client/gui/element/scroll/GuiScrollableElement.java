@@ -8,7 +8,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.NotNull;
 
 public abstract class GuiScrollableElement extends GuiTexturedElement {
 
@@ -46,7 +45,7 @@ public abstract class GuiScrollableElement extends GuiTexturedElement {
     protected abstract int getFocusedElements();
 
     @Override
-    public void onClick(@NotNull MouseButtonEvent event, boolean isDoubleClick) {
+    public void onClick(MouseButtonEvent event, boolean isDoubleClick) {
         super.onClick(event, isDoubleClick);
         int scroll = getScroll();
         int x = getGuiLeft() + barX;
@@ -64,16 +63,16 @@ public abstract class GuiScrollableElement extends GuiTexturedElement {
     }
 
     @Override
-    protected void onDrag(@NotNull MouseButtonEvent event, double deltaX, double deltaY) {
+    protected void onDrag(MouseButtonEvent event, double deltaX, double deltaY) {
         super.onDrag(event, deltaX, deltaY);
         if (isDragging() && needsScrollBars()) {
             double yAxis = event.y() - getGuiTop();
-            this.scroll = Mth.clamp((yAxis - barY - dragOffset) / getMax(), 0, 1);
+            this.scroll = Math.clamp((yAxis - barY - dragOffset) / getMax(), 0, 1);
         }
     }
 
     @Override
-    public void onRelease(@NotNull MouseButtonEvent event) {
+    public void onRelease(MouseButtonEvent event) {
         super.onRelease(event);
         dragOffset = 0;
     }
@@ -97,7 +96,7 @@ public abstract class GuiScrollableElement extends GuiTexturedElement {
     protected int getScroll() {
         //Calculate thumb position along scrollbar
         int max = getMax();
-        return Mth.clamp((int) (scroll * max), 0, max);
+        return Math.clamp((int) (scroll * max), 0, max);
     }
 
     public int getCurrentSelection() {
@@ -114,7 +113,7 @@ public abstract class GuiScrollableElement extends GuiTexturedElement {
                 } else {
                     delta = -1;
                 }
-                scroll = (float) Mth.clamp(scroll - delta / elements, 0, 1);
+                scroll = Math.clamp((float) (scroll - delta / elements), 0, 1);
                 return true;
             }
         }

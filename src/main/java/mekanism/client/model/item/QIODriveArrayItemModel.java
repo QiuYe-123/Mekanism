@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.function.Supplier;
 import mekanism.api.resource.LargeResourceStack;
 import mekanism.client.model.blockstate.QIODriveArrayBlockStateModel;
-import mekanism.common.attachments.FrequencyAware;
-import mekanism.common.attachments.containers.type.ContainerType;
-import mekanism.common.attachments.qio.DriveMetadata;
+import mekanism.common.component.FrequencyAware;
+import mekanism.common.component.containers.type.ContainerType;
+import mekanism.common.component.qio.DriveMetadata;
 import mekanism.common.content.qio.IQIODriveItem;
 import mekanism.common.content.qio.QIOFrequency;
 import mekanism.common.lib.frequency.FrequencyTypes;
@@ -175,7 +175,7 @@ public record QIODriveArrayItemModel(
         @Override
         public ItemModel bake(ItemModel.BakingContext context, Matrix4fc transformation) {
             ModelBaker baker = context.blockModelBaker();
-            QIODriveArrayBlockStateModel stateModel = (new QIODriveArrayBlockStateModel.Unbaked(new Variant(cuboidUnbaked.model(), Variant.SimpleModelState.DEFAULT)))
+            QIODriveArrayBlockStateModel stateModel = new QIODriveArrayBlockStateModel.Unbaked(new Variant(cuboidUnbaked.model(), Variant.SimpleModelState.DEFAULT))
                   .bake(context.blockModelBaker());
             ResolvedModel resolvedBaseModel = baker.getModel(cuboidUnbaked.model());
             ModelRenderProperties properties = new ModelRenderProperties(resolvedBaseModel.getTopGuiLight().lightLikeBlock(), stateModel.particleMaterial(), resolvedBaseModel.getTopTransforms());

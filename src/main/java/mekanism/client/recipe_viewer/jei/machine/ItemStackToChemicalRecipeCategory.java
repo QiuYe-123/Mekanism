@@ -16,11 +16,10 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import org.jetbrains.annotations.NotNull;
 
 public class ItemStackToChemicalRecipeCategory<RECIPE extends ItemStackToChemicalRecipe> extends HolderRecipeCategory<RECIPE> {
 
-    protected static final String CHEMICAL_INPUT = "chemicalInput";
+    protected static final String CHEMICAL_OUTPUT = "chemicalOutput";
 
     protected final GuiProgress progressBar;
     private final GuiGauge<?> output;
@@ -34,10 +33,10 @@ public class ItemStackToChemicalRecipeCategory<RECIPE extends ItemStackToChemica
     }
 
     @Override
-    public void setRecipe(@NotNull IRecipeLayoutBuilder builder, RecipeHolder<RECIPE> recipeHolder, @NotNull IFocusGroup focusGroup) {
+    public void setRecipe(IRecipeLayoutBuilder builder, RecipeHolder<RECIPE> recipeHolder, IFocusGroup focusGroup) {
         RECIPE recipe = recipeHolder.value();
         initItem(builder, RecipeIngredientRole.INPUT, input, recipe.getInput().getRepresentations(getSlotDisplayContext()));
-        initChemical(builder, RecipeIngredientRole.OUTPUT, output, recipe.getOutputDefinition())
-              .setSlotName(CHEMICAL_INPUT);
+        initChemical(builder, output, recipe.getOutputDefinition())
+              .setSlotName(CHEMICAL_OUTPUT);
     }
 }

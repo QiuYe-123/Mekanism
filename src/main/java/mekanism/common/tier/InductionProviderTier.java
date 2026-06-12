@@ -1,12 +1,10 @@
 package mekanism.common.tier;
 
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
 import mekanism.common.config.value.CachedLongValue;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public enum InductionProviderTier implements ITier {
     BASIC(BaseTier.BASIC, 256_000L),
     ADVANCED(BaseTier.ADVANCED, 2_048_000L),
@@ -36,9 +34,7 @@ public enum InductionProviderTier implements ITier {
         return baseOutput;
     }
 
-    /**
-     * ONLY CALL THIS FROM TierConfig. It is used to give the InductionProviderTier a reference to the actual config value object
-     */
+    /// ONLY CALL THIS FROM TierConfig. It is used to give the InductionProviderTier a reference to the actual config value object
     public void setConfigReference(CachedLongValue outputReference) {
         this.outputReference = outputReference;
     }

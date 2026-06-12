@@ -3,7 +3,6 @@ package mekanism.api.recipes.basic;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.recipes.ChemicalCrystallizerRecipe;
 import mekanism.api.recipes.MekanismRecipeSerializers;
@@ -12,25 +11,23 @@ import net.minecraft.core.TypedInstance;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.Nullable;
 
 
-@NothingNullByDefault
 public class BasicChemicalCrystallizerRecipe extends ChemicalCrystallizerRecipe {
 
     protected final ChemicalStackIngredient input;
     protected final ItemStackTemplate output;
 
-    /**
-     * @param input  Input.
-     * @param output Output.
-     */
+    /// @param input  Input.
+    /// @param output Output.
     public BasicChemicalCrystallizerRecipe(ChemicalStackIngredient input, ItemStackTemplate output) {
         this.input = Objects.requireNonNull(input, "Input cannot be null.");
         this.output = Objects.requireNonNull(output, "Output cannot be null.");
     }
 
     @Override
-    @Contract(value = "_ -> new", pure = true)
+    @Contract(pure = true)
     public ItemStackTemplate getOutput(TypedInstance<Chemical> input) {
         return output;
     }
@@ -45,11 +42,9 @@ public class BasicChemicalCrystallizerRecipe extends ChemicalCrystallizerRecipe 
         return input;
     }
 
-    /**
-     * For Serializer usage only. Do not modify the returned stack!
-     *
-     * @return the uncopied output definition
-     */
+    /// For Serializer usage only. Do not modify the returned stack!
+    ///
+    /// @return the uncopied output definition
     public ItemStackTemplate getOutputRaw() {
         return this.output;
     }
@@ -60,7 +55,7 @@ public class BasicChemicalCrystallizerRecipe extends ChemicalCrystallizerRecipe 
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         } else if (o == null || getClass() != o.getClass()) {

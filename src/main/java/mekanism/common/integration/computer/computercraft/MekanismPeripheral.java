@@ -7,17 +7,14 @@ import dan200.computercraft.api.lua.MethodResult;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IDynamicPeripheral;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import java.lang.ref.WeakReference;
 import mekanism.common.integration.computer.IComputerTile;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jetbrains.annotations.Nullable;
-
-import java.lang.ref.WeakReference;
+import org.jspecify.annotations.Nullable;
 
 public class MekanismPeripheral<TILE extends BlockEntity & IComputerTile> extends CCMethodCaller implements IDynamicPeripheral {
 
-    /**
-     * Only call this if the given tile actually has computer support as it won't be double-checked.
-     */
+    /// Only call this if the given tile actually has computer support as it won't be double-checked.
     public static <TILE extends BlockEntity & IComputerTile> MekanismPeripheral<TILE> create(TILE tile) {
         MekanismPeripheral<TILE> mekanismPeripheral = new MekanismPeripheral<>(tile);
         tile.getComputerMethods(mekanismPeripheral);
@@ -57,7 +54,7 @@ public class MekanismPeripheral<TILE extends BlockEntity & IComputerTile> extend
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         return obj instanceof MekanismPeripheral<?> other && equals(other);
     }
 

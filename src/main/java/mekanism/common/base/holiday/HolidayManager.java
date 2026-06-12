@@ -20,8 +20,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public final class HolidayManager {
 
@@ -68,7 +67,6 @@ public final class HolidayManager {
         Mekanism.logger.info("Initialized HolidayManager.");
     }
 
-    @NonNull
     private static Supplier<SoundEvent> getSoundEventSupplier(Holder<SoundEvent> filterable) {
         return () -> {
             if (areHolidaysEnabled() && soundHoliday != null) {
@@ -96,9 +94,7 @@ public final class HolidayManager {
         }
     }
 
-    /**
-     * @apiNote Only call on the client side
-     */
+    /// @apiNote Only call on the client side
     public static void notify(Player player) {
         if (!holidaysNotified) {
             //Mark as notified even if messages are configured to off, so that we don't have to try notifying for the rest of the day

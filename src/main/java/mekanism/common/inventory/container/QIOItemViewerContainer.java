@@ -63,9 +63,8 @@ import net.neoforged.neoforge.common.TranslatableEnum;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
+import org.jspecify.annotations.Nullable;
 
 public abstract class QIOItemViewerContainer extends MekanismContainer implements ISlotClickHandler {
 
@@ -75,7 +74,7 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
 
     public static int getSlotsYMax() {
         int maxY = Mth.ceil(Minecraft.getInstance().getWindow().getGuiScaledHeight() * 0.05 - 8) + 1;
-        return Mth.clamp(maxY, SLOTS_Y_MIN, SLOTS_Y_MAX);
+        return Math.clamp(maxY, SLOTS_Y_MIN, SLOTS_Y_MAX);
     }
 
     private final Map<UUID, ItemSlotData> cachedInventory;
@@ -95,7 +94,7 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
     private int doubleClickTransferTicks = 0;
     private int lastSlot = -1;
     private ItemStack lastStack = ItemStack.EMPTY;
-    private List<InventoryContainerSlot>[] craftingGridInputSlots;
+    private @Nullable List<InventoryContainerSlot> @Nullable [] craftingGridInputSlots;
     private final VirtualInventoryContainerSlot[][] craftingSlots = new VirtualInventoryContainerSlot[IQIOCraftingWindowHolder.MAX_CRAFTING_WINDOWS][10];
 
     private boolean sortingPaused;
@@ -157,9 +156,7 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
 
     public abstract void toggleTargetDirection();
 
-    /**
-     * @apiNote Only used on the client
-     */
+    /// @apiNote Only used on the client
     public QIOItemViewerContainer recreate() {
         //If sorting is currently paused, unpause it and apply any sorting necessary so that we don't have to transfer what the sorting state is
         boolean wasPaused = sortingPaused;
@@ -170,9 +167,7 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
         return container;
     }
 
-    /**
-     * @apiNote Only used on the client
-     */
+    /// @apiNote Only used on the client
     protected abstract QIOItemViewerContainer recreateUnchecked();
 
     @Override
@@ -210,7 +205,7 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
     }
 
     @Override
-    protected void openInventory(@NotNull Inventory inv) {
+    protected void openInventory(Inventory inv) {
         super.openInventory(inv);
         if (!getLevel().isClientSide()) {
             QIOFrequency freq = getFrequency();
@@ -221,7 +216,7 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
     }
 
     @Override
-    protected void closeInventory(@NotNull Player player) {
+    protected void closeInventory(Player player) {
         super.closeInventory(player);
         if (!player.level().isClientSide()) {
             QIOFrequency freq = getFrequency();
@@ -277,12 +272,14 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
         }
     }
 
-    /**
-     * Used to lazy initialize the various lists of slots for specific crafting grids
-     *
-     * @apiNote Only call on server
-     */
+    /// Used to lazy initialize the various lists of slots for specific crafting grids
+    ///
+    /// @apiNote Only call on server
     private List<InventoryContainerSlot> getCraftingGridSlots(byte selectedCraftingGrid) {
+        if (craftingGridInputSlots == null) {
+            //Something went wrong or this was called from the client
+            return Collections.emptyList();
+        }
         List<InventoryContainerSlot> craftingGridSlots = craftingGridInputSlots[selectedCraftingGrid];
         if (craftingGridSlots == null) {
             //If we haven't precalculated which slots go with this crafting grid yet, do so
@@ -295,10 +292,9 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
         return craftingGridSlots;
     }
 
-    @NotNull
     @Override
-    public ItemStack quickMoveStack(@NotNull Player player, int slotID) {
-        Slot currentSlot = slots.get(slotID);
+    public ItemStack quickMoveStack(Player player, int slotID) {
+        Slot currentSlot = getSlot(slotID);
         if (currentSlot == null) {
             return ItemStack.EMPTY;
         } else if (currentSlot instanceof VirtualCraftingOutputSlot virtualSlot) {
@@ -457,11 +453,9 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
         }
     }
 
-    /**
-     * Removes an item from the cached inventory, item list, and search list
-     *
-     * @return The previously stored cached data, or null if the item was not part of the cached inventory.
-     */
+    /// Removes an item from the cached inventory, item list, and search list
+    ///
+    /// @return The previously stored cached data, or null if the item was not part of the cached inventory.
     @Nullable
     private ItemSlotData removeItemBasic(UUID itemUUID) {
         ItemSlotData oldData = cachedInventory.remove(itemUUID);
@@ -515,9 +509,7 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
         return new QIOCraftingTransferHelper(cachedInventory.values(), hotBarSlots, mainInventorySlots, craftingWindow, player);
     }
 
-    /**
-     * @apiNote Only call this client side
-     */
+    /// @apiNote Only call this client side
     public void setSortDirection(SortDirection sortDirection) {
         if (this.sortDirection != sortDirection) {
             this.sortDirection = sortDirection;
@@ -530,9 +522,7 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
         return sortDirection;
     }
 
-    /**
-     * @apiNote Only call this client side
-     */
+    /// @apiNote Only call this client side
     public void setSortType(ListSortType sortType) {
         if (this.sortType != sortType) {
             this.sortType = sortType;
@@ -541,9 +531,7 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
         }
     }
 
-    /**
-     * @apiNote Only call this client side
-     */
+    /// @apiNote Only call this client side
     private void applySortingOptionChange() {
         MekanismConfig.client.save();
         this.sortingNeeded = SortingNeeded.ALL;
@@ -554,7 +542,6 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
         return sortType;
     }
 
-    @NotNull
     public List<IScrollableSlot> getQIOItemList() {
         return searchQuery.isInvalid() ? itemList : searchList;
     }
@@ -579,16 +566,14 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
         return getSelectedCraftingGrid(getSelectedWindow());
     }
 
-    /**
-     * @apiNote Only call on server
-     */
+    /// @apiNote Only call on server
     public byte getSelectedCraftingGrid(UUID player) {
         return getSelectedCraftingGrid(getSelectedWindow(player));
     }
 
     private byte getSelectedCraftingGrid(@Nullable SelectedWindowData selectedWindow) {
-        if (selectedWindow != null && selectedWindow.type == WindowType.CRAFTING) {
-            return selectedWindow.extraData;
+        if (selectedWindow != null && selectedWindow.type() == WindowType.CRAFTING) {
+            return selectedWindow.extraData();
         }
         return (byte) -1;
     }
@@ -737,7 +722,7 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (obj == this) {
                 return true;
             } else if (obj == null || obj.getClass() != this.getClass()) {
@@ -786,7 +771,6 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
             return this == ASCENDING;
         }
 
-        @NotNull
         @Override
         public String getTranslationKey() {
             return name.getTranslationKey();
@@ -830,9 +814,7 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
             }
         }
 
-        /**
-         * @return true if the sort type has any level of sorting based on count
-         */
+        /// @return true if the sort type has any level of sorting based on count
         public boolean usesCount() {
             return usesCount;
         }
@@ -847,7 +829,6 @@ public abstract class QIOItemViewerContainer extends MekanismContainer implement
             return name.translate();
         }
 
-        @NotNull
         @Override
         public Component getTranslatedName() {
             return getShortName();

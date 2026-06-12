@@ -21,11 +21,12 @@ import mekanism.generators.common.config.MekanismGeneratorsConfig;
 import mekanism.generators.common.registries.GeneratorsBlocks;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 public class TileEntityWindGenerator extends TileEntityGenerator implements IBoundingBlock {
 
@@ -35,6 +36,7 @@ public class TileEntityWindGenerator extends TileEntityGenerator implements IBou
     private float angle;
     private double currentMultiplier = 0;
     private boolean isBlacklistDimension;
+    @UnknownNullability//Initialized via getInitialInventory
     @WrappingComputerMethod(wrapper = ComputerIInventorySlotWrapper.class, methodNames = "getEnergyItem", docPlaceholder = "energy item slot")
     EnergyInventorySlot energySlot;
 
@@ -42,7 +44,6 @@ public class TileEntityWindGenerator extends TileEntityGenerator implements IBou
         super(GeneratorsBlocks.WIND_GENERATOR, pos, state);
     }
 
-    @NotNull
     @Override
     protected IContainerHolder<IInventorySlot> getInitialInventory(IContentsListener listener) {
         MekContainerHelper<IInventorySlot> builder = MekContainerHelper.forSide(facingSupplier);
@@ -56,8 +57,8 @@ public class TileEntityWindGenerator extends TileEntityGenerator implements IBou
     }
 
     @Override
-    protected boolean onUpdateServer() {
-        boolean sendUpdatePacket = super.onUpdateServer();
+    protected boolean onUpdateServer(ServerLevel level) {
+        boolean sendUpdatePacket = super.onUpdateServer(level);
         energySlot.drainContainerIntoSlot(null);
         // If we're in a blacklisted dimension, there's nothing more to do
         if (isBlacklistDimension) {
@@ -82,8 +83,8 @@ public class TileEntityWindGenerator extends TileEntityGenerator implements IBou
     }
 
     @Override
-    protected void onUpdateClient() {
-        super.onUpdateClient();
+    protected void onUpdateClient(Level level) {
+        super.onUpdateClient(level);
         if (getActive()) {
             angle = (angle + getHeightSpeedRatio()) % 360;
         }
@@ -101,9 +102,7 @@ public class TileEntityWindGenerator extends TileEntityGenerator implements IBou
         return SPEED * height / (level.getMaxY() + 1 - minBuildHeight);
     }
 
-    /**
-     * Determines the current output multiplier, taking sky visibility and height into account.
-     **/
+    /// Determines the current output multiplier, taking sky visibility and height into account.
     private double getMultiplier() {
         if (level != null) {
             BlockPos top = getBlockPos().above(4);
@@ -116,19 +115,19 @@ public class TileEntityWindGenerator extends TileEntityGenerator implements IBou
                 int maxLevelHeight = Math.min(level.getMaxY() + 1, minBuildHeight + level.dimensionType().logicalHeight()) - 1;
                 int minY = Math.max(MekanismGeneratorsConfig.generators.windGenerationMinY.get(), minBuildHeight);
                 int maxY = Math.min(MekanismGeneratorsConfig.generators.windGenerationMaxY.get(), maxLevelHeight);
-                int clampedY = Math.min(maxY, Math.max(minY, top.getY()));
+                int clampedY = Math.clamp(top.getY(), minY, maxY);
                 long minG = MekanismGeneratorsConfig.generators.windGenerationMin.get();
                 long maxG = MekanismGeneratorsConfig.generators.windGenerationMax.get();
-                double slope = ((double) (maxG - minG)) / (maxY - minY);
+                double slope = (double) (maxG - minG) / (maxY - minY);
                 double toGen = minG + (slope * (clampedY - minY));
-                return (toGen / minG);
+                return toGen / minG;
             }
         }
         return 0L;
     }
 
     @Override
-    public void setLevel(@NotNull Level world) {
+    public void setLevel(Level world) {
         super.setLevel(world);
         // Check the blacklist and force an update if we're in the blacklist. Otherwise, we'll never send
         // an initial activity status and the client (in MP) will show the windmills turning while not

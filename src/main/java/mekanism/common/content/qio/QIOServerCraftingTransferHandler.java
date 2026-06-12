@@ -26,11 +26,9 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Used for the server side transfer handling by the {@link PacketQIOFillCraftingWindow}
- */
+/// Used for the server side transfer handling by the [PacketQIOFillCraftingWindow]
 public class QIOServerCraftingTransferHandler {
 
     private static final int MAX_NEEDED = QIOCraftingWindow.SLOTS_PER_WINDOW * Item.ABSOLUTE_MAX_STACK_SIZE;

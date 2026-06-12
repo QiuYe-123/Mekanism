@@ -2,6 +2,7 @@ package mekanism.common.lib.math;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class Quaternion {
 
@@ -18,7 +19,7 @@ public class Quaternion {
 
     public Quaternion(Vec3 axis, double angle, boolean degrees) {
         if (degrees) {
-            angle *= (Math.PI / 180F);
+            angle *= Mth.DEG_TO_RAD;
         }
 
         double sin = Math.sin(angle / 2.0F);
@@ -28,9 +29,9 @@ public class Quaternion {
     // roll, pitch, yaw
     public Quaternion(double xAngle, double yAngle, double zAngle, boolean degrees) {
         if (degrees) {
-            xAngle *= (Math.PI / 180F);
-            yAngle *= (Math.PI / 180F);
-            zAngle *= (Math.PI / 180F);
+            xAngle *= Mth.DEG_TO_RAD;
+            yAngle *= Mth.DEG_TO_RAD;
+            zAngle *= Mth.DEG_TO_RAD;
         }
 
         double sinX = Math.sin(0.5F * xAngle), cosX = Math.cos(0.5F * xAngle);
@@ -44,7 +45,7 @@ public class Quaternion {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

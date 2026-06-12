@@ -5,7 +5,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.recipes.ItemStackToEnergyRecipe;
@@ -26,12 +25,9 @@ import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class EnergyInventorySlot extends BasicInventorySlot {
 
-    /**
-     * Fills the container from this item OR converts the given item to energy
-     */
+    /// Fills the container from this item OR converts the given item to energy
     public static EnergyInventorySlot fillOrConvert(IEnergyContainer energyContainer, Supplier<@Nullable Level> worldSupplier, @Nullable IContentsListener listener, int x, int y) {
         Objects.requireNonNull(energyContainer, "Energy container cannot be null");
         Objects.requireNonNull(worldSupplier, "World supplier cannot be null");
@@ -39,20 +35,16 @@ public class EnergyInventorySlot extends BasicInventorySlot {
               (itemType, automationType) -> automationType.isInternal() || canFillOrConvert(energyContainer, worldSupplier, itemType), null, null, listener, x, y);
     }
 
-    /**
-     * Fills the container from this item
-     */
+    /// Fills the container from this item
     public static EnergyInventorySlot fill(IEnergyContainer energyContainer, @Nullable IContentsListener listener, int x, int y) {
         Objects.requireNonNull(energyContainer, "Energy container cannot be null");
         return new EnergyInventorySlot(energyContainer, (itemType, automationType) -> !automationType.isExternal() || !canFill(energyContainer, itemType),
               (itemType, automationType) -> automationType.isInternal() || canFill(energyContainer, itemType), listener, x, y);
     }
 
-    /**
-     * Accepts any items that can be filled with the current contents of the energy container, or if it is an energy container and the container is currently empty
-     * <p>
-     * Drains the container into this item.
-     */
+    /// Accepts any items that can be filled with the current contents of the energy container, or if it is an energy container and the container is currently empty
+    ///
+    /// Drains the container into this item.
     public static EnergyInventorySlot drain(IEnergyContainer energyContainer, @Nullable IContentsListener listener, int x, int y) {
         Objects.requireNonNull(energyContainer, "Energy container cannot be null");
         return new EnergyInventorySlot(energyContainer, (itemType, automationType) -> !automationType.isExternal() || !canDrain(energyContainer, itemType),
@@ -132,9 +124,7 @@ public class EnergyInventorySlot extends BasicInventorySlot {
         setSlotOverlay(SlotOverlay.POWER);
     }
 
-    /**
-     * Fills the energy container from slot, allowing for the item to also be converted to energy if need be (example redstone -> energy)
-     */
+    /// Fills the energy container from slot, allowing for the item to also be converted to energy if need be (example redstone -> energy)
     public void fillContainerOrConvert(@Nullable TransactionContext transaction) {
         //Fill the container from the item
         if (!fillContainerFromSlot(transaction)) {
@@ -162,9 +152,7 @@ public class EnergyInventorySlot extends BasicInventorySlot {
         }
     }
 
-    /**
-     * Fills energy container from slot, does not try converting the item via any conversions conversion
-     */
+    /// Fills energy container from slot, does not try converting the item via any conversions conversion
     public boolean fillContainerFromSlot(@Nullable TransactionContext transaction) {
         if (isEmpty() || EnergyHandlerUtil.isFull(energyContainer)) {
             return false;
@@ -195,9 +183,7 @@ public class EnergyInventorySlot extends BasicInventorySlot {
         }
     }
 
-    /**
-     * Drains container into slot
-     */
+    /// Drains container into slot
     public void drainContainerIntoSlot(@Nullable TransactionContext transaction) {
         if (isEmpty() || energyContainer.isEmpty()) {
             return;

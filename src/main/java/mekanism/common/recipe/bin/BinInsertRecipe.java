@@ -1,8 +1,7 @@
 package mekanism.common.recipe.bin;
 
 import mekanism.api.AutomationType;
-import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.common.attachments.containers.item.ComponentBackedBinInventorySlot;
+import mekanism.common.component.containers.item.ComponentBackedBinInventorySlot;
 import mekanism.common.item.block.ItemBlockBin;
 import mekanism.common.lib.transaction.TransactionHelper;
 import mekanism.common.registries.MekanismDataComponents;
@@ -20,7 +19,6 @@ import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 //TODO: Test this recipe in various modded crafting tables/auto crafters
-@NothingNullByDefault
 public class BinInsertRecipe extends BinRecipe {
 
     public static final BinInsertRecipe INSTANCE = new BinInsertRecipe();

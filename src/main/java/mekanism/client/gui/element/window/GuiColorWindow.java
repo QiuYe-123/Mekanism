@@ -29,10 +29,9 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.entity.LivingEntity;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class GuiColorWindow extends GuiWindow {
 
@@ -223,7 +222,7 @@ public class GuiColorWindow extends GuiWindow {
     }
 
     @Override
-    public boolean charTyped(@NotNull CharacterEvent event) {
+    public boolean charTyped(CharacterEvent event) {
         boolean ret = super.charTyped(event);
         if (textField.canWrite()) {
             updateColorFromText();
@@ -232,7 +231,7 @@ public class GuiColorWindow extends GuiWindow {
     }
 
     @Override
-    public boolean keyPressed(@NotNull KeyEvent event) {
+    public boolean keyPressed(KeyEvent event) {
         boolean ret = super.keyPressed(event);
         if (textField.canWrite()) {
             //Update color if the key caused a change to the text contents
@@ -271,7 +270,7 @@ public class GuiColorWindow extends GuiWindow {
         }
 
         @Override
-        public void drawBackground(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        public void drawBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
             super.drawBackground(guiGraphics, mouseX, mouseY, partialTicks);
             drawTransparencyGrid(guiGraphics, relativeX, relativeY, width, height);
             Color c = getColor();
@@ -288,14 +287,14 @@ public class GuiColorWindow extends GuiWindow {
         protected abstract void set(double mouseX, double mouseY);
 
         @Override
-        public void onClick(@NotNull MouseButtonEvent event, boolean isDoubleClick) {
+        public void onClick(MouseButtonEvent event, boolean isDoubleClick) {
             super.onClick(event, isDoubleClick);
             set(event.x(), event.y());
             setDragging(true);
         }
 
         @Override
-        protected void onDrag(@NotNull MouseButtonEvent event, double deltaX, double deltaY) {
+        protected void onDrag(MouseButtonEvent event, double deltaX, double deltaY) {
             super.onDrag(event, deltaX, deltaY);
             if (isDragging()) {
                 set(event.x(), event.y());
@@ -315,7 +314,7 @@ public class GuiColorWindow extends GuiWindow {
             drawTiledGradient(guiGraphics, relativeX, relativeY, width, height);
             int posX = relativeX + Math.round(GuiColorWindow.this.saturation * width) - 2;
             int posY = relativeY + Math.round((1 - GuiColorWindow.this.value) * height) - 2;
-            GuiUtils.drawOutline(guiGraphics, posX, posY, 5, 5, 0xFFFFFFFF);
+            GuiUtils.drawOutline(guiGraphics, posX, posY, 5, 5, CommonColors.WHITE);
             //Fill the selection in without taking alpha into account
             GuiUtils.fill(guiGraphics, posX + 1, posY + 1, 3, 3, getColor().alpha(1.0).argb());
         }
@@ -323,9 +322,9 @@ public class GuiColorWindow extends GuiWindow {
         @Override
         protected void set(double mouseX, double mouseY) {
             float newS = (float) (mouseX - getX()) / width;
-            GuiColorWindow.this.saturation = Mth.clamp(newS, 0, 1);
+            GuiColorWindow.this.saturation = Math.clamp(newS, 0, 1);
             float newV = (float) (mouseY - getY()) / height;
-            GuiColorWindow.this.value = 1 - Mth.clamp(newV, 0, 1);
+            GuiColorWindow.this.value = 1 - Math.clamp(newV, 0, 1);
             updateTextFromColor();
             updateArmorPreview();
         }
@@ -351,7 +350,7 @@ public class GuiColorWindow extends GuiWindow {
         @Override
         protected void set(double mouseX, double mouseY) {
             float val = (float) (mouseX - getX()) / width;
-            GuiColorWindow.this.hue = Mth.clamp(val, 0, 1) * 360F;
+            GuiColorWindow.this.hue = Math.clamp(val, 0, 1) * 360F;
             updateTextFromColor();
             updateArmorPreview();
         }
@@ -364,7 +363,7 @@ public class GuiColorWindow extends GuiWindow {
         }
 
         @Override
-        public void drawBackground(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        public void drawBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
             super.drawBackground(guiGraphics, mouseX, mouseY, partialTicks);
             //Draw transparency checkerboard
             drawTransparencyGrid(guiGraphics, relativeX, relativeY, width, height);
@@ -387,7 +386,7 @@ public class GuiColorWindow extends GuiWindow {
         @Override
         protected void set(double mouseX, double mouseY) {
             float val = (float) (mouseX - getX()) / width;
-            GuiColorWindow.this.alpha = Mth.clamp(val, 0, 1);
+            GuiColorWindow.this.alpha = Math.clamp(val, 0, 1);
             updateTextFromColor();
             updateArmorPreview();
         }

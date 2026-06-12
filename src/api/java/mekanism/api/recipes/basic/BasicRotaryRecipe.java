@@ -3,8 +3,9 @@ package mekanism.api.recipes.basic;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import mekanism.api.annotations.NothingNullByDefault;
+import java.util.Optional;
 import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.ChemicalStackTemplate;
 import mekanism.api.recipes.MekanismRecipeSerializers;
 import mekanism.api.recipes.RotaryRecipe;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
@@ -13,83 +14,63 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidStackTemplate;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class BasicRotaryRecipe extends RotaryRecipe {
 
+    @Nullable
     protected final ChemicalStackIngredient chemicalInput;
+    @Nullable
     protected final FluidStackIngredient fluidInput;
     @Nullable
     private final FluidStackTemplate fluidOutput;
-    private final ChemicalStack chemicalOutput;
-    protected final boolean hasFluidToChemical;
+    @Nullable
+    private final ChemicalStackTemplate chemicalOutput;
 
-    /**
-     * Rotary recipe that converts a fluid into a chemical.
-     *
-     * @param fluidInput     Fluid input.
-     * @param chemicalOutput Chemical output.
-     *
-     * @apiNote It is recommended to use {@link #BasicRotaryRecipe(FluidStackIngredient, ChemicalStackIngredient, ChemicalStack, FluidStackTemplate)} over this constructor in
-     * combination with {@link #BasicRotaryRecipe(ChemicalStackIngredient, FluidStackTemplate)} and making two separate recipes if the conversion will be possible in both
-     * directions.
-     */
-    public BasicRotaryRecipe(FluidStackIngredient fluidInput, ChemicalStack chemicalOutput) {
+    /// Rotary recipe that converts a fluid into a chemical.
+    ///
+    /// @param fluidInput     Fluid input.
+    /// @param chemicalOutput Chemical output.
+    ///
+    /// @apiNote It is recommended to use [#BasicRotaryRecipe(FluidStackIngredient, ChemicalStackIngredient, ChemicalStackTemplate, FluidStackTemplate)] over this
+    /// constructor in combination with [#BasicRotaryRecipe(ChemicalStackIngredient, FluidStackTemplate)] and making two separate recipes if the conversion will be
+    /// possible in both directions.
+    public BasicRotaryRecipe(FluidStackIngredient fluidInput, ChemicalStackTemplate chemicalOutput) {
         this.fluidInput = Objects.requireNonNull(fluidInput, "Fluid input cannot be null.");
-        Objects.requireNonNull(chemicalOutput, "Chemical output cannot be null.");
-        if (chemicalOutput.isEmpty()) {
-            throw new IllegalArgumentException("Chemical output cannot be empty.");
-        }
-        this.chemicalOutput = chemicalOutput.copy();
-        //noinspection ConstantConditions we safety check it being null behind require hasChemicalToFluid
+        this.chemicalOutput = Objects.requireNonNull(chemicalOutput, "Chemical output cannot be null.");
         this.chemicalInput = null;
         this.fluidOutput = null;
-        this.hasFluidToChemical = true;
     }
 
-    /**
-     * Rotary recipe that converts a chemical into a fluid.
-     *
-     * @param chemicalInput Chemical input.
-     * @param fluidOutput   Fluid output.
-     *
-     * @apiNote It is recommended to use {@link #BasicRotaryRecipe(FluidStackIngredient, ChemicalStackIngredient, ChemicalStack, FluidStackTemplate)} over this constructor in
-     * combination with {@link #BasicRotaryRecipe(FluidStackIngredient, ChemicalStack)} and making two separate recipes if the conversion will be possible in both
-     * directions.
-     */
+    /// Rotary recipe that converts a chemical into a fluid.
+    ///
+    /// @param chemicalInput Chemical input.
+    /// @param fluidOutput   Fluid output.
+    ///
+    /// @apiNote It is recommended to use [#BasicRotaryRecipe(FluidStackIngredient, ChemicalStackIngredient, ChemicalStackTemplate, FluidStackTemplate)] over this
+    /// constructor in combination with [#BasicRotaryRecipe(FluidStackIngredient, ChemicalStackTemplate)] and making two separate recipes if the conversion will be
+    /// possible in both directions.
     public BasicRotaryRecipe(ChemicalStackIngredient chemicalInput, FluidStackTemplate fluidOutput) {
         this.chemicalInput = Objects.requireNonNull(chemicalInput, "Chemical input cannot be null.");
-        Objects.requireNonNull(fluidOutput, "Fluid output cannot be null.");
-        this.fluidOutput = fluidOutput;
-        //noinspection ConstantConditions we safety check it being null behind require hasFluidToChemical
+        this.fluidOutput = Objects.requireNonNull(fluidOutput, "Fluid output cannot be null.");
         this.fluidInput = null;
-        this.chemicalOutput = ChemicalStack.EMPTY;
-        this.hasFluidToChemical = false;
+        this.chemicalOutput = null;
     }
 
-    /**
-     * Rotary recipe that is capable of converting a fluid into a chemical and a chemical into a fluid.
-     *
-     * @param fluidInput     Fluid input.
-     * @param chemicalInput  Chemical input.
-     * @param chemicalOutput Chemical output.
-     * @param fluidOutput    Fluid output.
-     *
-     * @apiNote It is recommended to use this constructor over using {@link #BasicRotaryRecipe(FluidStackIngredient, ChemicalStack)} and
-     * {@link #BasicRotaryRecipe(ChemicalStackIngredient, FluidStackTemplate)} in combination and creating two recipes if the conversion will be possible in both directions.
-     */
-    public BasicRotaryRecipe(FluidStackIngredient fluidInput, ChemicalStackIngredient chemicalInput, ChemicalStack chemicalOutput, FluidStackTemplate fluidOutput) {
+    /// Rotary recipe that is capable of converting a fluid into a chemical and a chemical into a fluid.
+    ///
+    /// @param fluidInput     Fluid input.
+    /// @param chemicalInput  Chemical input.
+    /// @param chemicalOutput Chemical output.
+    /// @param fluidOutput    Fluid output.
+    ///
+    /// @apiNote It is recommended to use this constructor over using [#BasicRotaryRecipe(FluidStackIngredient, ChemicalStackTemplate)] and
+    /// [#BasicRotaryRecipe(ChemicalStackIngredient, FluidStackTemplate)] in combination and creating two recipes if the conversion will be possible in both directions.
+    public BasicRotaryRecipe(FluidStackIngredient fluidInput, ChemicalStackIngredient chemicalInput, ChemicalStackTemplate chemicalOutput, FluidStackTemplate fluidOutput) {
         this.chemicalInput = Objects.requireNonNull(chemicalInput, "Chemical input cannot be null.");
         this.fluidInput = Objects.requireNonNull(fluidInput, "Fluid input cannot be null.");
-        Objects.requireNonNull(chemicalOutput, "Chemical output cannot be null.");
-        Objects.requireNonNull(fluidOutput, "Fluid output cannot be null.");
-        if (chemicalOutput.isEmpty()) {
-            throw new IllegalArgumentException("Chemical output cannot be empty.");
-        }
-        this.chemicalOutput = chemicalOutput.copy();
-        this.fluidOutput = fluidOutput;
-        this.hasFluidToChemical = true;
+        this.chemicalOutput = Objects.requireNonNull(chemicalOutput, "Chemical output cannot be null.");
+        this.fluidOutput = Objects.requireNonNull(fluidOutput, "Fluid output cannot be null.");
     }
 
     @Override
@@ -99,112 +80,79 @@ public class BasicRotaryRecipe extends RotaryRecipe {
 
     @Override
     public final boolean hasFluidToChemical() {
-        return hasFluidToChemical;
-    }
-
-    /**
-     * @throws IllegalStateException if {@link #hasChemicalToFluid()} is {@code false}.
-     */
-    protected void assertHasChemicalToFluid() {
-        if (!hasChemicalToFluid()) {
-            throw new IllegalStateException("This recipe has no chemical to fluid conversion.");
-        }
-    }
-
-    /**
-     * @throws IllegalStateException if {@link #hasFluidToChemical()} is {@code false}.
-     */
-    protected void assertHasFluidToChemical() {
-        if (!hasFluidToChemical()) {
-            throw new IllegalStateException("This recipe has no fluid to chemical conversion.");
-        }
+        return this.chemicalOutput != null;
     }
 
     @Override
     public boolean test(FluidStack fluidStack) {
-        return hasFluidToChemical() && fluidInput.test(fluidStack);
+        return hasFluidToChemical() && getFluidInput().test(fluidStack);
     }
 
     @Override
     public boolean test(ChemicalStack chemicalStack) {
-        return hasChemicalToFluid() && chemicalInput.test(chemicalStack);
+        return hasChemicalToFluid() && getChemicalInput().test(chemicalStack);
     }
 
     @Override
     public FluidStackIngredient getFluidInput() {
-        assertHasFluidToChemical();
-        return fluidInput;
+        return Objects.requireNonNull(fluidInput, "This recipe has no fluid to chemical conversion.");
     }
 
     @Override
     public ChemicalStackIngredient getChemicalInput() {
-        assertHasChemicalToFluid();
-        return chemicalInput;
+        return Objects.requireNonNull(chemicalInput, "This recipe has no chemical to fluid conversion.");
     }
 
     @Override
-    public List<ChemicalStack> getChemicalOutputDefinition() {
-        assertHasFluidToChemical();
-        return Collections.singletonList(chemicalOutput);
+    public List<ChemicalStackTemplate> getChemicalOutputDefinition() {
+        ChemicalStackTemplate output = Objects.requireNonNull(chemicalOutput, "This recipe has no fluid to chemical conversion.");
+        return Collections.singletonList(output);
     }
 
     @Override
     public List<FluidStackTemplate> getFluidOutputDefinition() {
-        assertHasChemicalToFluid();
-        return Collections.singletonList(fluidOutput);
+        FluidStackTemplate output = Objects.requireNonNull(fluidOutput, "This recipe has no chemical to fluid conversion.");
+        return Collections.singletonList(output);
     }
 
     @Override
-    @Contract(value = "_ -> new", pure = true)
-    public ChemicalStack getChemicalOutput(FluidStack input) {
-        assertHasFluidToChemical();
-        return chemicalOutput.copy();
+    @Contract(pure = true)
+    public ChemicalStackTemplate getChemicalOutput(FluidStack input) {
+        return Objects.requireNonNull(chemicalOutput, "This recipe has no fluid to chemical conversion.");
     }
 
     @Override
     @Contract(pure = true)
     public FluidStackTemplate getFluidOutput(ChemicalStack input) {
-        assertHasChemicalToFluid();
-        return fluidOutput;
+        return Objects.requireNonNull(fluidOutput, "This recipe has no chemical to fluid conversion.");
     }
 
-    /**
-     * For Serializer use. DO NOT MODIFY RETURN VALUE.
-     *
-     * @return the uncopied basic input, {@code null} if the recipe doesn't support chemical to fluid recipes.
-     */
-    @Nullable
-    public ChemicalStackIngredient getChemicalInputRaw() {
-        return chemicalInput;
+    /// For Serializer use. DO NOT MODIFY RETURN VALUE.
+    ///
+    /// @return the uncopied basic input or an empty optional if the recipe doesn't support chemical to fluid recipes.
+    public Optional<ChemicalStackIngredient> getChemicalInputRaw() {
+        return Optional.ofNullable(chemicalInput);
     }
 
-    /**
-     * For Serializer use. DO NOT MODIFY RETURN VALUE.
-     *
-     * @return the uncopied basic output
-     */
-    public ChemicalStack getChemicalOutputRaw() {
-        return this.chemicalOutput;
+    /// For Serializer use.
+    ///
+    /// @return the uncopied basic output
+    public Optional<ChemicalStackTemplate> getChemicalOutputRaw() {
+        return Optional.ofNullable(chemicalOutput);
     }
 
-    /**
-     * For Serializer use. DO NOT MODIFY RETURN VALUE.
-     *
-     * @return the uncopied basic input, {@code null} if the recipe doesn't support fluid to chemical recipes.
-     */
-    @Nullable
-    public FluidStackIngredient getFluidInputRaw() {
-        return fluidInput;
+    /// For Serializer use. DO NOT MODIFY RETURN VALUE.
+    ///
+    /// @return the uncopied basic input or an empty optional if the recipe doesn't support fluid to chemical recipes.
+    public Optional<FluidStackIngredient> getFluidInputRaw() {
+        return Optional.ofNullable(fluidInput);
     }
 
-    /**
-     * For Serializer use. DO NOT MODIFY RETURN VALUE.
-     *
-     * @return the uncopied basic output
-     */
-    @Nullable
-    public FluidStackTemplate getFluidOutputRaw() {
-        return this.fluidOutput;
+    /// For Serializer use.
+    ///
+    /// @return the uncopied basic output
+    public Optional<FluidStackTemplate> getFluidOutputRaw() {
+        return Optional.ofNullable(fluidOutput);
     }
 
     @Override
@@ -213,37 +161,27 @@ public class BasicRotaryRecipe extends RotaryRecipe {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         } else if (o == null || getClass() != o.getClass()) {
             return false;
         }
         BasicRotaryRecipe other = (BasicRotaryRecipe) o;
-        if (hasChemicalToFluid() == other.hasChemicalToFluid() && hasFluidToChemical == other.hasFluidToChemical) {
-            boolean equal = true;
-            if (hasChemicalToFluid()) {
-                equal = chemicalInput.equals(other.chemicalInput) && Objects.equals(fluidOutput, other.fluidOutput);
-            }
-            if (hasFluidToChemical) {
-                equal |= fluidInput.equals(other.fluidInput) && chemicalOutput.equals(other.chemicalOutput);
-            }
-            return equal;
-        }
-        return false;
+        return Objects.equals(chemicalInput, other.chemicalInput) && Objects.equals(fluidOutput, other.fluidOutput) &&
+               Objects.equals(fluidInput, other.fluidInput) && Objects.equals(chemicalOutput, other.chemicalOutput);
     }
 
     @Override
     public int hashCode() {
         int hash;
-        if (hasFluidToChemical) {
+        if (fluidInput != null && chemicalOutput != null) {//hasFluidToChemical
             hash = 31 * fluidInput.hashCode() + chemicalOutput.hashCode();
         } else {
             hash = 1;
         }
-        if (fluidOutput != null) {
+        if (chemicalInput != null && fluidOutput != null) {//hasChemicalToFluid
             hash = 31 * hash + chemicalInput.hashCode();
-            //TODO - 26.1: Validate this is fine in relation to direct codecs
             hash = 31 * hash + fluidOutput.hashCode();
         }
         return hash;

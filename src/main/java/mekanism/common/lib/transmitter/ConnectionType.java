@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import java.util.Locale;
 import java.util.function.IntFunction;
 import mekanism.api.IIncrementalEnum;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.IHasTextComponent.IHasEnumNameTextComponent;
 import mekanism.api.text.IHasTranslationKey;
@@ -16,7 +15,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 
-@NothingNullByDefault
 public enum ConnectionType implements IIncrementalEnum<ConnectionType>, StringRepresentable, IHasTranslationKey, IHasEnumNameTextComponent {
     NORMAL(MekanismLang.CONNECTION_NORMAL, EnumColor.ORANGE),
     PUSH(MekanismLang.CONNECTION_PUSH, EnumColor.BRIGHT_GREEN),
@@ -54,16 +52,12 @@ public enum ConnectionType implements IIncrementalEnum<ConnectionType>, StringRe
         return BY_ID.apply(index);
     }
 
-    /**
-     * @return {@code true} If this connection type allows other things to insert into it.
-     */
+    /// @return `true` If this connection type allows other things to insert into it.
     public boolean canAccept() {
         return this == NORMAL || this == PULL;
     }
 
-    /**
-     * @return {@code true} If this connection type can send to other things or allow them to extract from it.
-     */
+    /// @return `true` If this connection type can send to other things or allow them to extract from it.
     public boolean canSendTo() {
         return this == NORMAL || this == PUSH;
     }

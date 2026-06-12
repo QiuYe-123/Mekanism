@@ -12,6 +12,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
 public interface QuadTransformation {
 
@@ -95,13 +96,11 @@ public interface QuadTransformation {
         return TransformationList.of(transforms);
     }
 
-    /**
-     * Transforms the given quad.
-     *
-     * @param quad Quad to transform.
-     *
-     * @return {@code true} if the quad was changed.
-     */
+    /// Transforms the given quad.
+    ///
+    /// @param quad Quad to transform.
+    ///
+    /// @return `true` if the quad was changed.
     boolean transform(Quad quad);
 
     default QuadTransformation and(QuadTransformation other) {
@@ -129,7 +128,7 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             }
@@ -159,7 +158,7 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             }
@@ -191,7 +190,7 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             }
@@ -224,7 +223,7 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             }
@@ -262,7 +261,7 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             }
@@ -292,7 +291,7 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             }
@@ -331,7 +330,7 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             }
@@ -365,7 +364,7 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             }
@@ -398,7 +397,7 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             }
@@ -444,7 +443,7 @@ public interface QuadTransformation {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o == this) {
                 return true;
             }

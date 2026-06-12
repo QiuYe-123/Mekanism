@@ -1,7 +1,6 @@
 package mekanism.api.recipes.ingredients.creator;
 
 import java.util.Objects;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
@@ -11,7 +10,6 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.TypedInstance;
 import net.minecraft.tags.TagKey;
 
-@NothingNullByDefault
 public interface IChemicalStackIngredientCreator extends IIngredientCreator<Chemical, ChemicalStack, ChemicalStackIngredient> {
 
     @Override
@@ -42,15 +40,13 @@ public interface IChemicalStackIngredientCreator extends IIngredientCreator<Chem
         return from(IngredientCreatorAccess.chemical().tag(tag), amount);
     }
 
-    /**
-     * Creates a Chemical Stack Ingredient that matches a given chemical ingredient and amount.
-     *
-     * @param ingredient Ingredient to match.
-     * @param amount     Amount needed.
-     *
-     * @throws NullPointerException     if the given ingredient is null.
-     * @throws IllegalArgumentException if the ingredient is explicitly empty or the given amount smaller than one.
-     */
+    /// Creates a Chemical Stack Ingredient that matches a given chemical ingredient and amount.
+    ///
+    /// @param ingredient Ingredient to match.
+    /// @param amount     Amount needed.
+    ///
+    /// @throws NullPointerException     if the given ingredient is null.
+    /// @throws IllegalArgumentException if the ingredient is explicitly empty or the given amount smaller than one.
     default ChemicalStackIngredient from(ChemicalIngredient ingredient, int amount) {
         Objects.requireNonNull(ingredient, "ChemicalStackIngredients cannot be created from a null ingredient.");
         return ChemicalStackIngredient.of(ingredient, amount);

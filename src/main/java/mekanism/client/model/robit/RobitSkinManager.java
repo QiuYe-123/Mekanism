@@ -12,10 +12,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import mekanism.api.robit.RobitSkin;
 import mekanism.client.RobitSpriteUploader;
@@ -51,11 +49,9 @@ import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 import net.neoforged.neoforge.client.model.standalone.UnbakedStandaloneModel;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Vector3fc;
-import org.jspecify.annotations.NullMarked;
 
-@NullMarked
 public class RobitSkinManager {
 
     public static final Identifier BASE_ROBIT_MODEL = Mekanism.rl("robit/robit");
@@ -99,8 +95,8 @@ public class RobitSkinManager {
     }
 
     public Vector3fc[] getExtents() {
-        BakeResult defaultModel = getBaked(MekanismRobitSkins.BASE_SKIN, MekanismRobitSkins.BASE_SKIN_TEXTURE);
-        return CuboidItemModelWrapper.computeExtents(defaultModel.model.get(0).getQuads(null));
+        BakeResult defaultModel = getBaked(MekanismRobitSkins.BASE_HOLDER.value(), MekanismRobitSkins.BASE_SKIN_TEXTURE);
+        return CuboidItemModelWrapper.computeExtents(defaultModel.model.getFirst().getQuads(null));
     }
 
     public BakeResult getBaked(RobitSkin skin, @Nullable Identifier activeTexture) {

@@ -2,7 +2,6 @@ package mekanism.client.render.tileentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.model.ModelEnergyCore;
 import mekanism.client.render.tileentity.RenderEnergyCube.EnergyCubeRenderState;
 import mekanism.common.Mekanism;
@@ -23,12 +22,12 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Vector3f;
 
-@NothingNullByDefault
 public class RenderEnergyCube extends MekanismTileEntityRenderer<TileEntityEnergyCube, EnergyCubeRenderState> {
 
     public static final ModelLayerLocation CORE_LAYER = new ModelLayerLocation(Mekanism.rl("energy_core"), "main");
@@ -57,11 +56,11 @@ public class RenderEnergyCube extends MekanismTileEntityRenderer<TileEntityEnerg
     }
 
     @Override
-    public void extractRenderState(TileEntityEnergyCube cube, EnergyCubeRenderState state, float partialTick, Vec3 cameraPosition, @Nullable ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+    public void extractRenderState(TileEntityEnergyCube cube, EnergyCubeRenderState state, float partialTick, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         super.extractRenderState(cube, state, partialTick, cameraPosition, breakProgress);
         state.coreTint = cube.getTier().getBaseTier().getPackedColor(ARGB.as8BitChannel(cube.getEnergyScale()));
         //TODO - 26.1: Do we want to use game time as a basis or some other value?
-        state.ticks = cube.getLevel().getGameTime() + partialTick;
+        state.ticks = cube.getGameTime() + partialTick;
     }
 
     @Override
@@ -100,7 +99,7 @@ public class RenderEnergyCube extends MekanismTileEntityRenderer<TileEntityEnerg
 
     public static class EnergyCubeRenderState extends BlockEntityRenderState {
 
-        public int coreTint = 0xFFFFFFFF;
+        public int coreTint = CommonColors.WHITE;
         public float ticks;
     }
 }

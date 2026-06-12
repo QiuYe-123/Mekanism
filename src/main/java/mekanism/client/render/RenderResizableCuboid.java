@@ -17,14 +17,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.phys.Vec3;
 import org.intellij.lang.annotations.MagicConstant;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Adapted from Mantle's FluidRenderer and Tinker's SmelteryTankRenderer
- */
+/// Adapted from Mantle's FluidRenderer and Tinker's SmelteryTankRenderer
 public class RenderResizableCuboid {
 
     private static final Vector3f NORMAL = new Vector3f(1, 1, 1).normalize();
@@ -129,7 +127,7 @@ public class RenderResizableCuboid {
         matrix.translate(xShift, yShift, zShift);
 
         int finalAxisToRender = axisToRender;
-        nodeCollector.submitCustomGeometry(matrix, renderType, ((pose, buffer) -> {
+        nodeCollector.submitCustomGeometry(matrix, renderType, (pose, buffer) -> {
             NormalData normalData = new NormalData(pose.normal(), NORMAL, faceDisplay);
             if ((finalAxisToRender & X_AXIS_MASK) != 0) {
                 renderSideXAxis(buffer, light, overlay, faceDisplay, xDelta, yDelta, zDelta, sprites, yBounds, zBounds, xBounds, pose.pose(), normalData, westColor, eastColor);
@@ -140,7 +138,7 @@ public class RenderResizableCuboid {
             if ((finalAxisToRender & Z_AXIS_MASK) != 0) {
                 renderSideZAxis(buffer, light, overlay, faceDisplay, xDelta, yDelta, zDelta, sprites, yBounds, zBounds, xBounds, pose.pose(), normalData, northColor, southColor);
             }
-        }));
+        });
 
         matrix.popPose();
     }
@@ -416,9 +414,7 @@ public class RenderResizableCuboid {
         }
     }
 
-    /**
-     * @implNote From Tinker's
-     */
+    /// @implNote From Tinker's
     private static float[] getBlockBounds(int delta, float start, float end) {
         float[] bounds = new float[2 + delta];
         bounds[0] = start;
@@ -430,9 +426,7 @@ public class RenderResizableCuboid {
         return bounds;
     }
 
-    /**
-     * @implNote From Tinker's
-     */
+    /// @implNote From Tinker's
     private static int calculateDelta(float min, float max) {
         //The texture can stretch over more blocks than the subtracted height is if min's decimal is bigger than max's decimal (causing UV over 1)
         // ignoring the decimals prevents this, as yd then equals exactly how many ints are between the two
@@ -589,14 +583,21 @@ public class RenderResizableCuboid {
         public static final byte FACE_WEST = 1 << 4;
         public static final byte FACE_EAST = 1 << 5;
 
-        public static final @SideRenderFlags byte ALL_FACES = FACE_DOWN | FACE_UP | FACE_NORTH | FACE_SOUTH | FACE_WEST | FACE_EAST;
-        public static final @SideRenderFlags byte NOT_DOWN = FACE_UP | FACE_NORTH | FACE_SOUTH | FACE_WEST | FACE_EAST;
-        public static final @SideRenderFlags byte HORIZONTAL = FACE_NORTH | FACE_SOUTH | FACE_WEST | FACE_EAST;
-        public static final @SideRenderFlags byte X_AXIS = FACE_WEST | FACE_EAST;
-        public static final @SideRenderFlags byte Z_AXIS = FACE_NORTH | FACE_SOUTH;
-        public static final @SideRenderFlags byte Y_AXIS = FACE_DOWN | FACE_UP;
+        @SideRenderFlags
+        public static final byte ALL_FACES = FACE_DOWN | FACE_UP | FACE_NORTH | FACE_SOUTH | FACE_WEST | FACE_EAST;
+        @SideRenderFlags
+        public static final byte NOT_DOWN = FACE_UP | FACE_NORTH | FACE_SOUTH | FACE_WEST | FACE_EAST;
+        @SideRenderFlags
+        public static final byte HORIZONTAL = FACE_NORTH | FACE_SOUTH | FACE_WEST | FACE_EAST;
+        @SideRenderFlags
+        public static final byte X_AXIS = FACE_WEST | FACE_EAST;
+        @SideRenderFlags
+        public static final byte Z_AXIS = FACE_NORTH | FACE_SOUTH;
+        @SideRenderFlags
+        public static final byte Y_AXIS = FACE_DOWN | FACE_UP;
 
-        public static final @SideRenderFlags byte[] DIRECTION_TO_FACE = Util.make(new byte[6], mapping -> {
+        @SideRenderFlags
+        public static final byte[] DIRECTION_TO_FACE = Util.make(new byte[6], mapping -> {
             mapping[Direction.DOWN.ordinal()] = FACE_DOWN;
             mapping[Direction.UP.ordinal()] = FACE_UP;
             mapping[Direction.NORTH.ordinal()] = FACE_NORTH;
@@ -605,12 +606,14 @@ public class RenderResizableCuboid {
             mapping[Direction.EAST.ordinal()] = FACE_EAST;
         });
 
+        @SideRenderFlags
         @SuppressWarnings({"MagicConstant", "RedundantSuppression"})//IJ is silly
-        public static @SideRenderFlags byte of(Direction dir) {
+        public static byte of(Direction dir) {
             return DIRECTION_TO_FACE[dir.ordinal()];
         }
 
-        public static @SideRenderFlags byte from(boolean down, boolean up, boolean north, boolean south, boolean west, boolean east) {
+        @SideRenderFlags
+        public static byte from(boolean down, boolean up, boolean north, boolean south, boolean west, boolean east) {
             byte output = 0;
             if (down) {
                 output |= FACE_DOWN;
@@ -635,10 +638,8 @@ public class RenderResizableCuboid {
         }
     }
 
-    /**
-     * Used to only have to calculate normals once rather than transforming based on the matrix for every vertex call. If a face shouldn't be displayed the normal vector
-     * will be zero.
-     */
+    /// Used to only have to calculate normals once rather than transforming based on the matrix for every vertex call. If a face shouldn't be displayed the normal vector
+    /// will be zero.
     private record NormalData(Vector3f front, Vector3f back) {
 
         private NormalData(Matrix3f normalMatrix, Vector3f normal, FaceDisplay faceDisplay) {

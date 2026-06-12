@@ -21,8 +21,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class BlockStateHelper {
 
@@ -34,10 +33,10 @@ public class BlockStateHelper {
     //Fluid logged.
     public static final EnumProperty<FluidLogType> FLUID_LOGGED = EnumProperty.create("fluid_logged", FluidLogType.class);
 
-    public static final BlockBehaviour.StatePredicate NEVER_PREDICATE = (state, world, pos) -> false;
-    public static final BlockBehaviour.StatePredicate ALWAYS_PREDICATE = (state, world, pos) -> true;
+    public static final BlockBehaviour.StatePredicate NEVER_PREDICATE = (_, _, _) -> false;
+    public static final BlockBehaviour.StatePredicate ALWAYS_PREDICATE = (_, _, _) -> true;
 
-    public static BlockState getDefaultState(@NotNull BlockState state) {
+    public static BlockState getDefaultState(BlockState state) {
         for (Attribute attr : Attribute.getAll(state.typeHolder())) {
             if (attr instanceof AttributeState atr) {
                 state = atr.getDefaultState(state);
@@ -72,18 +71,14 @@ public class BlockStateHelper {
         }
     }
 
-    /**
-     * Helper to "hack" in and modify the light value precalculator for states to be able to use as a base level the value already set, but also modify it based on which
-     * fluid a block may be fluid logged with and then use that light level instead if it is higher.
-     */
+    /// Helper to "hack" in and modify the light value precalculator for states to be able to use as a base level the value already set, but also modify it based on which
+    /// fluid a block may be fluid logged with and then use that light level instead if it is higher.
     public static BlockBehaviour.Properties applyLightLevelAdjustments(BlockBehaviour.Properties properties) {
         return applyLightLevelAdjustments(properties, state -> state.getBlock() instanceof IStateFluidLoggable fluidLoggable ? fluidLoggable.getFluidLightLevel(state) : 0);
     }
 
-    /**
-     * Helper to "hack" in and modify the light value precalculator for states to be able to use as a base level the value already set, but also modify it based on
-     * another function to allow for compounding the light values and then using that light level instead if it is higher.
-     */
+    /// Helper to "hack" in and modify the light value precalculator for states to be able to use as a base level the value already set, but also modify it based on
+    /// another function to allow for compounding the light values and then using that light level instead if it is higher.
     public static BlockBehaviour.Properties applyLightLevelAdjustments(BlockBehaviour.Properties properties, ToIntFunction<BlockState> toApply) {
         //Cache what the current light level function is
         ToIntFunction<BlockState> existingLightLevelFunction = properties.lightEmission;
@@ -91,16 +86,17 @@ public class BlockStateHelper {
         return properties.lightLevel(state -> Math.max(existingLightLevelFunction.applyAsInt(state), toApply.applyAsInt(state)));
     }
 
+    @Nullable
     @Contract("null, _ -> null")
     public static BlockState getStateForPlacement(@Nullable BlockState state, BlockPlaceContext context) {
+        return state == null ? null : getStateForPlacementNN(state, context);
+    }
+
+    public static BlockState getStateForPlacementNN(BlockState state, BlockPlaceContext context) {
         return getStateForPlacement(state, context.getLevel(), context.getClickedPos(), context.getPlayer(), context.getClickedFace());
     }
 
-    @Contract("null, _, _, _, _ -> null")
-    public static BlockState getStateForPlacement(@Nullable BlockState state, @NotNull LevelAccessor world, @NotNull BlockPos pos, @Nullable Player player, @NotNull Direction face) {
-        if (state == null) {
-            return null;
-        }
+    public static BlockState getStateForPlacement(BlockState state, LevelAccessor world, BlockPos pos, @Nullable Player player, Direction face) {
         for (Attribute attr : Attribute.getAll(state.typeHolder())) {
             if (attr instanceof AttributeState atr) {
                 state = atr.getStateForPlacement(state, world, pos, player, face);

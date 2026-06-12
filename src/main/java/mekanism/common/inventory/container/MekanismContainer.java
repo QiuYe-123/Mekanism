@@ -39,7 +39,6 @@ import mekanism.common.inventory.container.sync.SyncableRegistryEntry;
 import mekanism.common.inventory.container.sync.SyncableResource;
 import mekanism.common.inventory.container.sync.SyncableShort;
 import mekanism.common.inventory.container.sync.list.SyncableCollection;
-import mekanism.common.inventory.container.sync.list.SyncableList;
 import mekanism.common.network.PacketUtils;
 import mekanism.common.network.to_client.container.PacketUpdateContainer;
 import mekanism.common.network.to_client.container.property.PropertyData;
@@ -64,8 +63,7 @@ import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.resource.Resource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class MekanismContainer extends AbstractContainerMenu implements ISecurityContainer {
 
@@ -84,18 +82,14 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
     private final Iterable<TransactionalSlot> playerSlots = Iterables.concat(hotBarSlots, mainInventorySlots);
     private final List<ISyncableData> trackedData = new ArrayList<>();
     private final Map<Object, List<ISyncableData>> specificTrackedData = new Object2ObjectOpenHashMap<>();
-    /**
-     * Keeps track of which window the player has open. Only used on the client, so doesn't need to keep track of other players.
-     *
-     * @apiNote Don't set this directly use the {@link #setSelectedWindow(SelectedWindowData)} instead, this is just protected so that the QIO item viewer container can
-     * copy it directly to the new container.
-     */
+    /// Keeps track of which window the player has open. Only used on the client, so doesn't need to keep track of other players.
+    ///
+    /// @apiNote Don't set this directly use the [#setSelectedWindow(SelectedWindowData)] instead, this is just protected so that the QIO item viewer container can copy
+    /// it directly to the new container.
     @Nullable
     protected SelectedWindowData selectedWindow;
-    /**
-     * Only used on the server
-     */
-    private Map<UUID, SelectedWindowData> selectedWindows;
+    /// Only used on the server
+    private final Map<UUID, SelectedWindowData> selectedWindows;
 
     protected MekanismContainer(ContainerTypeRegistryObject<?> type, int id, Inventory inv) {
         super(type.get(), id);
@@ -103,6 +97,8 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         if (!getLevel().isClientSide()) {
             //Only keep track of uuid based selected grids on the server (we use a size of one as for the most part containers are actually 1:1)
             selectedWindows = new HashMap<>(1);
+        } else {
+            selectedWindows = Collections.emptyMap();
         }
     }
 
@@ -114,9 +110,8 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         return inv.player.level();
     }
 
-    @NotNull
     @Override
-    protected Slot addSlot(@NotNull Slot slot) {
+    protected Slot addSlot(Slot slot) {
         super.addSlot(slot);
         if (slot instanceof IHasExtraData hasExtraData) {
             //If the slot has any extra data, allow it to add any trackers it may have
@@ -136,9 +131,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         return slot;
     }
 
-    /**
-     * Adds slots and opens, must be called at end of extending classes constructors
-     */
+    /// Adds slots and opens, must be called at end of extending classes constructors
     protected void addSlotsAndOpen() {
         addSlots();
         addInventorySlots(inv);
@@ -169,7 +162,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
     }
 
     @Override
-    public boolean canTakeItemForPickAll(@NotNull ItemStack stack, @NotNull Slot slot) {
+    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot) {
         if (slot instanceof ITransactionalSlot transactionalSlot) {
             if (!transactionalSlot.canMergeWith(stack)) {
                 return false;
@@ -181,18 +174,18 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
     }
 
     @Override
-    public void removed(@NotNull Player player) {
+    public void removed(Player player) {
         super.removed(player);
         closeInventory(player);
     }
 
-    protected void closeInventory(@NotNull Player player) {
+    protected void closeInventory(Player player) {
         if (!player.level().isClientSide()) {
             clearSelectedWindow(player.getUUID());
         }
     }
 
-    protected void openInventory(@NotNull Inventory inv) {
+    protected void openInventory(Inventory inv) {
     }
 
     protected int getInventoryYOffset() {
@@ -203,7 +196,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         return 8;
     }
 
-    protected void addInventorySlots(@NotNull Inventory inv) {
+    protected void addInventorySlots(Inventory inv) {
         if (this instanceof IEmptyContainer) {
             //Don't include the player's inventory slots
             return;
@@ -221,7 +214,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         }
     }
 
-    protected void addArmorSlots(@NotNull Inventory inv, int x, int y, int offhandOffset) {
+    protected void addArmorSlots(Inventory inv, int x, int y, int offhandOffset) {
         int armorSlots = 4;
         for (int index = 0; index < armorSlots; index++) {
             final EquipmentSlot slotType = EnumUtils.EQUIPMENT_SLOT_TYPES[2 + armorSlots - index - 1];
@@ -233,7 +226,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         }
     }
 
-    protected HotBarSlot createHotBarSlot(@NotNull Inventory inv, int index, int x, int y) {
+    protected HotBarSlot createHotBarSlot(Inventory inv, int index, int x, int y) {
         return new HotBarSlot(inv, index, x, y);
     }
 
@@ -259,13 +252,10 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         return Iterables.unmodifiableIterable(playerSlots);
     }
 
-    /**
-     * @return The contents in this slot AFTER transferring items away.
-     */
-    @NotNull
+    /// @return The contents in this slot AFTER transferring items away.
     @Override
-    public ItemStack quickMoveStack(@NotNull Player player, int slotID) {
-        Slot currentSlot = slots.get(slotID);
+    public ItemStack quickMoveStack(Player player, int slotID) {
+        Slot currentSlot = getSlot(slotID);
         if (currentSlot == null || !currentSlot.hasItem()) {
             return ItemStack.EMPTY;
         }
@@ -318,17 +308,15 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         }
     }
 
-    /**
-     * Helper to first try inserting ignoring empty slots, and then insert not ignoring empty slots
-     *
-     * @param slots          Slots to insert into
-     * @param itemType       Type of item to insert.
-     * @param amount         Amount of the item to insert.
-     * @param transaction    The transaction that this operation is part of.
-     * @param selectedWindow Selected window, or null if there is no window selected. This mostly only really matters in relation to VirtualInventoryContainerSlots
-     *
-     * @return Amount inserted
-     */
+    /// Helper to first try inserting ignoring empty slots, and then insert not ignoring empty slots
+    ///
+    /// @param slots          Slots to insert into
+    /// @param itemType       Type of item to insert.
+    /// @param amount         Amount of the item to insert.
+    /// @param transaction    The transaction that this operation is part of.
+    /// @param selectedWindow Selected window, or null if there is no window selected. This mostly only really matters in relation to VirtualInventoryContainerSlots
+    ///
+    /// @return Amount inserted
     public static <SLOT extends Slot & ITransactionalSlot> int insertItem(Iterable<SLOT> slots, ItemResource itemType, int amount, TransactionContext transaction,
           @Nullable SelectedWindowData selectedWindow) {
         int inserted = 0;
@@ -338,18 +326,16 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         return inserted;
     }
 
-    /**
-     * @param slots          Slots to insert into
-     * @param itemType       Type of item to insert.
-     * @param amount         Amount of the item to insert.
-     * @param transaction    The transaction that this operation is part of.
-     * @param ignoreEmpty    {@code true} to ignore/skip empty slots.
-     * @param selectedWindow Selected window, or null if there is no window selected. This mostly only really matters in relation to VirtualInventoryContainerSlots
-     *
-     * @return Amount inserted
-     *
-     * @see mekanism.api.resource.IMekanismResourceHandler#insert(Resource, int, TransactionContext, AutomationType)
-     */
+    /// @param slots             Slots to insert into
+    /// @param itemType          Type of item to insert.
+    /// @param amount            Amount of the item to insert.
+    /// @param transaction       The transaction that this operation is part of.
+    /// @param ignoreEmpty`true` to ignore/skip empty slots.
+    /// @param selectedWindow    Selected window, or null if there is no window selected. This mostly only really matters in relation to VirtualInventoryContainerSlots
+    ///
+    /// @return Amount inserted
+    ///
+    /// @see mekanism.api.resource.IMekanismResourceHandler#insert(Resource, int, TransactionContext, AutomationType)
     public static <SLOT extends Slot & ITransactionalSlot> int insertItem(Iterable<SLOT> slots, ItemResource itemType, final int amount, TransactionContext transaction,
           boolean ignoreEmpty, @Nullable SelectedWindowData selectedWindow) {
         int inserted = 0;
@@ -374,8 +360,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         return inserted;
     }
 
-    @NotNull
-    protected ItemStack transferSuccess(@NotNull Slot currentSlot, @NotNull Player player, int amountInserted) {
+    protected ItemStack transferSuccess(Slot currentSlot, Player player, int amountInserted) {
         //TODO - 26.1: This remove call has the potential to break the contract that mayPickup is called first?
         // Though all of our callers are from within #quickMoveStack which vanilla checks mayPickup before calling
         ItemStack newStack = currentSlot.remove(amountInserted);
@@ -383,25 +368,19 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         return newStack;
     }
 
-    /**
-     * @apiNote Only call on client
-     */
+    /// @apiNote Only call on client
     @Nullable
     public SelectedWindowData getSelectedWindow() {
         return selectedWindow;
     }
 
-    /**
-     * @apiNote Only call on server
-     */
+    /// @apiNote Only call on server
     @Nullable
     public SelectedWindowData getSelectedWindow(UUID player) {
         return selectedWindows.get(player);
     }
 
-    /**
-     * @apiNote Only call on client
-     */
+    /// @apiNote Only call on client
     public void setSelectedWindow(@Nullable SelectedWindowData selectedWindow) {
         if (!Objects.equals(this.selectedWindow, selectedWindow)) {
             this.selectedWindow = selectedWindow;
@@ -409,9 +388,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         }
     }
 
-    /**
-     * @apiNote Only call on server
-     */
+    /// @apiNote Only call on server
     public void setSelectedWindow(UUID player, @Nullable SelectedWindowData selectedWindow) {
         if (selectedWindow == null) {
             clearSelectedWindow(player);
@@ -420,9 +397,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         }
     }
 
-    /**
-     * @apiNote Only call on server
-     */
+    /// @apiNote Only call on server
     private void clearSelectedWindow(UUID player) {
         selectedWindows.remove(player);
     }
@@ -432,9 +407,8 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         trackedData.add(data);
     }
 
-    @NotNull
     @Override
-    protected DataSlot addDataSlot(@NotNull DataSlot referenceHolder) {
+    protected DataSlot addDataSlot(DataSlot referenceHolder) {
         //Override vanilla's int tracking so that if for some reason this method gets called for our container
         // it properly adds it to our tracking
         track(SyncableInt.create(referenceHolder::get, referenceHolder::set));
@@ -559,21 +533,21 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         }
     }
 
-    public void handleWindowProperty(short property, @NotNull ItemStack value) {
+    public void handleWindowProperty(short property, ItemStack value) {
         ISyncableData data = getTrackedData(property);
         if (data instanceof SyncableItemStack syncable) {
             syncable.set(value);
         }
     }
 
-    public <RESOURCE extends Resource> void handleWindowProperty(short property, @NotNull RESOURCE value) {
+    public <RESOURCE extends Resource> void handleWindowProperty(short property, RESOURCE value) {
         ISyncableData data = getTrackedData(property);
         if (data instanceof SyncableResource) {
             ((SyncableResource<RESOURCE>) data).set(value);
         }
     }
 
-    public <RESOURCE extends Resource> void handleWindowProperty(short property, @NotNull LargeResourceStack<RESOURCE> value) {
+    public <RESOURCE extends Resource> void handleWindowProperty(short property, LargeResourceStack<RESOURCE> value) {
         ISyncableData data = getTrackedData(property);
         if (data instanceof SyncableLargeResourceStack) {
             ((SyncableLargeResourceStack<RESOURCE>) data).set(value);
@@ -592,7 +566,6 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
         switch (data) {
             case SyncableByteArray syncable -> syncable.set(value);
             case SyncableFrequency<?> syncable -> syncable.set(getLevel().registryAccess(), value);
-            case SyncableList<?> syncable -> syncable.set(getLevel().registryAccess(), value);
             case SyncableCollection<?, ?> syncable -> syncable.set(getLevel().registryAccess(), value);
             case null, default -> Mekanism.logger.error("Unknown byte value type: {}, please report", data == null ? null : data.getClass().getName());
         }

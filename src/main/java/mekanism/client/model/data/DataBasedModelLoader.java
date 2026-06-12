@@ -9,13 +9,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.neoforged.neoforge.model.data.ModelProperty;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
-import org.jetbrains.annotations.NotNull;*/
 
-/**
- * Mekanism model loader that properly loads models and switches between them based on the active model data
- */
+/// Mekanism model loader that properly loads models and switches between them based on the active model data
 //TODO - 26.1 models
-/*public class DataBasedModelLoader implements IGeometryLoader<DataBasedGeometry> {
+public class DataBasedModelLoader implements IGeometryLoader<DataBasedGeometry> {
 
     public static final ModelProperty<Void> EMITTING = new ModelProperty<>();
 
@@ -28,9 +25,8 @@ import org.jetbrains.annotations.NotNull;*/
     private DataBasedModelLoader() {
     }
 
-    @NotNull
     @Override
-    public DataBasedGeometry read(@NotNull JsonObject jsonObject, @NotNull JsonDeserializationContext ctx) {
+    public DataBasedGeometry read(JsonObject jsonObject, JsonDeserializationContext ctx) {
         Identifier noData = readModelPath(jsonObject, "no_data");
         Map<ModelProperty<Void>, Identifier> propertyBasedModels = new HashMap<>();
         for (Map.Entry<String, ModelProperty<Void>> entry : SUPPORTED_PROPERTIES.entrySet()) {

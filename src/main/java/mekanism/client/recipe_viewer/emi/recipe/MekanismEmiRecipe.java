@@ -10,10 +10,9 @@ import dev.emi.emi.api.widget.WidgetHolder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Supplier;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.ChemicalStackTemplate;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
 import mekanism.api.recipes.ingredients.FluidStackIngredient;
 import mekanism.api.recipes.ingredients.ItemStackIngredient;
@@ -34,11 +33,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidStackTemplate;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public abstract class MekanismEmiRecipe<RECIPE> extends AbstractContainerEventHandler implements EmiRecipe, IGuiWrapper {
 
     private final List<EmiIngredient> inputs = new ArrayList<>();
@@ -111,7 +108,7 @@ public abstract class MekanismEmiRecipe<RECIPE> extends AbstractContainerEventHa
         addOutputDefinition(definition.stream().map(FluidStackTemplate::create).map(NeoForgeEmiStack::of).toList());
     }
 
-    protected void addChemicalOutputDefinition(List<ChemicalStack> definition) {
+    protected void addChemicalOutputDefinition(List<ChemicalStackTemplate> definition) {
         addOutputDefinition(definition.stream().<EmiStack>map(ChemicalEmiStack::new).toList());
     }
 
@@ -150,7 +147,6 @@ public abstract class MekanismEmiRecipe<RECIPE> extends AbstractContainerEventHa
         return category;
     }
 
-    @Nullable
     @Override
     public Identifier getId() {
         return id;
@@ -205,10 +201,8 @@ public abstract class MekanismEmiRecipe<RECIPE> extends AbstractContainerEventHa
         return () -> RecipeViewerUtils.getCurrent(stacks);
     }
 
-    /**
-     * @apiNote x and y are based on the values set in the tile, as the GUI then shifts the slots by one to account for the border. This method is mostly meant as a
-     * helper to make keeping track of the positioning numbers easier.
-     */
+    /// @apiNote x and y are based on the values set in the tile, as the GUI then shifts the slots by one to account for the border. This method is mostly meant as a
+    /// helper to make keeping track of the positioning numbers easier.
     protected SlotWidget addSlot(WidgetHolder widgetHolder, SlotType type, int x, int y, EmiIngredient ingredient) {
         GuiSlot slot = addSlot(widgetHolder, type, x, y);
         return initItem(widgetHolder, slot.getX(), slot.getY(), ingredient);

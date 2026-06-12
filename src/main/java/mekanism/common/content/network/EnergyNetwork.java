@@ -8,7 +8,7 @@ import java.util.UUID;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.math.MathUtils;
 import mekanism.common.MekanismLang;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.capabilities.energy.VariableCapacityEnergyContainer;
 import mekanism.common.content.network.distribution.EnergyTransmitterSaveTarget;
 import mekanism.common.content.network.transmitter.UniversalCable;
@@ -22,12 +22,12 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class EnergyNetwork extends DynamicBufferedNetwork<EnergyHandler, EnergyNetwork, Long, UniversalCable> {
 
     //for emit utils
+    @Nullable
     public static final Void ENERGY = null;
 
     public final VariableCapacityEnergyContainer energyContainer;
@@ -68,7 +68,6 @@ public class EnergyNetwork extends DynamicBufferedNetwork<EnergyHandler, EnergyN
         return transmittersToUpdate;
     }
 
-    @NotNull
     @Override
     public Long getBuffer() {
         return energyContainer.getAmountAsLong();
@@ -171,7 +170,6 @@ public class EnergyNetwork extends DynamicBufferedNetwork<EnergyHandler, EnergyN
         return MekanismLang.GENERIC_PER_TICK.translate(EnergyDisplay.of(prevTransferAmount));
     }
 
-    @NotNull
     @Override
     public Component getTextComponent() {
         return MekanismLang.NETWORK_DESCRIPTION.translate(MekanismLang.ENERGY_NETWORK, transmittersSize(), getAcceptorCount());

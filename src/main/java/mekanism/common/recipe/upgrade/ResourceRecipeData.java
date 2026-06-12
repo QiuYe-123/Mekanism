@@ -3,19 +3,17 @@ package mekanism.common.recipe.upgrade;
 import java.util.ArrayList;
 import java.util.List;
 import mekanism.api.AutomationType;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.resource.IMekanismResourceHandler;
 import mekanism.api.resource.IResourceContainer;
 import mekanism.api.resource.LargeResourceStack;
-import mekanism.common.attachments.containers.type.ResourceContainerType;
+import mekanism.common.component.containers.type.ResourceContainerType;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.resource.Resource;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class ResourceRecipeData<RESOURCE extends Resource> implements RecipeUpgradeData<ResourceRecipeData<RESOURCE>> {
 
     protected final ResourceContainerType<RESOURCE, ?> containerType;
@@ -95,10 +93,8 @@ public class ResourceRecipeData<RESOURCE extends Resource> implements RecipeUpgr
         return inserted;
     }
 
-    /**
-     * Similar to {@link IResourceContainer#insert(Resource, int, TransactionContext, AutomationType)} except directly sets the contents ignoring any rate limits, and
-     * supporting if the amount is greater than max long.
-     */
+    /// Similar to [IResourceContainer#insert(Resource, int, TransactionContext, AutomationType)] except directly sets the contents ignoring any rate limits, and
+    /// supporting if the amount is greater than max long.
     private long insertInto(IResourceContainer<RESOURCE> container, RESOURCE resource, final long amount, TransactionContext transaction) {
         //TODO - 26.1: Evaluate if any containers ever get passed to this that override insert that we potentially need bonus logic? In general as it is
         // just component backed slots, most likely the answer is no. Maybe if someone added a recipe to make creative bins would be the only case

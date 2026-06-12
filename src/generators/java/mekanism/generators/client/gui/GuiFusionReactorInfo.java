@@ -22,7 +22,6 @@ import mekanism.generators.common.tile.fusion.TileEntityFusionReactorController;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import org.jetbrains.annotations.NotNull;
 
 public abstract class GuiFusionReactorInfo extends GuiMekanismTile<TileEntityFusionReactorController, EmptyTileContainer<TileEntityFusionReactorController>> {
 
@@ -35,7 +34,7 @@ public abstract class GuiFusionReactorInfo extends GuiMekanismTile<TileEntityFus
     protected void addGuiElements() {
         super.addGuiElements();
         addRenderableWidget(new MekanismImageButton(this, 6, 6, 14, getButtonLocation("back"),
-              (element, event, isDoubleClick) -> PacketUtils.sendToServer(new PacketTileButtonPress(ClickedTileButton.BACK_BUTTON, ((GuiFusionReactorInfo) element.gui()).tile))))
+              (element, _, _) -> PacketUtils.sendToServer(new PacketTileButtonPress(ClickedTileButton.BACK_BUTTON, ((GuiFusionReactorInfo) element.gui()).tile))))
               .setTooltip(TooltipUtils.BACK);
         addRenderableWidget(new GuiEnergyTab(this, () -> {
             FusionReactorMultiblockData multiblock = tile.getMultiblock();
@@ -51,7 +50,7 @@ public abstract class GuiFusionReactorInfo extends GuiMekanismTile<TileEntityFus
     }
 
     @Override
-    protected void drawForegroundText(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+    protected void drawForegroundText(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         renderTitleTextWithOffset(guiGraphics, 18);//Adjust spacing for back button
         super.drawForegroundText(guiGraphics, mouseX, mouseY);
     }

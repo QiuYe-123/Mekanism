@@ -4,6 +4,7 @@ import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
 import mekanism.common.config.value.CachedIntValue;
 import mekanism.common.util.EnumUtils;
+import org.jspecify.annotations.Nullable;
 
 public enum TransporterTier implements ITier {
     BASIC(BaseTier.BASIC, 1, 5),
@@ -14,7 +15,9 @@ public enum TransporterTier implements ITier {
     private final int basePull;
     private final int baseSpeed;
     private final BaseTier baseTier;
+    @Nullable
     private CachedIntValue pullReference;
+    @Nullable
     private CachedIntValue speedReference;
 
     TransporterTier(BaseTier tier, int pull, int s) {
@@ -54,9 +57,7 @@ public enum TransporterTier implements ITier {
         return baseSpeed;
     }
 
-    /**
-     * ONLY CALL THIS FROM TierConfig. It is used to give the TransporterTier a reference to the actual config value object
-     */
+    /// ONLY CALL THIS FROM TierConfig. It is used to give the TransporterTier a reference to the actual config value object
     public void setConfigReference(CachedIntValue pullReference, CachedIntValue speedReference) {
         this.pullReference = pullReference;
         this.speedReference = speedReference;

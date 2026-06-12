@@ -12,10 +12,9 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleAnnotationValueVisitor14;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Helper methods for using an AnnotationMirror and getting elements by name.
- */
+/// Helper methods for using an AnnotationMirror and getting elements by name.
 public class AnnotationHelper {
 
     private final Map<? extends ExecutableElement, ? extends AnnotationValue> annotationValueMap;
@@ -28,15 +27,14 @@ public class AnnotationHelper {
         }
     }
 
-    /**
-     * Get a value suitable for use in an $L substitution. May be raw primitive or CodeBlock
-     *
-     * @param key          the annotation member name
-     * @param defaultValue a default value to use if no value found or string is empty
-     *
-     * @return a raw primitive or CodeBlock representing the value
-     */
-    public Object getLiteral(String key, Object defaultValue) {
+    /// Get a value suitable for use in an $L substitution. May be raw primitive or CodeBlock
+    ///
+    /// @param key          the annotation member name
+    /// @param defaultValue a default value to use if no value found or string is empty
+    ///
+    /// @return a raw primitive or CodeBlock representing the value
+    @Nullable
+    public Object getLiteral(String key, @Nullable Object defaultValue) {
         ExecutableElement element = nameToElement.get(key);
         if (element == null) {
             return defaultValue;
@@ -47,37 +45,34 @@ public class AnnotationHelper {
         ), element.getReturnType());
     }
 
-    /**
-     * Get an enum constant name, element must be an enum constant or default will be returned
-     *
-     * @param key          the annotation member name
-     * @param defaultValue a default value to use if no value found
-     *
-     * @return a raw primitive or CodeBlock representing the value
-     */
+    /// Get an enum constant name, element must be an enum constant or default will be returned
+    ///
+    /// @param key          the annotation member name
+    /// @param defaultValue a default value to use if no value found
+    ///
+    /// @return a raw primitive or CodeBlock representing the value
     public String getEnumConstantName(String key, String defaultValue) {
         ExecutableElement element = nameToElement.get(key);
         if (element == null) {
             return defaultValue;
         }
         AnnotationValue value = annotationValueMap.get(element);
-        return value.accept(new SimpleAnnotationValueVisitor14<String, Void>(defaultValue) {
+        return value.accept(new SimpleAnnotationValueVisitor14<String, @Nullable Void>(defaultValue) {
             @Override
-            public String visitEnumConstant(VariableElement c, Void unused) {
+            public String visitEnumConstant(VariableElement c, @Nullable Void unused) {
                 return c.getSimpleName().toString();
             }
         }, null);
     }
 
-    /**
-     * Get a string value from the annotation.
-     *
-     * @param key          the annotation member name
-     * @param defaultValue a value to return if the value found is empty or not a string
-     *
-     * @return the string value or the default
-     */
-    public String getStringValue(String key, String defaultValue) {
+    /// Get a string value from the annotation.
+    ///
+    /// @param key          the annotation member name
+    /// @param defaultValue a value to return if the value found is empty or not a string
+    ///
+    /// @return the string value or the default
+    @Nullable
+    public String getStringValue(String key, @Nullable String defaultValue) {
         AnnotationValue value = annotationValueMap.get(nameToElement.get(key));
         if (value != null && value.getValue() instanceof String s && !s.isBlank()) {
             return s;
@@ -85,14 +80,12 @@ public class AnnotationHelper {
         return defaultValue;
     }
 
-    /**
-     * Get a boolean value from the annotation.
-     *
-     * @param key          the annotation member name
-     * @param defaultValue a value to return if the value found is empty or not a boolean
-     *
-     * @return the boolean value or the default
-     */
+    /// Get a boolean value from the annotation.
+    ///
+    /// @param key          the annotation member name
+    /// @param defaultValue a value to return if the value found is empty or not a boolean
+    ///
+    /// @return the boolean value or the default
     public boolean getBooleanValue(String key, boolean defaultValue) {
         AnnotationValue value = annotationValueMap.get(nameToElement.get(key));
         if (value != null && value.getValue() instanceof Boolean b) {
@@ -101,13 +94,12 @@ public class AnnotationHelper {
         return defaultValue;
     }
 
-    /**
-     * Get a Class value from the annotation
-     *
-     * @param key the annotation member name
-     *
-     * @return a TypeMirror or null if not a class value
-     */
+    /// Get a Class value from the annotation
+    ///
+    /// @param key the annotation member name
+    ///
+    /// @return a TypeMirror or null if not a class value
+    @Nullable
     public TypeMirror getClassValue(String key) {
         AnnotationValue value = annotationValueMap.get(nameToElement.get(key));
         if (value.getValue() instanceof TypeMirror tm) {
@@ -116,27 +108,27 @@ public class AnnotationHelper {
         return null;
     }
 
-    /**
-     * Get a list of Class (TypeMirror) values from the annotation. Non-class values will be ignored
-     *
-     * @param key the annotation member name
-     *
-     * @return a list with any values found
-     */
+    /// Get a list of Class (TypeMirror) values from the annotation. Non-class values will be ignored
+    ///
+    /// @param key the annotation member name
+    ///
+    /// @return a list with any values found
     public List<TypeMirror> getClassArray(String key) {
         AnnotationValue value = annotationValueMap.get(nameToElement.get(key));
         List<TypeMirror> returnVal = new ArrayList<>();
-        value.accept(new SimpleAnnotationValueVisitor14<Void, Void>() {
+        value.accept(new SimpleAnnotationValueVisitor14<@Nullable Void, @Nullable Void>() {
+            @Nullable
             @Override
-            public Void visitArray(List<? extends AnnotationValue> vals, Void unused) {
+            public Void visitArray(List<? extends AnnotationValue> vals, @Nullable Void unused) {
                 for (AnnotationValue annotationValue : vals) {
                     annotationValue.accept(this, null);
                 }
                 return null;
             }
 
+            @Nullable
             @Override
-            public Void visitType(TypeMirror t, Void unused) {
+            public Void visitType(TypeMirror t, @Nullable Void unused) {
                 returnVal.add(t);
                 return null;
             }
@@ -144,27 +136,27 @@ public class AnnotationHelper {
         return returnVal;
     }
 
-    /**
-     * Get a list of String values from the annotation. Non string values will be ignored
-     *
-     * @param key the annotation member name
-     *
-     * @return a list with any values found
-     */
+    /// Get a list of String values from the annotation. Non string values will be ignored
+    ///
+    /// @param key the annotation member name
+    ///
+    /// @return a list with any values found
     public List<String> getStringArray(String key) {
         AnnotationValue value = annotationValueMap.get(nameToElement.get(key));
         List<String> returnVal = new ArrayList<>();
-        value.accept(new SimpleAnnotationValueVisitor14<Void, Void>() {
+        value.accept(new SimpleAnnotationValueVisitor14<@Nullable Void, @Nullable Void>() {
+            @Nullable
             @Override
-            public Void visitArray(List<? extends AnnotationValue> vals, Void unused) {
+            public Void visitArray(List<? extends AnnotationValue> vals, @Nullable Void unused) {
                 for (AnnotationValue annotationValue : vals) {
                     annotationValue.accept(this, null);
                 }
                 return null;
             }
 
+            @Nullable
             @Override
-            public Void visitString(String s, Void unused) {
+            public Void visitString(@Nullable String s, @Nullable Void unused) {
                 if (s != null && !s.isBlank()) {
                     returnVal.add(s);
                 }

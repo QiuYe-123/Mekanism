@@ -18,7 +18,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import org.jetbrains.annotations.NotNull;
 
 public class CreativeTabDeferredRegister extends MekanismDeferredRegister<CreativeModeTab> {
 
@@ -35,21 +34,17 @@ public class CreativeTabDeferredRegister extends MekanismDeferredRegister<Creati
     }
 
     @Override
-    public void register(@NotNull IEventBus bus) {
+    public void register(IEventBus bus) {
         super.register(bus);
         bus.addListener(addToExistingTabs);
     }
 
-    /**
-     * @apiNote We manually require the title and icon to be passed so that we ensure all tabs have one.
-     */
+    /// @apiNote We manually require the title and icon to be passed so that we ensure all tabs have one.
     public MekanismDeferredHolder<CreativeModeTab, CreativeModeTab> registerMain(ILangEntry title, Holder<Item> icon, UnaryOperator<CreativeModeTab.Builder> operator) {
         return register(getNamespace(), title, icon, operator);
     }
 
-    /**
-     * @apiNote We manually require the title and icon to be passed so that we ensure all tabs have one.
-     */
+    /// @apiNote We manually require the title and icon to be passed so that we ensure all tabs have one.
     public MekanismDeferredHolder<CreativeModeTab, CreativeModeTab> register(String name, ILangEntry title, Holder<Item> icon, UnaryOperator<CreativeModeTab.Builder> operator) {
         return register(name, () -> {
             CreativeModeTab.Builder builder = CreativeModeTab.builder()

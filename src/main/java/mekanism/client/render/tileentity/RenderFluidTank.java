@@ -1,7 +1,6 @@
 package mekanism.client.render.tileentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.MekanismRenderer.FluidTextureType;
 import mekanism.client.render.ModelRenderer;
@@ -18,11 +17,11 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class RenderFluidTank extends MekanismTileEntityRenderer<TileEntityFluidTank, FluidTankRenderState> {
 
     private static final int stages = 1_400;
@@ -43,7 +42,7 @@ public class RenderFluidTank extends MekanismTileEntityRenderer<TileEntityFluidT
     }
 
     @Override
-    public void extractRenderState(TileEntityFluidTank tank, FluidTankRenderState state, float partialTick, Vec3 cameraPosition, @Nullable ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+    public void extractRenderState(TileEntityFluidTank tank, FluidTankRenderState state, float partialTick, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         super.extractRenderState(tank, state, partialTick, cameraPosition, breakProgress);
         FluidResource fluid = tank.fluidTank.resource();
         state.fluidTint = MekanismRenderer.getColorARGB(fluid, state.fluidScale);
@@ -95,16 +94,14 @@ public class RenderFluidTank extends MekanismTileEntityRenderer<TileEntityFluidT
     public static class FluidTankRenderState extends BlockEntityRenderState {
 
         public float contentsMaxY;
-        public int fluidTint = 0xFFFFFFFF;
+        public int fluidTint = CommonColors.WHITE;
         public int fluidGlow;
         public float fluidScale;
         public float valveMinY;
-        public int valveTint = 0xFFFFFFFF;
+        public int valveTint = CommonColors.WHITE;
         public int valveGlow;
-        @Nullable
-        public RenderResizableCuboid.TexturePicker fluidTexture;
-        @Nullable
-        public MekanismRenderer.ValveTextureGetter valveFluidTexture;
+        public RenderResizableCuboid.@Nullable TexturePicker fluidTexture;
+        public MekanismRenderer.@Nullable ValveTextureGetter valveFluidTexture;
 
     }
 }

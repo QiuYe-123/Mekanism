@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import mekanism.api.chemical.Chemical;
@@ -52,8 +51,7 @@ import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class BaseCrTExampleProvider implements DataProvider {
 
@@ -83,20 +81,20 @@ public abstract class BaseCrTExampleProvider implements DataProvider {
         addNameLookupOverride(Boolean.TYPE, "bool");
         addPrimitiveInfo(Boolean.TYPE, Boolean.class, "bool");
         addNameLookupOverride(Character.class, "char");
-        addSupportedConversion(Character.TYPE, Character.class, (imports, c) -> "'" + c + "'");
-        addSupportedConversion(IItemStack.class, ItemStack.class, (imports, stack) -> ItemStackUtil.getCommandString(stack));
-        addSupportedConversion(IFluidStack.class, FluidStack.class, (imports, stack) -> IFluidStack.of(stack).getCommandString());
+        addSupportedConversion(Character.TYPE, Character.class, (_, c) -> "'" + c + "'");
+        addSupportedConversion(IItemStack.class, ItemStack.class, (_, stack) -> ItemStackUtil.getCommandString(stack));
+        addSupportedConversion(IFluidStack.class, FluidStack.class, (_, stack) -> IFluidStack.of(stack).getCommandString());
         addSupportedConversion(Percentaged.class, IItemStack.class, WeightedItemStack.class,
-              (imports, stack) -> IItemStack.of(stack.stack).percent(stack.chance).getCommandString(),
-              (imports, stack) -> {
+              (_, stack) -> IItemStack.of(stack.stack).percent(stack.chance).getCommandString(),
+              (_, stack) -> {
                   if (stack.chance == 1) {
                       return ItemStackUtil.getCommandString(stack.stack);
                   }
                   return null;
               }
         );
-        addSupportedConversion(IIngredientWithAmount.class, ItemStackIngredient.class, (imports, ingredient) -> CrTUtils.toCrT(ingredient).getCommandString());
-        addSupportedConversion(CTFluidIngredient.class, FluidStackIngredient.class, (imports, ingredient) -> CrTUtils.toCrT(ingredient).getCommandString());
+        addSupportedConversion(IIngredientWithAmount.class, ItemStackIngredient.class, (_, ingredient) -> CrTUtils.toCrT(ingredient).getCommandString());
+        addSupportedConversion(CTFluidIngredient.class, FluidStackIngredient.class, (_, ingredient) -> CrTUtils.toCrT(ingredient).getCommandString());
         addChemicalConversions();
         if (PARAMETER_NAMES == null) {
             //Lazy initialize the parameter names, ideally we would find a better time to do this and
@@ -123,26 +121,26 @@ public abstract class BaseCrTExampleProvider implements DataProvider {
 
     protected void addPrimitiveInfo(Class<?> primitiveClass, Class<?> objectClass, String name) {
         addNameLookupOverride(objectClass, name);
-        addSupportedConversion(primitiveClass, objectClass, (imports, primitive) -> primitive.toString());
+        addSupportedConversion(primitiveClass, objectClass, (_, primitive) -> primitive.toString());
     }
 
     @SafeVarargs
     protected final <ACTUAL> void addSupportedConversion(Class<?> crtClass, Class<? extends ACTUAL> actualClass,
-          BiFunction<CrTImportsComponent, ? super ACTUAL, String>... conversions) {
+          Conversion<? super ACTUAL>... conversions) {
         addSupportedConversion(crtClass, null, actualClass, conversions);
     }
 
     @SafeVarargs
     protected final <ACTUAL> void addSupportedConversionWithAlt(Class<?> crtClass, Class<?> altCrTClass, Class<? extends ACTUAL> actualClass,
-          BiFunction<CrTImportsComponent, ? super ACTUAL, String>... conversions) {
+          Conversion<? super ACTUAL>... conversions) {
         addSupportedConversion(crtClass, actualClass, conversions);
         addSupportedConversion(altCrTClass, actualClass, conversions);
     }
 
     @SafeVarargs
     protected final <ACTUAL> void addSupportedConversion(Class<?> crtClass, @Nullable Class<?> generic, Class<? extends ACTUAL> actualClass,
-          BiFunction<CrTImportsComponent, ? super ACTUAL, String>... conversions) {
-        supportedConversions.computeIfAbsent(crtClass, clazz -> new ConversionTracker()).add(generic, new ClassConversionInfo<>(actualClass, List.of(conversions)));
+          Conversion<? super ACTUAL>... conversions) {
+        supportedConversions.computeIfAbsent(crtClass, _ -> new ConversionTracker()).add(generic, new ClassConversionInfo<>(actualClass, List.of(conversions)));
     }
 
     @Nullable
@@ -170,9 +168,9 @@ public abstract class BaseCrTExampleProvider implements DataProvider {
             List<String> representations = new ArrayList<>();
             for (ClassConversionInfo<?> conversionInfo : conversions) {
                 if (conversionInfo.actualClass.isAssignableFrom(actualClass)) {
-                    for (BiFunction<CrTImportsComponent, ?, String> stringFunction : conversionInfo.conversions) {
+                    for (Conversion<?> stringFunction : conversionInfo.conversions) {
                         //noinspection unchecked
-                        String representation = ((BiFunction<CrTImportsComponent, ? super ACTUAL, String>) stringFunction).apply(imports, actual);
+                        String representation = ((Conversion<? super ACTUAL>) stringFunction).convert(imports, actual);
                         if (representation != null) {
                             //We use null to represent things we can't represent and then don't add them here
                             representations.add(representation);
@@ -209,13 +207,11 @@ public abstract class BaseCrTExampleProvider implements DataProvider {
 
     protected abstract void addExamples(HolderLookup.Provider registries);
 
-    /**
-     * Creates and adds a CraftTweaker example script builder with the file located by data/modid/scripts/fileName.json
-     *
-     * @param fileName Name of the file, must be a valid resource location path.
-     *
-     * @return Builder
-     */
+    /// Creates and adds a CraftTweaker example script builder with the file located by data/modid/scripts/fileName.json
+    ///
+    /// @param fileName Name of the file, must be a valid resource location path.
+    ///
+    /// @return Builder
     protected CrTExampleBuilder<?> exampleBuilder(String fileName) {
         Objects.requireNonNull(fileName, "Example Builder ID cannot be null.");
         if (!Identifier.isValidPath(fileName)) {
@@ -229,9 +225,8 @@ public abstract class BaseCrTExampleProvider implements DataProvider {
         return exampleBuilder;
     }
 
-    @NotNull
     @Override
-    public CompletableFuture<?> run(@NotNull CachedOutput cache) {
+    public CompletableFuture<?> run(CachedOutput cache) {
         return this.registries.thenCompose(lookup -> {
             examples.clear();
             addExamples(lookup);
@@ -245,17 +240,16 @@ public abstract class BaseCrTExampleProvider implements DataProvider {
         });
     }
 
-    @NotNull
     @Override
     public String getName() {
         return "CraftTweaker Examples: " + modid;
     }
 
     private void addChemicalConversions() {
-        addSupportedConversion(ICrTChemicalStack.class, ChemicalStack.class, (imports, stack) -> new CrTChemicalStack(stack).getCommandString());
+        addSupportedConversion(ICrTChemicalStack.class, ChemicalStack.class, (_, stack) -> new CrTChemicalStack(stack).getCommandString());
         addSupportedConversion(ChemicalStackIngredient.class, ChemicalStackIngredient.class,
               (imports, ingredient) -> getIngredientRepresentation(ingredient, imports.addImport(CrTConstants.CLASS_CHEMICAL_STACK_INGREDIENT), CrTChemicalStack::new, CrTUtils.chemicalTags()),
-              (imports, ingredient) -> {
+              (_, ingredient) -> {
                   if (ingredient.ingredient() instanceof TagChemicalIngredient tagged) {
                       return CrTUtils.chemicalTags().tag(tagged.tag()).withAmount(ingredient.amount()).getCommandString();
                   } else {
@@ -305,7 +299,14 @@ public abstract class BaseCrTExampleProvider implements DataProvider {
         }
     }
 
-    private record ClassConversionInfo<ACTUAL>(Class<? extends ACTUAL> actualClass, List<BiFunction<CrTImportsComponent, ? super ACTUAL, String>> conversions) {
+    @FunctionalInterface
+    public interface Conversion<TYPE> {
+
+        @Nullable
+        String convert(CrTImportsComponent imports, TYPE type);
+    }
+
+    private record ClassConversionInfo<ACTUAL>(Class<? extends ACTUAL> actualClass, List<Conversion<? super ACTUAL>> conversions) {
     }
 
     private static class ConversionTracker {

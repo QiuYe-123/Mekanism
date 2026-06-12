@@ -5,23 +5,19 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import mekanism.api.MekanismAPI;
 import mekanism.api.SerializationConstants;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.HolderSet.Named;
 import net.minecraft.tags.TagKey;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Base Chemical ingredient implementation that matches all chemicals within the given tag.
- * <p>
- * Unlike with ingredients, this is an explicit "type" of chemical ingredient, though it may still be written without a type field, see
- * {@link mekanism.api.recipes.ingredients.creator.IChemicalIngredientCreator#mapCodecNonEmpty}
- *
- * @since 10.6.0
- */
-@NothingNullByDefault
+/// Base Chemical ingredient implementation that matches all chemicals within the given tag.
+///
+/// Unlike with ingredients, this is an explicit "type" of chemical ingredient, though it may still be written without a type field, see
+/// [mekanism.api.recipes.ingredients.creator.IChemicalIngredientCreator#mapCodecNonEmpty]
+///
+/// @since 10.6.0
 public non-sealed class TagChemicalIngredient extends ChemicalIngredient {
 
     public static final MapCodec<TagChemicalIngredient> CODEC = TagKey.codec(MekanismAPI.CHEMICAL_REGISTRY_NAME).xmap(
@@ -31,9 +27,7 @@ public non-sealed class TagChemicalIngredient extends ChemicalIngredient {
 
     private final TagKey<Chemical> tag;
 
-    /**
-     * @param tag Tag key to match.
-     */
+    /// @param tag Tag key to match.
     public TagChemicalIngredient(TagKey<Chemical> tag) {
         this.tag = tag;
     }
@@ -64,9 +58,7 @@ public non-sealed class TagChemicalIngredient extends ChemicalIngredient {
         return CODEC;
     }
 
-    /**
-     * {@return tag key to match}
-     */
+    /// {@return tag key to match}
     public final TagKey<Chemical> tag() {
         return tag;
     }

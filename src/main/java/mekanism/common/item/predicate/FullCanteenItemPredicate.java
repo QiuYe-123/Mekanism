@@ -3,7 +3,7 @@ package mekanism.common.item.predicate;
 import com.mojang.serialization.MapCodec;
 import java.util.List;
 import mekanism.api.resource.LargeResourceStack;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.registries.MekanismFluids;
 import mekanism.common.registries.MekanismItems;
@@ -14,7 +14,6 @@ import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.predicates.DataComponentPredicate;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
-import org.jetbrains.annotations.NotNull;
 
 public class FullCanteenItemPredicate implements DataComponentPredicate {
 
@@ -36,7 +35,7 @@ public class FullCanteenItemPredicate implements DataComponentPredicate {
     }
 
     @Override
-    public boolean matches(@NotNull DataComponentGetter stack) {
+    public boolean matches(DataComponentGetter stack) {
         List<LargeResourceStack<FluidResource>> tanks = ContainerType.FLUID.getAttachedContents(stack);
         return !tanks.isEmpty() && tanks.stream().allMatch(tank ->
               tank.amount() == MekanismConfig.gear.canteenMaxStorage.get() && tank.resource().is(MekanismFluids.NUTRITIONAL_PASTE));

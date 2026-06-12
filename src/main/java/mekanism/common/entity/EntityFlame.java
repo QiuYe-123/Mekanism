@@ -53,8 +53,7 @@ import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class EntityFlame extends Projectile implements IEntityWithComplexSpawn {
 
@@ -111,7 +110,7 @@ public class EntityFlame extends Projectile implements IEntityWithComplexSpawn {
             EntityHitResult entityResult = ProjectileUtil.getEntityHitResult(level(), this, localVec, motionVec,
                   getBoundingBox().expandTowards(getDeltaMovement()).inflate(1.0), this::canHitEntity);
             if (entityResult != null && entityResult.getType() == Type.ENTITY) {
-                if (entityResult.getEntity() instanceof Player target && getOwner() instanceof Player owner && !owner.canHarmPlayer(target)) {
+                if (entityResult.getEntity() instanceof Player target && getOwner() instanceof Player ownerPlayer && !ownerPlayer.canHarmPlayer(target)) {
                     hitResult = null;
                 } else {
                     hitResult = entityResult;
@@ -149,7 +148,7 @@ public class EntityFlame extends Projectile implements IEntityWithComplexSpawn {
     }
 
     @Override
-    protected void onHitBlock(@NotNull BlockHitResult blockRayTrace) {
+    protected void onHitBlock(BlockHitResult blockRayTrace) {
         super.onHitBlock(blockRayTrace);
         BlockPos hitPos = blockRayTrace.getBlockPos();
         Direction hitSide = blockRayTrace.getDirection();
@@ -294,7 +293,7 @@ public class EntityFlame extends Projectile implements IEntityWithComplexSpawn {
     }
 
     @Override
-    protected void defineSynchedData(@NotNull SynchedEntityData.Builder builder) {
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
     }
 
     @Override

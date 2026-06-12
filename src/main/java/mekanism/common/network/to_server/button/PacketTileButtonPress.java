@@ -25,12 +25,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Used for informing the server that a click happened in a GUI and the gui window needs to change
- */
+/// Used for informing the server that a click happened in a GUI and the gui window needs to change
 public record PacketTileButtonPress(ClickedTileButton buttonClicked, BlockPos pos) implements IMekanismPacket {
 
     public static final CustomPacketPayload.Type<PacketTileButtonPress> TYPE = new CustomPacketPayload.Type<>(Mekanism.rl("tile_button"));
@@ -44,7 +41,6 @@ public record PacketTileButtonPress(ClickedTileButton buttonClicked, BlockPos po
         this(buttonClicked, tile.getBlockPos());
     }
 
-    @NotNull
     @Override
     public CustomPacketPayload.Type<PacketTileButtonPress> type() {
         return TYPE;

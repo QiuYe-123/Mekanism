@@ -11,9 +11,9 @@ import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/** If this block is a part of a multiblock. */
+/// If this block is a part of a multiblock.
 public class AttributeMultiblock implements Attribute {
 
     public static final Attribute EXTERNAL = new AttributeMultiblock(MultiblockType.EXTERNAL);

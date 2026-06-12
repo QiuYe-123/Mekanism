@@ -20,34 +20,35 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class MovableFilterButton extends FilterButton {
 
+    @Nullable
     private static final Tooltip MOVE_UP = TooltipUtils.create(MekanismLang.MOVE_UP, MekanismLang.MOVE_TO_TOP);
+    @Nullable
     private static final Tooltip MOVE_DOWN = TooltipUtils.create(MekanismLang.MOVE_DOWN, MekanismLang.MOVE_TO_BOTTOM);
 
     private final FilterSelectButton upButton;
     private final FilterSelectButton downButton;
 
     public MovableFilterButton(IGuiWrapper gui, int x, int y, int index, IntSupplier filterIndex, FilterManager<?> filterManager, ObjIntConsumer<MouseButtonEvent> upButtonPress,
-          ObjIntConsumer<MouseButtonEvent> downButtonPress, ObjIntConsumer<IFilter<?>> onPress, IntConsumer toggleButtonPress, Function<IFilter<?>, List<ItemStack>> renderStackSupplier) {
+          ObjIntConsumer<MouseButtonEvent> downButtonPress, ObjIntConsumer<@Nullable IFilter<?>> onPress, IntConsumer toggleButtonPress, Function<@Nullable IFilter<?>, List<ItemStack>> renderStackSupplier) {
         this(gui, x, y, TEXTURE_WIDTH, TEXTURE_HEIGHT / 2, index, filterIndex, filterManager, upButtonPress, downButtonPress, onPress, toggleButtonPress, renderStackSupplier);
     }
 
     public MovableFilterButton(IGuiWrapper gui, int x, int y, int width, int height, int index, IntSupplier filterIndex, FilterManager<?> filterManager,
-          ObjIntConsumer<MouseButtonEvent> upButtonPress, ObjIntConsumer<MouseButtonEvent> downButtonPress, ObjIntConsumer<IFilter<?>> onPress, IntConsumer toggleButtonPress,
-          Function<IFilter<?>, List<ItemStack>> renderStackSupplier) {
+          ObjIntConsumer<MouseButtonEvent> upButtonPress, ObjIntConsumer<MouseButtonEvent> downButtonPress, ObjIntConsumer<@Nullable IFilter<?>> onPress, IntConsumer toggleButtonPress,
+          Function<@Nullable IFilter<?>, List<ItemStack>> renderStackSupplier) {
         super(gui, x, y, width, height, index, filterIndex, filterManager, onPress, toggleButtonPress, renderStackSupplier);
         int arrowX = relativeX + this.width - 14;
         int halfHeight = this.height / 2;
-        upButton = addChild(new FilterSelectButton(gui, arrowX, relativeY + halfHeight - 8, false, (element, event, isDoubleClick) -> {
+        upButton = addChild(new FilterSelectButton(gui, arrowX, relativeY + halfHeight - 8, false, (_, event, _) -> {
             upButtonPress.accept(event, getActualIndex());
             return true;
         }));
         upButton.setTooltip(MOVE_UP);
-        downButton = addChild(new FilterSelectButton(gui, arrowX, relativeY + halfHeight + 1, true, (element, event, isDoubleClick) -> {
+        downButton = addChild(new FilterSelectButton(gui, arrowX, relativeY + halfHeight + 1, true, (_, event, _) -> {
             downButtonPress.accept(event, getActualIndex());
             return true;
         }));
@@ -78,13 +79,13 @@ public class MovableFilterButton extends FilterButton {
     }
 
     @Override
-    public void drawBackground(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(guiGraphics, mouseX, mouseY, partialTicks);
         IFilter<?> filter = getFilter();
         EnumColor color = switch (filter) {
-            case IItemStackFilter<?> stackFilter -> EnumColor.INDIGO;
-            case ITagFilter<?> tagFilter -> EnumColor.BRIGHT_GREEN;
-            case IModIDFilter<?> modIDFilter -> EnumColor.RED;
+            case IItemStackFilter<?> _ -> EnumColor.INDIGO;
+            case ITagFilter<?> _ -> EnumColor.BRIGHT_GREEN;
+            case IModIDFilter<?> _ -> EnumColor.RED;
             case null, default -> null;
         };
         if (color != null) {

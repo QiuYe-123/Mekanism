@@ -1,7 +1,6 @@
 package mekanism.common.recipe.compat;
 
 import biomesoplenty.api.item.BOPItems;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.datagen.recipe.builder.ItemStackToChemicalRecipeBuilder;
 import mekanism.api.datagen.recipe.builder.ItemStackToItemStackRecipeBuilder;
 import mekanism.api.recipes.ingredients.ItemStackIngredient;
@@ -17,7 +16,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 
-@NothingNullByDefault
 public class BiomesOPlentyRecipeProvider extends CompatRecipeProvider {
 
     public BiomesOPlentyRecipeProvider(HolderLookup.Provider registries, String modid) {
@@ -125,7 +123,7 @@ public class BiomesOPlentyRecipeProvider extends CompatRecipeProvider {
         int flowerRate = 3 * PigmentExtractingRecipeProvider.DYE_RATE;
         ItemStackToChemicalRecipeBuilder.pigmentExtracting(
                     inputIngredient,
-                    MekanismChemicals.PIGMENT_COLOR_LOOKUP.get(color).asStack(flowerRate)
+                    MekanismChemicals.PIGMENT_COLOR_LOOKUP.get(color).asTemplate(flowerRate)
               ).addCondition(modLoaded)
               .save(consumer, Mekanism.rl(basePath + "pigment_extracting/" + color.getRegistryPrefix()));
     }
@@ -141,7 +139,7 @@ public class BiomesOPlentyRecipeProvider extends CompatRecipeProvider {
         int largeFlowerRate = 6 * PigmentExtractingRecipeProvider.DYE_RATE;
         ItemStackToChemicalRecipeBuilder.pigmentExtracting(
                     inputIngredient,
-                    MekanismChemicals.PIGMENT_COLOR_LOOKUP.get(color).asStack(largeFlowerRate)
+                    MekanismChemicals.PIGMENT_COLOR_LOOKUP.get(color).asTemplate(largeFlowerRate)
               ).addCondition(modLoaded)
               .save(consumer, Mekanism.rl(basePath + "pigment_extracting/large_" + color.getRegistryPrefix()));
     }

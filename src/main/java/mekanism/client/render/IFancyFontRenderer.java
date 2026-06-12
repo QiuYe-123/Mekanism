@@ -10,11 +10,12 @@ import net.minecraft.client.gui.ActiveTextCollector.Parameters;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
+import org.jspecify.annotations.Nullable;
 
 //TODO - 1.21: Document this class
 //TODO - 26.1 fixme
@@ -26,9 +27,7 @@ public interface IFancyFontRenderer {
         return Minecraft.getInstance().font;
     }
 
-    /**
-     * Time the gui was opened in ms, or zero if the time is unknown (scrolling text will just use the current time then)
-     */
+    /// Time the gui was opened in ms, or zero if the time is unknown (scrolling text will just use the current time then)
     default long getTimeOpened() {
         //TODO: Try and improve how we handle the time opened concept for test in scrollable elements
         //TODO: Gui elements that are part of a GuiWindow, should use the window's time instead of the gui's time
@@ -145,7 +144,7 @@ public interface IFancyFontRenderer {
 
     default void drawScaledScrollingString(GuiGraphicsExtractor graphics, Component text, int minX, int minY, int maxX, int maxY, TextAlignment alignment, int color, boolean shadow,
           float scale, long msVisible) {
-        if (scale == 1.0F) {
+        if (Mth.equal(scale, 1)) {
             drawScrollingString(graphics, text, minX, minY, maxX, maxY, alignment, color, shadow, msVisible);
             return;
         }
@@ -170,14 +169,13 @@ public interface IFancyFontRenderer {
         }
     }
 
-    /**
-     * Based off the logic for calculating the scissor area and draw target that vanilla does in
-     * {@link ActiveTextCollector#defaultScrollingHelper(Component, int, int, int, int, int, int, int, Parameters)}
-     *
-     * @param visibleDuration Time in ms that this string has been visible for.
-     *
-     * @apiNote Call {@link GuiGraphicsExtractor#disableScissor()} after using this method
-     */
+    /// Based off the logic for calculating the scissor area and draw target that vanilla does in:
+    ///
+    /// [ActiveTextCollector#defaultScrollingHelper(Component, int, int, int, int, int, int, int, Parameters)]
+    ///
+    /// @param visibleDuration Time in ms that this string has been visible for.
+    ///
+    /// @apiNote Call [GuiGraphicsExtractor#disableScissor()] after using this method
     private static float prepScrollingString(GuiGraphicsExtractor graphics, Font font, float textWidth, int areaWidth, int minX, int minY, int maxX, int maxY, long visibleDuration) {
         graphics.enableScissor(minX, minY, maxX, maxY);
         //TODO: Re-evaluate this, as for text (especially scaled text) when moving very slowly near the edges, it makes the text a bit blurry
@@ -192,7 +190,7 @@ public interface IFancyFontRenderer {
         double seconds = visibleDuration / 1_000D;
         double scrollPeriod = Math.max(maxPosition * ActiveTextCollector.PERIOD_PER_SCROLLED_PIXEL, ActiveTextCollector.MIN_SCROLL_PERIOD);
         //Controls the speed at which we go between the start of the scroll and the end
-        double scrollSpeedModifier = Math.cos((2 * Math.PI) * seconds / scrollPeriod);
+        double scrollSpeedModifier = Math.cos(2 * Math.PI * seconds / scrollPeriod);
         if (!font.isBidirectional()) {
             //If the text is left to right (such as english). We need to start the modifier at the opposite peak so that it starts
             // at the beginning of the string
@@ -224,9 +222,7 @@ public interface IFancyFontRenderer {
         LEFT,
         CENTER,
         RIGHT,
-        /**
-         * Represents that for left to right languages this will be left aligned, and for right to left it will be right aligned.
-         */
+        /// Represents that for left to right languages this will be left aligned, and for right to left it will be right aligned.
         RELATIVE;//TODO: Make use of this in various spots that make sense
 
         public float getTarget(Font font, int minX, int maxX, float textWidth) {
@@ -266,7 +262,7 @@ public interface IFancyFontRenderer {
         }
 
         private void render(GuiGraphicsExtractor graphics, int x, int startY, int maxLength, TextAlignment alignment, int color, float scale) {
-            if ((color & 0xFF000000) == 0) {
+            if (ARGB.alpha(color) == 0) {
                 Mekanism.logger.warn("Alpha not supplied?", new Exception());
             }
             Font font = fontRenderer.font();

@@ -18,7 +18,6 @@ import net.minecraft.util.ByIdMap;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import org.jetbrains.annotations.NotNull;
 
 public record PacketOpenGui(GuiType guiType) implements IMekanismPacket {
 
@@ -27,7 +26,6 @@ public record PacketOpenGui(GuiType guiType) implements IMekanismPacket {
           PacketOpenGui::new, PacketOpenGui::guiType
     );
 
-    @NotNull
     @Override
     public CustomPacketPayload.Type<PacketOpenGui> type() {
         return TYPE;
@@ -42,7 +40,7 @@ public record PacketOpenGui(GuiType guiType) implements IMekanismPacket {
     }
 
     public enum GuiType {
-        MODULE_TWEAKER(() -> new ContainerProvider(MekanismLang.MODULE_TWEAKER, (id, inv, player) -> MekanismContainerTypes.MODULE_TWEAKER.get().create(id, inv)),
+        MODULE_TWEAKER(() -> new ContainerProvider(MekanismLang.MODULE_TWEAKER, (id, inv, _) -> MekanismContainerTypes.MODULE_TWEAKER.get().create(id, inv)),
               ModuleTweakerContainer::hasTweakableItem);
 
         public static final IntFunction<GuiType> BY_ID = ByIdMap.continuous(GuiType::ordinal, values(), ByIdMap.OutOfBoundsStrategy.WRAP);

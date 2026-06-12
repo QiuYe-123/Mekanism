@@ -35,9 +35,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.neoforged.neoforge.client.model.item.DynamicFluidContainerModel;
 import net.neoforged.neoforge.registries.DeferredHolder;
-import org.jspecify.annotations.NullMarked;
 
-@NullMarked
 public abstract class BaseModelProvider extends ModelProvider {
 
     private static final DynamicFluidContainerModel.Textures DEFAULT_BUCKET = new DynamicFluidContainerModel.Textures(
@@ -134,9 +132,7 @@ public abstract class BaseModelProvider extends ModelProvider {
         return modelLocation;
     }
 
-    /**
-     * @deprecated use {@link #modLocation(String)} instead
-     */
+    /// @deprecated use [#modLocation(String)] instead
     @Deprecated
     protected Identifier modLoc(String path) {
         return modLocation(path);

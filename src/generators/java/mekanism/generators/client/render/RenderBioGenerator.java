@@ -1,7 +1,6 @@
 package mekanism.generators.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.MekanismRenderer.FluidTextureType;
 import mekanism.client.render.ModelRenderer;
@@ -19,12 +18,12 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class RenderBioGenerator extends MekanismTileEntityRenderer<TileEntityBioGenerator, BioGeneratorRenderState> {
 
     private static final int stages = 40;
@@ -50,7 +49,7 @@ public class RenderBioGenerator extends MekanismTileEntityRenderer<TileEntityBio
 
     @Override
     public void extractRenderState(TileEntityBioGenerator generator, BioGeneratorRenderState state, float partialTick, Vec3 cameraPosition,
-          @Nullable ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+          ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         super.extractRenderState(generator, state, partialTick, cameraPosition, breakProgress);
         FluidResource fluid = generator.bioFuelTank.resource();
         float fluidScale = generator.bioFuelTank.amountAsLong() / (float) generator.bioFuelTank.capacityAsLong(fluid);
@@ -113,10 +112,10 @@ public class RenderBioGenerator extends MekanismTileEntityRenderer<TileEntityBio
 
         public float minX, minZ;
         public float maxX, maxY, maxZ;
-        public int tint = 0xFFFFFFFF;
-        @Nullable
-        public RenderResizableCuboid.TexturePicker fluidTexture;
-        public @SideRender.SideRenderFlags byte renderCheck = SideRender.ALL_FACES;
+        public int tint = CommonColors.WHITE;
+        public RenderResizableCuboid.@Nullable TexturePicker fluidTexture;
+        @SideRender.SideRenderFlags
+        public byte renderCheck = SideRender.ALL_FACES;
 
     }
 }

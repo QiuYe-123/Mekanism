@@ -5,14 +5,12 @@ import dev.gigaherz.jsonthings.things.parsers.ThingParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalBuilder;
 import mekanism.common.util.ChemicalUtils;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public final class JsonChemicalBuilder extends BaseBuilder<Chemical, JsonChemicalBuilder> {
 
     private final List<Consumer<ChemicalBuilder>> baseData = new ArrayList<>();
@@ -57,21 +55,17 @@ public final class JsonChemicalBuilder extends BaseBuilder<Chemical, JsonChemica
         return this;
     }
 
-    /**
-     * Sets the tint to apply to this chemical when rendering.
-     *
-     * @param tint Color in RRGGBB format
-     */
+    /// Sets the tint to apply to this chemical when rendering.
+    ///
+    /// @param tint Color in AARRGGBB format
     public JsonChemicalBuilder tint(int tint) {
         return baseData(builder -> builder.tint(tint));
     }
 
-    /**
-     * Sets the color representation to apply to this chemical when used for things like durability bars. Mostly for use in combination with custom textures that are not
-     * tinted.
-     *
-     * @param color Color in RRGGBB format
-     */
+    /// Sets the color representation to apply to this chemical when used for things like durability bars. Mostly for use in combination with custom textures that are not
+    /// tinted.
+    ///
+    /// @param color Color in AARRGGBB format
     public JsonChemicalBuilder colorRepresentation(int color) {
         colorRepresentation = color;
         return this;

@@ -11,7 +11,7 @@ import mekanism.client.model.ModelEnergyCore;
 import mekanism.client.model.blockstate.EnergyCubeModel;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.tileentity.RenderEnergyCube;
-import mekanism.common.attachments.component.AttachedSideConfig;
+import mekanism.common.component.component.AttachedSideConfig;
 import mekanism.common.item.block.ItemBlockEnergyCube;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.registries.MekanismBlocks;
@@ -34,11 +34,9 @@ import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.util.Lazy;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Vector3fc;
-import org.jspecify.annotations.NullMarked;
 
-@NullMarked
 public class RenderEnergyCubeItem implements SpecialModelRenderer<RenderEnergyCubeItem.CubeState> {
     
     private final ModelEnergyCore core;

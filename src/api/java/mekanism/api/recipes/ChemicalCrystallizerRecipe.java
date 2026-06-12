@@ -1,7 +1,6 @@
 package mekanism.api.recipes;
 
 import mekanism.api.MekanismAPI;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.recipes.SingleInputRecipe.ChemicalInputRecipe;
 import mekanism.api.recipes.vanilla_input.SingleChemicalRecipeInput;
 import net.minecraft.core.Holder;
@@ -13,14 +12,11 @@ import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
-/**
- * Input: Chemical
- * <br>
- * Output: ItemStack
- *
- * @apiNote Chemical Crystallizers can process this recipe type.
- */
-@NothingNullByDefault
+/// Input: Chemical
+///
+/// Output: ItemStack
+///
+/// @apiNote Chemical Crystallizers can process this recipe type.
 public abstract class ChemicalCrystallizerRecipe extends ChemicalInputRecipe<ItemStackTemplate> {
 
     private static final Holder<Item> CHEMICAL_CRYSTALLIZER = DeferredHolder.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MekanismAPI.MEKANISM_MODID, "chemical_crystallizer"));

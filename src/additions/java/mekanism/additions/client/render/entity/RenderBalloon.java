@@ -6,7 +6,6 @@ import java.util.List;
 import mekanism.additions.client.model.AdditionsModelCache;
 import mekanism.additions.client.render.entity.RenderBalloon.BalloonRenderState;
 import mekanism.additions.common.entity.EntityBalloon;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.model.BaseModelCache;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -20,9 +19,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class RenderBalloon extends EntityRenderer<EntityBalloon, BalloonRenderState> {
 
     private static final RenderType RENDER_TYPE = Sheets.translucentBlockSheet();
@@ -76,6 +74,6 @@ public class RenderBalloon extends EntityRenderer<EntityBalloon, BalloonRenderSt
         @Nullable
         public Vec3 latchedAdjustment;
         public List<BlockStateModelPart> model = Collections.emptyList();
-        public int[] tint = new int[1];
+        public final int[] tint = new int[1];
     }
 }

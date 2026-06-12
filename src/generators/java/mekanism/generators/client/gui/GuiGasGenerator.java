@@ -16,7 +16,6 @@ import mekanism.generators.common.tile.TileEntityGasGenerator;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import org.jetbrains.annotations.NotNull;
 
 public class GuiGasGenerator extends GuiMekanismTile<TileEntityGasGenerator, MekanismTileContainer<TileEntityGasGenerator>> {
 
@@ -31,18 +30,18 @@ public class GuiGasGenerator extends GuiMekanismTile<TileEntityGasGenerator, Mek
         addRenderableWidget(GuiSideHolder.create(this, -26, 6, 98, true, true, SpecialColors.TAB_ARMOR_SLOTS));
         super.addGuiElements();
         addRenderableWidget(new GuiEnergyTab(this, () -> {
-            long fuelDensity = tile.getCachedFuel() != null ? tile.getCachedFuel().energyDensity() : 0;
+            long fuelDensity = tile.getCachedFuel() == null ? 0 : tile.getCachedFuel().energyDensity();
             long productionAmount = MathUtils.clampToLong(fuelDensity * tile.getUsed());
             return List.of(
                   GeneratorsLang.PRODUCING_AMOUNT.translate(EnergyDisplay.of(productionAmount))
             );
         }));
-        addRenderableWidget(new GuiChemicalGauge(() -> tile.fuelTank, tile::getChemicalTanks, GaugeType.WIDE, this, 55, 18));
+        addRenderableWidget(new GuiChemicalGauge(tile::getFuelTank, tile::getChemicalTanks, GaugeType.WIDE, this, 55, 18));
         addRenderableWidget(new GuiVerticalPowerBar(this, tile.energyContainer(), 164, 15));
     }
 
     @Override
-    protected void drawForegroundText(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+    protected void drawForegroundText(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         renderTitleText(guiGraphics);
         renderInventoryTextAndOther(guiGraphics, GeneratorsLang.GAS_BURN_RATE.translate(tile.getUsed()));
         super.drawForegroundText(guiGraphics, mouseX, mouseY);

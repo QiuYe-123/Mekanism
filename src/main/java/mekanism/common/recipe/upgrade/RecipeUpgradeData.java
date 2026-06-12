@@ -7,19 +7,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import mekanism.api.Upgrade;
-import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.resource.LargeResourceStack;
 import mekanism.api.security.IItemSecurityUtils;
 import mekanism.api.security.ISecurityObject;
 import mekanism.api.security.SecurityMode;
-import mekanism.common.attachments.LockData;
-import mekanism.common.attachments.component.UpgradeAware;
-import mekanism.common.attachments.containers.type.ContainerType;
-import mekanism.common.attachments.containers.type.ResourceContainerType;
-import mekanism.common.attachments.qio.DriveContents;
-import mekanism.common.attachments.qio.DriveMetadata;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.block.attribute.AttributeUpgradeSupport;
+import mekanism.common.component.LockData;
+import mekanism.common.component.component.UpgradeAware;
+import mekanism.common.component.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ResourceContainerType;
+import mekanism.common.component.qio.DriveContents;
+import mekanism.common.component.qio.DriveMetadata;
 import mekanism.common.content.qio.IQIODriveItem;
 import mekanism.common.item.block.ItemBlockBin;
 import mekanism.common.item.block.ItemBlockPersonalStorage;
@@ -34,21 +33,16 @@ import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.resource.Resource;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@ParametersAreNotNullByDefault
 public interface RecipeUpgradeData<TYPE extends RecipeUpgradeData<TYPE>> {
 
     @Nullable
     TYPE merge(TYPE other);
 
-    /**
-     * @return {@code false} if it failed to apply to the stack due to being invalid
-     */
+    /// @return `false` if it failed to apply to the stack due to being invalid
     boolean applyToStack(ItemAccess itemAccess, TransactionContext transaction);
 
-    @NotNull
     static Set<RecipeUpgradeType> getSupportedTypes(ItemAccess itemAccess) {
         //TODO: Add more types of data that can be transferred such as side configs, bucket mode, dumping mode
         ItemResource itemType = itemAccess.getResource();
@@ -96,9 +90,7 @@ public interface RecipeUpgradeData<TYPE extends RecipeUpgradeData<TYPE>> {
         return containers.isEmpty() ? null : new ResourceRecipeData<>(containerType, containers);
     }
 
-    /**
-     * Make sure to validate with getSupportedTypes before calling this
-     */
+    /// Make sure to validate with getSupportedTypes before calling this
     @Nullable
     static RecipeUpgradeData<?> getUpgradeData(RecipeUpgradeType type, ItemAccess itemAccess, TransactionContext transaction) {
         ItemResource itemType = itemAccess.getResource();

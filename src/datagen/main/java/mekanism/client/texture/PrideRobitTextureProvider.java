@@ -22,7 +22,6 @@ import net.minecraft.data.PackOutput.Target;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Util;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.stb.STBIWriteCallback;
 import org.lwjgl.stb.STBImageWrite;
@@ -39,10 +38,9 @@ public class PrideRobitTextureProvider implements DataProvider {
         this.resourceManager = resourceManager;
     }
 
-    @NotNull
     @Override
     @SuppressWarnings("UnstableApiUsage")
-    public CompletableFuture<?> run(@NotNull CachedOutput cache) {
+    public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.runAsync(() -> {
             PathProvider pathProvider = output.createPathProvider(Target.RESOURCE_PACK, ROBIT_SKIN_PATH);
             try {
@@ -99,12 +97,10 @@ public class PrideRobitTextureProvider implements DataProvider {
         }, Util.backgroundExecutor());
     }
 
-    /**
-     * @param stripeIndex Stripe Index on the chain.
-     * @param chainIndex  The chain index (bottom, front(left), top, back(right)). It starts on the bottom to hide a potential seam on the bottom/back connection
-     *
-     * @return Color at that position
-     */
+    /// @param stripeIndex Stripe Index on the chain.
+    /// @param chainIndex  The chain index (bottom, front(left), top, back(right)). It starts on the bottom to hide a potential seam on the bottom/back connection
+    ///
+    /// @return Color at that position
     private int argb(int stripeIndex, int chainIndex, int rotationIndex, RobitPrideSkinData data) {
         //offset it by 12, so the pride flag always starts at the top by default
         int index = stripeIndex + rotationIndex + 12;
@@ -121,7 +117,6 @@ public class PrideRobitTextureProvider implements DataProvider {
         return data.getColor()[index % colors.length];
     }
 
-    @NotNull
     @Override
     public String getName() {
         return "Robit Texture Provider";

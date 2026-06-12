@@ -3,9 +3,8 @@ package mekanism.api.recipes.basic;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.ChemicalStackTemplate;
 import mekanism.api.recipes.ChemicalDissolutionRecipe;
 import mekanism.api.recipes.MekanismRecipeSerializers;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
@@ -13,29 +12,23 @@ import mekanism.api.recipes.ingredients.ItemStackIngredient;
 import net.minecraft.core.TypedInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class BasicChemicalDissolutionRecipe extends ChemicalDissolutionRecipe {
 
     protected final ItemStackIngredient itemInput;
     protected final ChemicalStackIngredient chemicalInput;
-    protected final ChemicalStack output;
+    protected final ChemicalStackTemplate output;
     private final boolean perTickUsage;
 
-    /**
-     * @param itemInput     Item input.
-     * @param chemicalInput Chemical input.
-     * @param output        Output.
-     * @param perTickUsage  Should the recipe consume the chemical input each tick it is processing.
-     */
-    public BasicChemicalDissolutionRecipe(ItemStackIngredient itemInput, ChemicalStackIngredient chemicalInput, ChemicalStack output, boolean perTickUsage) {
+    /// @param itemInput     Item input.
+    /// @param chemicalInput Chemical input.
+    /// @param output        Output.
+    /// @param perTickUsage  Should the recipe consume the chemical input each tick it is processing.
+    public BasicChemicalDissolutionRecipe(ItemStackIngredient itemInput, ChemicalStackIngredient chemicalInput, ChemicalStackTemplate output, boolean perTickUsage) {
         this.itemInput = Objects.requireNonNull(itemInput, "Item input cannot be null.");
         this.chemicalInput = Objects.requireNonNull(chemicalInput, "Chemical input cannot be null.");
-        Objects.requireNonNull(output, "Output cannot be null.");
-        if (output.isEmpty()) {
-            throw new IllegalArgumentException("Output cannot be empty.");
-        }
-        this.output = output.copy();
+        this.output = Objects.requireNonNull(output, "Output cannot be null.");
         this.perTickUsage = perTickUsage;
     }
 
@@ -55,21 +48,19 @@ public class BasicChemicalDissolutionRecipe extends ChemicalDissolutionRecipe {
     }
 
     @Override
-    public ChemicalStack getOutput(TypedInstance<Item> inputItem, TypedInstance<Chemical> inputChemical) {
-        return output.copy();
+    public ChemicalStackTemplate getOutput(TypedInstance<Item> inputItem, TypedInstance<Chemical> inputChemical) {
+        return output;
     }
 
     @Override
-    public List<ChemicalStack> getOutputDefinition() {
+    public List<ChemicalStackTemplate> getOutputDefinition() {
         return Collections.singletonList(output);
     }
 
-    /**
-     * For Serializer usage only. Do not modify the returned stack!
-     *
-     * @return the uncopied output definition
-     */
-    public ChemicalStack getOutputRaw() {
+    /// For Serializer usage only. Do not modify the returned stack!
+    ///
+    /// @return the uncopied output definition
+    public ChemicalStackTemplate getOutputRaw() {
         return output;
     }
 
@@ -79,7 +70,7 @@ public class BasicChemicalDissolutionRecipe extends ChemicalDissolutionRecipe {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         } else if (o == null || getClass() != o.getClass()) {

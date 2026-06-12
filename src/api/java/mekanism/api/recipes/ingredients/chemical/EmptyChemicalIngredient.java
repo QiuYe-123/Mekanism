@@ -3,21 +3,18 @@ package mekanism.api.recipes.ingredients.chemical;
 import com.mojang.serialization.MapCodec;
 import java.util.stream.Stream;
 import mekanism.api.MekanismAPI;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import net.minecraft.core.Holder;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Base Chemical ingredient implementation for a singleton that represents an empty chemical ingredient.
- * <p>
- * This is the only instance of an <b>explicitly</b> empty ingredient, and may be used as a fallback in ChemicalIngredient convenience methods (such as when trying to
- * create an ingredient from an empty list).
- *
- * @see mekanism.api.recipes.ingredients.creator.IChemicalIngredientCreator#empty()
- * @see ChemicalIngredient#isEmpty()
- * @since 10.6.0
- */
-@NothingNullByDefault
+/// Base Chemical ingredient implementation for a singleton that represents an empty chemical ingredient.
+///
+/// This is the only instance of an **explicitly** empty ingredient, and may be used as a fallback in ChemicalIngredient convenience methods (such as when trying to
+/// create an ingredient from an empty list).
+///
+/// @see mekanism.api.recipes.ingredients.creator.IChemicalIngredientCreator#empty()
+/// @see ChemicalIngredient#isEmpty()
+/// @since 10.6.0
 public final class EmptyChemicalIngredient extends ChemicalIngredient {
 
     public static final EmptyChemicalIngredient INSTANCE = new EmptyChemicalIngredient();
@@ -52,7 +49,7 @@ public final class EmptyChemicalIngredient extends ChemicalIngredient {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         return this == obj;
     }
 }

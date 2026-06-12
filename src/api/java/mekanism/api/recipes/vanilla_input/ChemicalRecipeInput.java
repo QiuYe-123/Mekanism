@@ -1,16 +1,12 @@
 package mekanism.api.recipes.vanilla_input;
 
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
 
-/**
- * Represents a recipe input that for chemical inputs.
- *
- * @since 10.6.0
- */
-@NothingNullByDefault
+/// Represents a recipe input that for chemical inputs.
+///
+/// @since 10.6.0
 public interface ChemicalRecipeInput extends RecipeInput {
 
     @Override
@@ -18,13 +14,11 @@ public interface ChemicalRecipeInput extends RecipeInput {
         return ItemStack.EMPTY;
     }
 
-    /**
-     * Gets the chemical with the given index.
-     *
-     * @param index Index to lookup.
-     *
-     * @return Chemical.
-     */
+    /// Gets the chemical with the given index.
+    ///
+    /// @param index Index to lookup.
+    ///
+    /// @return Chemical.
     ChemicalStack getChemical(int index);
 
     @Override

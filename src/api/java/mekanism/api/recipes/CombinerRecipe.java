@@ -1,7 +1,6 @@
 package mekanism.api.recipes;
 
 import mekanism.api.MekanismAPI;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.recipes.TwoInputMekRecipe.SimpleTwoInputRecipe;
 import mekanism.api.recipes.ingredients.ItemStackIngredient;
 import net.minecraft.core.Holder;
@@ -14,25 +13,19 @@ import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.registries.DeferredHolder;
-import org.jetbrains.annotations.NotNull;
 
-/**
- * Main Input: ItemStack
- * <br>
- * Secondary/Extra Input: ItemStack
- * <br>
- * Output: ItemStack
- *
- * @apiNote Combiners and Combining Factories can process this recipe type.
- */
-@NothingNullByDefault
+/// Main Input: ItemStack
+///
+/// Secondary/Extra Input: ItemStack
+///
+/// Output: ItemStack
+///
+/// @apiNote Combiners and Combining Factories can process this recipe type.
 public abstract class CombinerRecipe extends SimpleTwoInputRecipe<Item, ItemStack, ItemStackIngredient, RecipeInput, ItemStackTemplate> {
 
     private static final Holder<Item> COMBINER = DeferredHolder.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MekanismAPI.MEKANISM_MODID, "combiner"));
 
-    /**
-     * Gets the main input ingredient.
-     */
+    /// Gets the main input ingredient.
     public abstract ItemStackIngredient getMainInput();
 
     @Override
@@ -40,9 +33,7 @@ public abstract class CombinerRecipe extends SimpleTwoInputRecipe<Item, ItemStac
         return getMainInput();
     }
 
-    /**
-     * Gets the secondary input ingredient.
-     */
+    /// Gets the secondary input ingredient.
     public abstract ItemStackIngredient getExtraInput();
 
     @Override
@@ -50,7 +41,6 @@ public abstract class CombinerRecipe extends SimpleTwoInputRecipe<Item, ItemStac
         return getExtraInput();
     }
 
-    @NotNull
     @Override
     public ItemStack assemble(RecipeInput input) {
         if (!isIncomplete() && input.size() == 2) {

@@ -2,7 +2,6 @@ package mekanism.api.recipes;
 
 import java.util.List;
 import java.util.function.Predicate;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
@@ -24,7 +23,6 @@ import org.jetbrains.annotations.Contract;
 /// Base class to make implementing single input recipes easier
 ///
 /// @since 10.8.0
-@NothingNullByDefault
 public abstract class SingleInputRecipe<HOLDER_TYPE, STACK extends TypedInstance<HOLDER_TYPE>, INPUT extends InputIngredient<HOLDER_TYPE, STACK>,
       VANILLA_INPUT extends RecipeInput, OUTPUT> extends MekanismRecipe<VANILLA_INPUT> implements Predicate<STACK> {
 
@@ -36,14 +34,11 @@ public abstract class SingleInputRecipe<HOLDER_TYPE, STACK extends TypedInstance
         return getInput().test(stack);
     }
 
-    /**
-     * Helper to test this recipe against an instance but ignoring size.
-     *
-     * @param instance Input instance.
-     *
-     * @return {@code true} if the instance's type matches the input.
-     *
-     */
+    /// Helper to test this recipe against an instance but ignoring size.
+    ///
+    /// @param instance Input instance.
+    ///
+    /// @return `true` if the instance's type matches the input.
     public final boolean testType(TypedInstance<HOLDER_TYPE> instance) {
         return getInput().testType(instance);
     }

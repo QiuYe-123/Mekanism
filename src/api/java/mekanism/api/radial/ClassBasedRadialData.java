@@ -1,28 +1,22 @@
 package mekanism.api.radial;
 
 import java.util.Objects;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.radial.mode.INestedRadialMode;
 import mekanism.api.radial.mode.IRadialMode;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Base implementation for radial data that knows the type of modes it can handle.
- *
- * @param <MODE> Radial Mode.
- *
- * @since 10.3.2
- */
-@NothingNullByDefault
+/// Base implementation for radial data that knows the type of modes it can handle.
+///
+/// @param <MODE> Radial Mode.
+///
+/// @since 10.3.2
 public abstract class ClassBasedRadialData<MODE extends IRadialMode> extends RadialData<MODE> {
 
     protected final Class<MODE> clazz;
 
-    /**
-     * @param identifier Identifier representing this radial data. Must be unique within the radial level if this is a nested radial element.
-     * @param clazz      Class representing the type of data that this radial data knows how to handle.
-     */
+    /// @param identifier Identifier representing this radial data. Must be unique within the radial level if this is a nested radial element.
+    /// @param clazz      Class representing the type of data that this radial data knows how to handle.
     protected ClassBasedRadialData(Identifier identifier, Class<MODE> clazz) {
         super(identifier);
         this.clazz = Objects.requireNonNull(clazz, "Radial mode class type cannot be null.");

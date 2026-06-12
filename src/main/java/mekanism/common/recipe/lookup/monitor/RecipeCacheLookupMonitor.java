@@ -9,13 +9,13 @@ import mekanism.api.recipes.cache.ICachedRecipeHolder;
 import mekanism.api.recipes.cache.ItemStackConstantChemicalToObjectCachedRecipe;
 import mekanism.common.CommonWorldTickHandler;
 import mekanism.common.recipe.lookup.IRecipeLookupHandler;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class RecipeCacheLookupMonitor<RECIPE extends MekanismRecipe<?>> implements ICachedRecipeHolder<RECIPE>, IContentsListener {
 
     private final IRecipeLookupHandler<RECIPE> handler;
     protected final int cacheIndex;
+    @Nullable
     protected CachedRecipe<RECIPE> cachedRecipe;
     protected boolean hasNoRecipe;
     protected boolean shouldUnpause;
@@ -49,9 +49,7 @@ public class RecipeCacheLookupMonitor<RECIPE extends MekanismRecipe<?>> implemen
         shouldUnpause = true;
     }
 
-    /**
-     * Helper that wraps {@link #updateAndProcess()} inside of a brief check to calculate how much energy actually got used.
-     */
+    /// Helper that wraps [#updateAndProcess()] inside of a brief check to calculate how much energy actually got used.
     public int updateAndProcess(IEnergyContainer energyContainer) {
         //Copy this so that if it changes we still have the original amount. Don't bother making it a constant though as this way
         // we can then use minusEqual instead of subtract to remove an extra copy call
@@ -82,7 +80,7 @@ public class RecipeCacheLookupMonitor<RECIPE extends MekanismRecipe<?>> implemen
     }
 
     @Override
-    public void loadSavedData(@NotNull CachedRecipe<RECIPE> cached, int cacheIndex) {
+    public void loadSavedData(CachedRecipe<RECIPE> cached, int cacheIndex) {
         if (cachedIndexMatches(cacheIndex)) {
             ICachedRecipeHolder.super.loadSavedData(cached, cacheIndex);
             if (cached instanceof ItemStackConstantChemicalToObjectCachedRecipe<?, ?> c &&
@@ -111,7 +109,7 @@ public class RecipeCacheLookupMonitor<RECIPE extends MekanismRecipe<?>> implemen
 
     @Nullable
     @Override
-    public CachedRecipe<RECIPE> createNewCachedRecipe(@NotNull RECIPE recipe, int cacheIndex) {
+    public CachedRecipe<RECIPE> createNewCachedRecipe(RECIPE recipe, int cacheIndex) {
         return cachedIndexMatches(cacheIndex) ? handler.createNewCachedRecipe(recipe, cacheIndex) : null;
     }
 

@@ -4,10 +4,8 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import mekanism.api.annotations.MethodsAreNotNullByDefault;
-import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.inventory.IInventorySlot;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.lib.inventory.personalstorage.AbstractPersonalStorageItemInventory;
 import mekanism.common.lib.inventory.personalstorage.ClientSidePersonalStorageInventory;
 import mekanism.common.lib.inventory.personalstorage.PersonalStorageManager;
@@ -23,11 +21,7 @@ import net.neoforged.fml.util.thread.EffectiveSide;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 
-/**
- * Loot function which copies the Personal Storage inventory to the saved data and adds an inv id to the stack
- */
-@MethodsAreNotNullByDefault
-@ParametersAreNotNullByDefault
+/// Loot function which copies the Personal Storage inventory to the saved data and adds an inv id to the stack
 public class PersonalStorageContentsLootFunction implements LootItemFunction {
 
     public static final PersonalStorageContentsLootFunction INSTANCE = new PersonalStorageContentsLootFunction();

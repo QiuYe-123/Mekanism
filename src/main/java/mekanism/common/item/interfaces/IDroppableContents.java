@@ -2,7 +2,7 @@ package mekanism.common.item.interfaces;
 
 import java.util.List;
 import mekanism.api.resource.LargeResourceStack;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ContainerType;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
@@ -18,11 +18,9 @@ public interface IDroppableContents {
         return itemAccess.getAmount();
     }
 
-    /**
-     * Helper to get the inventory slots that should have their contents dropped into the world
-     *
-     * @apiNote Server side only.
-     */
+    /// Helper to get the inventory slots that should have their contents dropped into the world
+    ///
+    /// @apiNote Server side only.
     List<LargeResourceStack<ItemResource>> getDroppedSlots(ItemAccess itemAccess, TransactionContext transaction);
 
     @FunctionalInterface

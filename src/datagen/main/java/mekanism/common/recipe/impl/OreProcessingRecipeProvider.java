@@ -3,7 +3,6 @@ package mekanism.common.recipe.impl;
 import java.util.Objects;
 import mekanism.api.MekanismAPITags;
 import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.datagen.recipe.builder.ChemicalChemicalToChemicalRecipeBuilder;
 import mekanism.api.datagen.recipe.builder.ChemicalCrystallizerRecipeBuilder;
 import mekanism.api.datagen.recipe.builder.ChemicalDissolutionRecipeBuilder;
@@ -45,7 +44,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.common.Tags;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 class OreProcessingRecipeProvider implements ISubRecipeProvider {
 
@@ -80,7 +79,7 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
               false
         ).save(consumer, Mekanism.rl(basePath + "iron/enriched"));
         ItemStackChemicalToItemStackRecipeBuilder.metallurgicInfusing(
-              IngredientCreatorAccess.item().from(this.items, MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.DUST, PrimaryResource.IRON)),
+              IngredientCreatorAccess.item().from(this.items, MekanismTags.Items.getProcessedResource(ResourceType.DUST, PrimaryResource.IRON)),
               IngredientCreatorAccess.chemicalStack().from(this.chemicals, MekanismAPITags.Chemicals.CARBON, 10),
               MekanismItems.ENRICHED_IRON.asTemplate(),
               false
@@ -158,13 +157,13 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
                 toOre = 20;//8 * 2.5
             }
             default -> {
-                ingot = Objects.requireNonNull(MekanismItems.PROCESSED_RESOURCES.get(ResourceType.INGOT, resource));
-                ingotTag = Objects.requireNonNull(MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.INGOT, resource));
-                nugget = Objects.requireNonNull(MekanismItems.PROCESSED_RESOURCES.get(ResourceType.NUGGET, resource));
-                nuggetTag = Objects.requireNonNull(MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.NUGGET, resource));
+                ingot = Objects.requireNonNull(MekanismItems.getProcessedResource(ResourceType.INGOT, resource));
+                ingotTag = Objects.requireNonNull(MekanismTags.Items.getProcessedResource(ResourceType.INGOT, resource));
+                nugget = Objects.requireNonNull(MekanismItems.getProcessedResource(ResourceType.NUGGET, resource));
+                nuggetTag = Objects.requireNonNull(MekanismTags.Items.getProcessedResource(ResourceType.NUGGET, resource));
                 block = Objects.requireNonNull(MekanismBlocks.PROCESSED_RESOURCE_BLOCKS.get(resource)).getItemHolder();
-                raw = Objects.requireNonNull(MekanismItems.PROCESSED_RESOURCES.get(ResourceType.RAW, resource));
-                rawTag = Objects.requireNonNull(MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.RAW, resource));
+                raw = Objects.requireNonNull(MekanismItems.getProcessedResource(ResourceType.RAW, resource));
+                rawTag = Objects.requireNonNull(MekanismTags.Items.getProcessedResource(ResourceType.RAW, resource));
                 rawBlock = Objects.requireNonNull(MekanismBlocks.PROCESSED_RESOURCE_BLOCKS.get(resource.getRawResourceBlockInfo())).getItemHolder();
                 rawBlockTag = Objects.requireNonNull(MekanismTags.Items.PROCESSED_RESOURCE_BLOCKS.get(resource.getRawResourceBlockInfo()));
                 OreBlockType oreBlockType = Objects.requireNonNull(MekanismBlocks.ORES.get(OreType.get(resource)));
@@ -173,16 +172,16 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
             }
         }
 
-        Holder<Item> dust = Objects.requireNonNull(MekanismItems.PROCESSED_RESOURCES.get(ResourceType.DUST, resource));
-        Holder<Item> dirtyDust = Objects.requireNonNull(MekanismItems.PROCESSED_RESOURCES.get(ResourceType.DIRTY_DUST, resource));
-        Holder<Item> clump = Objects.requireNonNull(MekanismItems.PROCESSED_RESOURCES.get(ResourceType.CLUMP, resource));
-        Holder<Item> crystal = Objects.requireNonNull(MekanismItems.PROCESSED_RESOURCES.get(ResourceType.CRYSTAL, resource));
-        Holder<Item> shard = Objects.requireNonNull(MekanismItems.PROCESSED_RESOURCES.get(ResourceType.SHARD, resource));
-        TagKey<Item> dustTag = Objects.requireNonNull(MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.DUST, resource));
-        TagKey<Item> dirtyDustTag = Objects.requireNonNull(MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.DIRTY_DUST, resource));
-        TagKey<Item> clumpTag = Objects.requireNonNull(MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.CLUMP, resource));
-        TagKey<Item> shardTag = Objects.requireNonNull(MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.SHARD, resource));
-        TagKey<Item> crystalTag = Objects.requireNonNull(MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.CRYSTAL, resource));
+        Holder<Item> dust = Objects.requireNonNull(MekanismItems.getProcessedResource(ResourceType.DUST, resource));
+        Holder<Item> dirtyDust = Objects.requireNonNull(MekanismItems.getProcessedResource(ResourceType.DIRTY_DUST, resource));
+        Holder<Item> clump = Objects.requireNonNull(MekanismItems.getProcessedResource(ResourceType.CLUMP, resource));
+        Holder<Item> crystal = Objects.requireNonNull(MekanismItems.getProcessedResource(ResourceType.CRYSTAL, resource));
+        Holder<Item> shard = Objects.requireNonNull(MekanismItems.getProcessedResource(ResourceType.SHARD, resource));
+        TagKey<Item> dustTag = Objects.requireNonNull(MekanismTags.Items.getProcessedResource(ResourceType.DUST, resource));
+        TagKey<Item> dirtyDustTag = Objects.requireNonNull(MekanismTags.Items.getProcessedResource(ResourceType.DIRTY_DUST, resource));
+        TagKey<Item> clumpTag = Objects.requireNonNull(MekanismTags.Items.getProcessedResource(ResourceType.CLUMP, resource));
+        TagKey<Item> shardTag = Objects.requireNonNull(MekanismTags.Items.getProcessedResource(ResourceType.SHARD, resource));
+        TagKey<Item> crystalTag = Objects.requireNonNull(MekanismTags.Items.getProcessedResource(ResourceType.CRYSTAL, resource));
 
         SlurryRegistryObject<?, ?> slurry = MekanismChemicals.PROCESSED_RESOURCES.get(resource);
 
@@ -201,8 +200,8 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
             // from nuggets
             ExtendedShapedRecipeBuilder.shapedRecipe(ingot)
                   .pattern(MekanismRecipeProvider.TYPED_STORAGE_PATTERN)
-                  .key(Pattern.PREVIOUS, nugget)
-                  .key(Pattern.CONSTANT, this.items, nuggetTag)
+                  .key(Pattern.PREVIOUS, Objects.requireNonNull(nugget))
+                  .key(Pattern.CONSTANT, this.items, Objects.requireNonNull(nuggetTag))
                   .save(consumer, Mekanism.rl(basePath + "ingot/from_nuggets"));
             // to nuggets
             ExtendedShapelessRecipeBuilder.shapelessRecipe(nugget, 9)
@@ -275,7 +274,7 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
         FluidChemicalToChemicalRecipeBuilder.washing(
               IngredientCreatorAccess.fluid().from(this.fluids, FluidTags.WATER, 5),
               IngredientCreatorAccess.chemicalStack().fromHolder(slurry, 1),
-              new ChemicalStack(slurry.getCleanSlurry(), 1)
+              slurry.asCleanTemplate(1)
         ).save(consumer, Mekanism.rl(basePath + "slurry/clean"));
 
         // From ore
@@ -300,7 +299,7 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
         ChemicalDissolutionRecipeBuilder.dissolution(
               IngredientCreatorAccess.item().from(this.items, oreTag),
               IngredientCreatorAccess.chemicalStack().fromHolder(MekanismChemicals.SULFURIC_ACID, 1),
-              new ChemicalStack(slurry, 1_000),
+              slurry.asDirtyTemplate(1_000),
               true
         ).save(consumer, Mekanism.rl(basePath + "slurry/dirty/from_ore"));
 
@@ -326,7 +325,7 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
         ChemicalDissolutionRecipeBuilder.dissolution(
               IngredientCreatorAccess.item().from(this.items, rawTag, 3),
               IngredientCreatorAccess.chemicalStack().fromHolder(MekanismChemicals.SULFURIC_ACID, 1),
-              new ChemicalStack(slurry, 2_000),
+              slurry.asDirtyTemplate(2_000),
               true
         ).save(consumer, Mekanism.rl(basePath + "slurry/dirty/from_raw_ore"));
 
@@ -352,7 +351,7 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
         ChemicalDissolutionRecipeBuilder.dissolution(
               IngredientCreatorAccess.item().from(this.items, rawBlockTag),
               IngredientCreatorAccess.chemicalStack().fromHolder(MekanismChemicals.SULFURIC_ACID, 2),
-              new ChemicalStack(slurry, 6_000),
+              slurry.asDirtyTemplate(6_000),
               true
         ).save(consumer, Mekanism.rl(basePath + "slurry/dirty/from_raw_block"));
     }
@@ -472,7 +471,7 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
         //Dust
         //from infusing
         ItemStackChemicalToItemStackRecipeBuilder.metallurgicInfusing(
-              IngredientCreatorAccess.item().from(this.items, MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.DUST, PrimaryResource.COPPER), 3),
+              IngredientCreatorAccess.item().from(this.items, MekanismTags.Items.getProcessedResource(ResourceType.DUST, PrimaryResource.COPPER), 3),
               IngredientCreatorAccess.chemicalStack().from(this.chemicals, MekanismAPITags.Chemicals.TIN, 10),
               MekanismItems.BRONZE_DUST.asTemplate(4),
               false
@@ -629,37 +628,37 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
     private void addUraniumRecipes(RecipeOutput consumer, String basePath) {
         //yellow cake
         ItemStackToItemStackRecipeBuilder.enriching(
-              IngredientCreatorAccess.item().from(this.items, MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.INGOT, PrimaryResource.URANIUM)),
+              IngredientCreatorAccess.item().from(this.items, MekanismTags.Items.getProcessedResource(ResourceType.INGOT, PrimaryResource.URANIUM)),
               MekanismItems.YELLOW_CAKE_URANIUM.asTemplate(2)
         ).save(consumer, Mekanism.rl(basePath + "yellow_cake_uranium"));
         //hydrofluoric acid
         ChemicalDissolutionRecipeBuilder.dissolution(
               IngredientCreatorAccess.item().from(this.items, MekanismTags.Items.GEMS_FLUORITE),
               IngredientCreatorAccess.chemicalStack().fromHolder(MekanismChemicals.SULFURIC_ACID, 1),
-              MekanismChemicals.HYDROFLUORIC_ACID.asStack(1_000),
+              MekanismChemicals.HYDROFLUORIC_ACID.asTemplate(1_000),
               true
         ).save(consumer, Mekanism.rl(basePath + "hydrofluoric_acid"));
         ChemicalDissolutionRecipeBuilder.dissolution(
               IngredientCreatorAccess.item().from(this.items, MekanismTags.Items.STORAGE_BLOCKS_FLUORITE),
               IngredientCreatorAccess.chemicalStack().fromHolder(MekanismChemicals.SULFURIC_ACID, 9),
-              MekanismChemicals.HYDROFLUORIC_ACID.asStack(9_000),
+              MekanismChemicals.HYDROFLUORIC_ACID.asTemplate(9_000),
               true
         ).save(consumer, Mekanism.rl(basePath + "hydrofluoric_acid_from_block"));
         //uranium oxide
         ItemStackToChemicalRecipeBuilder.oxidizing(
               IngredientCreatorAccess.item().from(MekanismItems.YELLOW_CAKE_URANIUM),
-              MekanismChemicals.URANIUM_OXIDE.asStack(250)
+              MekanismChemicals.URANIUM_OXIDE.asTemplate(250)
         ).save(consumer, Mekanism.rl(basePath + "uranium_oxide"));
         //uranium hexafluoride
         ChemicalChemicalToChemicalRecipeBuilder.chemicalInfusing(
               IngredientCreatorAccess.chemicalStack().fromHolder(MekanismChemicals.HYDROFLUORIC_ACID, 1),
               IngredientCreatorAccess.chemicalStack().fromHolder(MekanismChemicals.URANIUM_OXIDE, 1),
-              MekanismChemicals.URANIUM_HEXAFLUORIDE.asStack(2)
+              MekanismChemicals.URANIUM_HEXAFLUORIDE.asTemplate(2)
         ).save(consumer, Mekanism.rl(basePath + "sulfuric_acid"));
         //fissile fuel
         ChemicalToChemicalRecipeBuilder.centrifuging(
               IngredientCreatorAccess.chemicalStack().fromHolder(MekanismChemicals.URANIUM_HEXAFLUORIDE, 1),
-              MekanismChemicals.FISSILE_FUEL.asStack(1)
+              MekanismChemicals.FISSILE_FUEL.asTemplate(1)
         ).save(consumer, Mekanism.rl(basePath + "fissile_fuel"));
         //fissile fuel reprocessing (IMPORTANT)
         ItemStackChemicalToItemStackRecipeBuilder.injecting(
@@ -671,7 +670,7 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
         //fragment -> fuel
         ItemStackToChemicalRecipeBuilder.oxidizing(
               IngredientCreatorAccess.item().from(MekanismItems.REPROCESSED_FISSILE_FRAGMENT),
-              MekanismChemicals.FISSILE_FUEL.asStack(2_000)
+              MekanismChemicals.FISSILE_FUEL.asTemplate(2_000)
         ).save(consumer, Mekanism.rl(basePath + "reprocessing/to_fuel"));
     }
 }

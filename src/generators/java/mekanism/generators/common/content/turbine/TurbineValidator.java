@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import mekanism.common.content.blocktype.BlockType;
 import mekanism.common.lib.math.voxel.VoxelCuboid;
@@ -174,7 +175,7 @@ public class TurbineValidator extends CuboidStructureValidator<TurbineMultiblock
 
         //Explore short circuits if the start position is not valid
         structure.coils = FormationProtocol.explore(world, chunkMap, complex.relative(Direction.UP), null,
-              (level, chunks, start, n, pos) -> WorldUtils.getTileEntity(TileEntityElectromagneticCoil.class, level, chunks, pos) != null);
+              (level, chunks, _, _, pos) -> WorldUtils.getTileEntity(TileEntityElectromagneticCoil.class, level, chunks, pos) != null);
 
         if (coils.size() > structure.coils) {
             return FormationResult.fail(GeneratorsLang.TURBINE_INVALID_MALFORMED_COILS);
@@ -186,7 +187,8 @@ public class TurbineValidator extends CuboidStructureValidator<TurbineMultiblock
                 if (coord.getY() < complex.getY()) {
                     return FormationResult.fail(GeneratorsLang.TURBINE_INVALID_VENT_BELOW_COMPLEX, coord);
                 }
-                ventData.add(new VentData(coord, getSide(coord)));
+                Direction side = Objects.requireNonNull(cuboid().getSide(coord), "Side should not be null when part of a wall");
+                ventData.add(new VentData(coord, side));
             }
         }
         if (ventData.isEmpty()) {

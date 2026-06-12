@@ -8,7 +8,7 @@ import mekanism.common.content.qio.filter.QIOItemStackFilter;
 import mekanism.common.tile.qio.TileEntityQIOFilterHandler;
 import mekanism.common.util.text.BooleanStateDisplay.OnOff;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class GuiQIOItemStackFilter extends GuiItemStackFilter<QIOItemStackFilter, TileEntityQIOFilterHandler> implements GuiQIOFilterHelper {
 
@@ -32,7 +32,7 @@ public class GuiQIOItemStackFilter extends GuiItemStackFilter<QIOItemStackFilter
     @Override
     protected void init() {
         super.init();
-        addChild(new MekanismImageButton(gui(), relativeX + 148, relativeY + 18, 11, 14, getButtonLocation("fuzzy"), (element, event, isDoubleClick) -> {
+        addChild(new MekanismImageButton(gui(), relativeX + 148, relativeY + 18, 11, 14, getButtonLocation("fuzzy"), (_, _, _) -> {
             filter.fuzzyMode = !filter.fuzzyMode;
             return true;
         })).setTooltip(MekanismLang.FUZZY_MODE);

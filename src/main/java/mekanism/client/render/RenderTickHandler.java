@@ -2,9 +2,10 @@ package mekanism.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -82,13 +83,12 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix3x2fStack;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 
 public class RenderTickHandler {
@@ -97,7 +97,7 @@ public class RenderTickHandler {
 
     private static final Map<BlockState, List<Line>> cachedWireFrames = new Reference2ObjectOpenHashMap<>();
     private static final BoltRenderer boltRenderer = new BoltRenderer();
-    private static final Map<Class<?>, Boolean> IS_EMI_SCREEN = new HashMap<>();
+    private static final Object2BooleanMap<Class<?>> IS_EMI_SCREEN = new Object2BooleanOpenHashMap<>();
 
     private boolean outliningArea = false;
 
@@ -135,12 +135,7 @@ public class RenderTickHandler {
     }
 
     private static boolean isEmiScreen(@Nullable Screen newScreen) {
-        return newScreen != null && IS_EMI_SCREEN.computeIfAbsent(newScreen.getClass(), cl -> {
-            if (cl.getName().startsWith("dev.emi.emi")) {
-                return Boolean.TRUE;
-            }
-            return Boolean.FALSE;
-        }) == Boolean.TRUE;
+        return newScreen != null && IS_EMI_SCREEN.computeIfAbsent(newScreen.getClass(), (Class<?> cl) -> cl.getName().startsWith("dev.emi.emi"));
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -271,7 +266,7 @@ public class RenderTickHandler {
             float f = p.getSwimAmount(partialTicks);
             if (p.isFallFlying()) {
                 float f1 = p.getFallFlyingTicks() + partialTicks;
-                float f2 = Mth.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
+                float f2 = Math.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
                 xRot = f2 * (-90.0F - p.getXRot());
             } else {
                 float f3 = p.isInWater() ? -90.0F - p.getXRot() : -90.0F;
@@ -436,7 +431,6 @@ public class RenderTickHandler {
         renderVertexWireFrame(lines, buffer, pose.pose(), pose.normal(), isHighContrast);
     }
 
-    @NonNull
     private static List<Line> getOutlinesFromModel(ClientLevel level, BlockPos pos, BlockState state) {
         List<Line> lines = cachedWireFrames.get(state);
         if (lines == null) {

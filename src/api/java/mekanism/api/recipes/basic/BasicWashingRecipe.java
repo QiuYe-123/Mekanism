@@ -4,9 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import mekanism.api.MekanismAPI;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.ChemicalStackTemplate;
 import mekanism.api.recipes.FluidChemicalToChemicalRecipe;
 import mekanism.api.recipes.MekanismRecipeSerializers;
 import mekanism.api.recipes.MekanismRecipeTypes;
@@ -23,29 +22,23 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class BasicWashingRecipe extends FluidChemicalToChemicalRecipe {
 
     private static final Holder<Item> CHEMICAL_WASHER = DeferredHolder.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MekanismAPI.MEKANISM_MODID, "chemical_washer"));
 
     protected final FluidStackIngredient fluidInput;
     protected final ChemicalStackIngredient chemicalInput;
-    protected final ChemicalStack output;
+    protected final ChemicalStackTemplate output;
 
-    /**
-     * @param fluidInput    Fluid input.
-     * @param chemicalInput Chemical input.
-     * @param output        Output.
-     */
-    public BasicWashingRecipe(FluidStackIngredient fluidInput, ChemicalStackIngredient chemicalInput, ChemicalStack output) {
+    /// @param fluidInput    Fluid input.
+    /// @param chemicalInput Chemical input.
+    /// @param output        Output.
+    public BasicWashingRecipe(FluidStackIngredient fluidInput, ChemicalStackIngredient chemicalInput, ChemicalStackTemplate output) {
         this.fluidInput = Objects.requireNonNull(fluidInput, "Fluid input cannot be null.");
         this.chemicalInput = Objects.requireNonNull(chemicalInput, "Chemical input cannot be null.");
-        Objects.requireNonNull(output, "Output cannot be null.");
-        if (output.isEmpty()) {
-            throw new IllegalArgumentException("Output cannot be empty.");
-        }
-        this.output = output.copy();
+        this.output = Objects.requireNonNull(output, "Output cannot be null.");
     }
 
     @Override
@@ -69,17 +62,17 @@ public class BasicWashingRecipe extends FluidChemicalToChemicalRecipe {
     }
 
     @Override
-    public List<ChemicalStack> getOutputDefinition() {
+    public List<ChemicalStackTemplate> getOutputDefinition() {
         return Collections.singletonList(output);
     }
 
     @Override
     @Contract(value = "_, _ -> new", pure = true)
-    public ChemicalStack getOutput(TypedInstance<Fluid> fluidStack, TypedInstance<Chemical> chemicalStack) {
-        return output.copy();
+    public ChemicalStackTemplate getOutput(TypedInstance<Fluid> fluidStack, TypedInstance<Chemical> chemicalStack) {
+        return output;
     }
 
-    public ChemicalStack getOutputRaw() {
+    public ChemicalStackTemplate getOutputRaw() {
         return output;
     }
 
@@ -89,7 +82,7 @@ public class BasicWashingRecipe extends FluidChemicalToChemicalRecipe {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         } else if (o == null || getClass() != o.getClass()) {

@@ -34,8 +34,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.transfer.item.ItemResource;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class FilterButton extends MekanismButton {
 
@@ -45,11 +44,12 @@ public class FilterButton extends MekanismButton {
 
     protected final FilterManager<?> filterManager;
     private final GuiSequencedSlotDisplay slotDisplay;
-    private final ObjIntConsumer<IFilter<?>> onPress;
+    private final ObjIntConsumer<@Nullable IFilter<?>> onPress;
     private final IntSupplier filterIndex;
     private final RadioButton toggleButton;
     private final GuiSlot slot;
     private final int index;
+    @Nullable
     private IFilter<?> prevFilter;
 
     @Nullable
@@ -61,8 +61,8 @@ public class FilterButton extends MekanismButton {
     }
 
     public FilterButton(IGuiWrapper gui, int x, int y, int width, int height, int index, IntSupplier filterIndex, FilterManager<?> filterManager,
-          ObjIntConsumer<IFilter<?>> onPress, IntConsumer toggleButtonPress, Function<IFilter<?>, List<ItemStack>> renderStackSupplier) {
-        super(gui, x, y, width, height, CommonComponents.EMPTY, (element, event, isDoubleClick) -> {
+          ObjIntConsumer<@Nullable IFilter<?>> onPress, IntConsumer toggleButtonPress, Function<@Nullable IFilter<?>, List<ItemStack>> renderStackSupplier) {
+        super(gui, x, y, width, height, CommonComponents.EMPTY, (element, _, _) -> {
             FilterButton button = (FilterButton) element;
             int actualIndex = button.filterIndex.getAsInt() + button.index;
             button.onPress.accept(getFilter(button.filterManager, actualIndex), actualIndex);
@@ -75,7 +75,7 @@ public class FilterButton extends MekanismButton {
         slot = addChild(new GuiSlot(SlotType.NORMAL, gui, relativeX + 2, relativeY + 2));
         slotDisplay = addChild(new GuiSequencedSlotDisplay(gui, relativeX + 3, relativeY + 3, () -> renderStackSupplier.apply(getFilter())));
         toggleButton = addChild(new RadioButton(gui, relativeX + this.width - RadioButton.RADIO_SIZE - getToggleXShift(), relativeY + (this.height / 2) - (RadioButton.RADIO_SIZE / 2),
-              this::isEnabled, (element, event, isDoubleClick) -> {
+              this::isEnabled, (_, _, _) -> {
             toggleButtonPress.accept(getActualIndex());
             return true;
         }, MekanismLang.FILTER_STATE.translate(EnumColor.BRIGHT_GREEN, MekanismLang.MODULE_ENABLED_LOWER), MekanismLang.FILTER_STATE.translate(EnumColor.RED, MekanismLang.MODULE_DISABLED_LOWER)));
@@ -100,7 +100,7 @@ public class FilterButton extends MekanismButton {
         return getFilter(filterManager, getActualIndex());
     }
 
-    public FilterButton warning(@NotNull WarningType type, @NotNull Predicate<IFilter<?>> hasWarning) {
+    public FilterButton warning(WarningType type, Predicate<@Nullable IFilter<?>> hasWarning) {
         //Proxy applying the warning to the slot
         slot.warning(type, () -> hasWarning.test(getFilter()));
         return this;
@@ -114,12 +114,13 @@ public class FilterButton extends MekanismButton {
         this.toggleButton.visible = visible;
     }
 
+    @Override
     public void updateBeforeExtract() {
         setVisibility(getFilter() != null);
     }
 
     @Override
-    public void drawBackground(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(guiGraphics, mouseX, mouseY, partialTicks);
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, getButtonX(), getButtonY(), 0, isMouseOverCheckWindows(mouseX, mouseY) ? 0 : 29, getButtonWidth(), getButtonHeight(), TEXTURE_WIDTH, 29, TEXTURE_WIDTH, TEXTURE_HEIGHT);
     }

@@ -22,6 +22,7 @@ import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.DistanceManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.testframework.DynamicTest;
@@ -30,7 +31,7 @@ import net.neoforged.testframework.annotation.RegisterStructureTemplate;
 import net.neoforged.testframework.annotation.TestHolder;
 import net.neoforged.testframework.gametest.GameTest;
 import net.neoforged.testframework.gametest.StructureTemplateBuilder;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @ForEachTest(groups = "network.transmitter")
 public class TransmitterNetworkTest {
@@ -90,10 +91,8 @@ public class TransmitterNetworkTest {
         );
     }
 
-    /**
-     * This test represents the issue that was reported in <a href="https://github.com/mekanism/Mekanism/issues/7428">Issue 7428</a> and most likely is also the last
-     * remaining cause of <a href="https://github.com/mekanism/Mekanism/issues/6356">Issue 6356</a>.
-     */
+    /// This test represents the issue that was reported in [Issue 7428](https://github.com/mekanism/Mekanism/issues/7428) and most likely is also the last remaining
+    /// cause of [Issue 6356](https://github.com/mekanism/Mekanism/issues/6356).
     @GameTest(template = STRAIGHT_CABLE, batch = "2")
     @TestHolder(description = "Tests that when part of a network becomes inaccessible but still loaded, "
                               + "we are able to properly remove the transmitters and then recover when the chunk becomes accessible again.")
@@ -121,6 +120,7 @@ public class TransmitterNetworkTest {
     private static class MatchingNetworkValidator implements Runnable {
 
         private final MekGameTestHelper helper;
+        @Nullable
         private UUID networkUUID;
 
         public MatchingNetworkValidator(MekGameTestHelper helper) {
@@ -135,7 +135,7 @@ public class TransmitterNetworkTest {
                     if (!transmitter.hasTransmitterNetwork()) {
                         helper.fail("No transmitter network found", relativePos);
                     }
-                    DynamicNetwork<?, ?, ?> network = transmitter.getTransmitterNetwork();
+                    DynamicNetwork<?, ?, ?> network = transmitter.getTransmitterNetworkNN();
                     if (networkUUID == null) {
                         networkUUID = network.getUUID();
                     } else if (!networkUUID.equals(network.getUUID())) {
@@ -206,7 +206,7 @@ public class TransmitterNetworkTest {
             return level;
         }
 
-        public void updateChunk(ChunkEvent event, boolean loaded) {
+        public void updateChunk(ChunkEvent<LevelChunk> event, boolean loaded) {
             if (!event.getLevel().isClientSide() && event.getChunk().getPos().equals(absolutePos)) {
                 //If we are watching the chunk and the loaded state isn't what we already had it as
                 if (isLoaded != loaded) {

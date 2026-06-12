@@ -30,11 +30,11 @@ import mekanism.api.text.IHasTextComponent.IHasEnumNameTextComponent;
 import mekanism.api.text.ILangEntry;
 import mekanism.common.MekanismLang;
 import mekanism.common.advancements.MekanismCriteriaTriggers;
-import mekanism.common.attachments.containers.type.IContainerType;
 import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.capabilities.holder.container.IContainerHolder;
 import mekanism.common.capabilities.holder.container.MekContainerHelper;
 import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
+import mekanism.common.component.containers.type.IContainerType;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.content.teleporter.TeleporterFrequency;
 import mekanism.common.integration.computer.ComputerException;
@@ -94,8 +94,8 @@ import net.neoforged.neoforge.entity.PartEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.Nullable;
 
 public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLoader {
 
@@ -110,22 +110,24 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
 
     public final Set<UUID> didTeleport = new ObjectOpenHashSet<>();
     private final Predicate<Entity> SAME_DIMENSION_TARGET = entity -> canTeleportEntity(entity, null);
+    @Nullable
     private AABB teleportBounds;
     public int teleDelay = 0;
     public boolean shouldRender;
     @Nullable
     private Direction frameDirection;
     private boolean frameRotated;
+    @Nullable
     private EnumColor color;
 
-    /**
-     * This teleporter's current status.
-     */
+    /// This teleporter's current status.
     public TeleporterStatus status = TeleporterStatus.NO_FREQUENCY;
 
     private final TileComponentChunkLoader<TileEntityTeleporter> chunkLoaderComponent;
 
+    @UnknownNullability//Initialized via getInitialEnergyContainer
     private MachineEnergyContainer<TileEntityTeleporter> energyContainer;
+    @UnknownNullability//Initialized via getInitialInventory
     @WrappingComputerMethod(wrapper = ComputerIInventorySlotWrapper.class, methodNames = "getEnergyItem", docPlaceholder = "energy slot")
     EnergyInventorySlot energySlot;
 
@@ -137,12 +139,11 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
     }
 
     @Override
-    protected @Nullable IEnergyContainerHolder getInitialEnergyContainer(IContentsListener listener) {
+    protected IEnergyContainerHolder getInitialEnergyContainer(IContentsListener listener) {
         energyContainer = MachineEnergyContainer.input(this, listener);
         return _ -> energyContainer;
     }
 
-    @NotNull
     @Override
     protected IContainerHolder<IInventorySlot> getInitialInventory(IContentsListener listener) {
         MekContainerHelper<IInventorySlot> builder = MekContainerHelper.forSide(facingSupplier);
@@ -165,13 +166,15 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
             //If the frame is horizontal always face towards the other portion of the frame
             side = teleporter.frameDirection;
         } else {
-            BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-            Level level = teleporter.getWorldNN();
-            for (Direction iterSide : EnumUtils.HORIZONTAL_DIRECTIONS) {
-                mutable.setWithOffset(target, iterSide);
-                if (level.isEmptyBlock(mutable)) {
-                    side = iterSide;
-                    break;
+            Level level = teleporter.getLevel();
+            if (level != null) {
+                BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+                for (Direction iterSide : EnumUtils.HORIZONTAL_DIRECTIONS) {
+                    mutable.setWithOffset(target, iterSide);
+                    if (level.isEmptyBlock(mutable)) {
+                        side = iterSide;
+                        break;
+                    }
                 }
             }
         }
@@ -185,8 +188,8 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
     }
 
     @Override
-    protected boolean onUpdateServer() {
-        boolean sendUpdatePacket = super.onUpdateServer();
+    protected boolean onUpdateServer(ServerLevel level) {
+        boolean sendUpdatePacket = super.onUpdateServer(level);
         if (teleportBounds == null && frameDirection != null) {
             resetBounds();
         }
@@ -195,13 +198,14 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
         try (Transaction transaction = Transaction.openRoot()) {
             TeleportInfo teleportInfo = canTeleport(freq, transaction);
             status = teleportInfo.status();
-            if (status.isReady() && teleDelay == 0 && canFunction()) {
+            //Note: The frequency not being null should be validated already by the canTeleport status result
+            if (status.isReady() && teleDelay == 0 && canFunction() && freq != null) {
                 teleport(freq, teleportInfo, transaction);
                 transaction.commit();
             }
         }
         if (teleDelay == 0 && teleportBounds != null && !didTeleport.isEmpty()) {
-            cleanTeleportCache();
+            cleanTeleportCache(level);
         }
 
         boolean prevShouldRender = shouldRender;
@@ -225,8 +229,8 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
         return frequency == null ? null : frequency.getClosestCoords(getTileGlobalPos());
     }
 
-    private void cleanTeleportCache() {
-        List<UUID> inTeleporter = level.getEntitiesOfClass(Entity.class, teleportBounds).stream().map(Entity::getUUID).toList();
+    private void cleanTeleportCache(ServerLevel level) {
+        List<UUID> inTeleporter = teleportBounds == null ? Collections.emptyList() : level.getEntitiesOfClass(Entity.class, teleportBounds).stream().map(Entity::getUUID).toList();
         if (inTeleporter.isEmpty()) {
             didTeleport.clear();
         } else {
@@ -248,13 +252,11 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
         }
     }
 
-    /**
-     * Checks whether, or why not, this teleporter can teleport entities.
-     *
-     * @return A teleport info with 1: yes, 2: no frame, 3: no link found, 4: not enough electricity. If it is one, then closest coords and to teleport will be present
-     *
-     * @apiNote Only call on server
-     */
+    /// Checks whether, or why not, this teleporter can teleport entities.
+    ///
+    /// @return A teleport info with 1: yes, 2: no frame, 3: no link found, 4: not enough electricity. If it is one, then closest coords and to teleport will be present
+    ///
+    /// @apiNote Only call on server
     private TeleportInfo canTeleport(@Nullable TeleporterFrequency frequency, TransactionContext transaction) {
         Direction direction = getFrameDirection();
         if (direction == null) {
@@ -312,9 +314,7 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
         return worldPosition.relative(frameDirection);
     }
 
-    /**
-     * @apiNote Only call this from the server
-     */
+    /// @apiNote Only call this from the server
     public void sendTeleportParticles() {
         BlockPos teleporterTargetPos = getTeleporterTargetPos();
         Direction offsetDirection;
@@ -327,9 +327,7 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
         PacketUtils.sendToAllTracking(new PacketPortalFX(teleporterTargetPos, offsetDirection), level, teleporterTargetPos);
     }
 
-    /**
-     * @apiNote Only call this from the server
-     */
+    /// @apiNote Only call this from the server
     private void teleport(TeleporterFrequency frequency, TeleportInfo teleportInfo, TransactionContext transaction) {
         if (teleportInfo.closest == null || level == null || teleportInfo.toTeleport.isEmpty()) {
             return;
@@ -393,9 +391,9 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
 
     private static SoundEvent getTeleportSound(Entity entity) {
         return switch (entity) {
-            case Player player -> SoundEvents.PLAYER_TELEPORT;
-            case Fox fox -> SoundEvents.FOX_TELEPORT;
-            case Shulker shulker -> SoundEvents.SHULKER_TELEPORT;
+            case Player _ -> SoundEvents.PLAYER_TELEPORT;
+            case Fox _ -> SoundEvents.FOX_TELEPORT;
+            case Shulker _ -> SoundEvents.SHULKER_TELEPORT;
             //Fall back to enderman teleporting sound
             default -> SoundEvents.ENDERMAN_TELEPORT;
         };
@@ -471,11 +469,9 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
         return level.getEntitiesOfClass(Entity.class, teleportBounds, sameDimension ? SAME_DIMENSION_TARGET : entity -> canTeleportEntity(entity, destinationLevel));
     }
 
-    /**
-     * @return energy cost or -1 if invalid.
-     *
-     * @apiNote Only call from the server side
-     */
+    /// @return energy cost or -1 if invalid.
+    ///
+    /// @apiNote Only call from the server side
     public static int calculateEnergyCost(Entity entity, GlobalPos pos) {
         if (entity.level() instanceof ServerLevel level) {
             Level targetWorld = level.getServer().getLevel(pos.dimension());
@@ -533,11 +529,9 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
         }
     }
 
-    /**
-     * Checks in what direction there is a frame.
-     *
-     * @return in what direction there is a frame, null if none.
-     */
+    /// Checks in what direction there is a frame.
+    ///
+    /// @return in what direction there is a frame, null if none.
     @Nullable
     public Direction getFrameDirection() {
         //Cache the chunks we are looking up to check the frames of
@@ -559,14 +553,12 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
         return null;
     }
 
-    /**
-     * Checks whether this Teleporter has a Frame in the given Direction.
-     *
-     * @param direction the direction from the Teleporter block in which the frame should be.
-     * @param rotated   whether the frame is rotated by 90 degrees.
-     *
-     * @return whether the frame exists.
-     */
+    /// Checks whether this Teleporter has a Frame in the given Direction.
+    ///
+    /// @param direction the direction from the Teleporter block in which the frame should be.
+    /// @param rotated   whether the frame is rotated by 90 degrees.
+    ///
+    /// @return whether the frame exists.
     private boolean hasFrame(Long2ObjectMap<ChunkAccess> chunkMap, BlockPos.MutableBlockPos pos, Object2BooleanMap<BlockPos> cachedIsFrame, Direction direction,
           boolean rotated) {
         int alternatingX = 0;
@@ -613,11 +605,9 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
         return isFrame;
     }
 
-    /**
-     * Gets the direction from the teleporter in which the frame is.
-     *
-     * @return the direction of the frame.
-     */
+    /// Gets the direction from the teleporter in which the frame is.
+    ///
+    /// @return the direction of the frame.
     @Nullable
     public Direction frameDirection() {
         if (frameDirection == null) {
@@ -626,16 +616,14 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
         return frameDirection;
     }
 
-    /**
-     * Gets whether the frame is rotated by 90 degrees around the direction axis.
-     *
-     * @return whether the frame is rotated by 90 degrees.
-     */
+    /// Gets whether the frame is rotated by 90 degrees around the direction axis.
+    ///
+    /// @return whether the frame is rotated by 90 degrees.
     public boolean frameRotated() {
         return frameRotated;
     }
 
-    public AABB getTeleporterBoundingBox(@NotNull Direction frameDirection) {
+    public AABB getTeleporterBoundingBox(Direction frameDirection) {
         //Note: We only include the area inside the frame, we don't bother including the teleporter's block itself
         return AABB.encapsulatingFullBlocks(worldPosition.relative(frameDirection), worldPosition.relative(frameDirection, 2));
     }
@@ -674,6 +662,7 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
         return energySlot.getGuiX();
     }
 
+    @Nullable
     public EnumColor getColor() {
         return color;
     }
@@ -685,7 +674,7 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
     }
 
     @Override
-    public void writeReducedUpdatedTag(@NotNull ValueOutput output) {
+    public void writeReducedUpdatedTag(ValueOutput output) {
         super.writeReducedUpdatedTag(output);
         output.putBoolean(SerializationConstants.RENDERING, shouldRender);
         if (color != null) {
@@ -694,7 +683,7 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
     }
 
     @Override
-    public void handleUpdateTag(@NotNull ValueInput input) {
+    public void handleUpdateTag(ValueInput input) {
         super.handleUpdateTag(input);
         shouldRender = input.getBooleanOr(SerializationConstants.RENDERING, shouldRender);
         color = NBTUtils.getEnum(input, SerializationConstants.COLOR, EnumColor.BY_ID);
@@ -815,13 +804,11 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
             return !isError;
         }
 
-        @NotNull
         @Override
         public Component getTextComponent() {
             return name;
         }
 
-        @NotNull
         @Override
         public String getSerializedName() {
             return serializedName;

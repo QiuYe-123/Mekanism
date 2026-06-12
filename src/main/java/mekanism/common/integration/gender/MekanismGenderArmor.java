@@ -5,10 +5,11 @@ import mekanism.common.Mekanism;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import org.jspecify.annotations.Nullable;
 
 public record MekanismGenderArmor(boolean coversBreasts, boolean alwaysHidesBreasts, float physicsResistance, float tightness, boolean armorStandsCopySettings) implements IGenderArmor {
 
-    private static final ItemCapability<IGenderArmor, Void> GENDER_ARMOR_CAPABILITY = ItemCapability.createVoid(Mekanism.hooks.genderMod.rl("gender_armor"), IGenderArmor.class);
+    private static final ItemCapability<IGenderArmor, @Nullable Void> GENDER_ARMOR_CAPABILITY = ItemCapability.createVoid(Mekanism.hooks.genderMod.rl("gender_armor"), IGenderArmor.class);
     public static final MekanismGenderArmor OPEN_FRONT = new MekanismGenderArmor(false, false, 0, 0, false);
     public static final MekanismGenderArmor HIDES_BREASTS = new MekanismGenderArmor(true, true, 0, 0, false);
     public static final MekanismGenderArmor HAZMAT = new MekanismGenderArmor(0.5F, 0.25F, false);
@@ -34,6 +35,6 @@ public record MekanismGenderArmor(boolean coversBreasts, boolean alwaysHidesBrea
     }
 
     public void register(RegisterCapabilitiesEvent event, ItemLike... items) {
-        event.registerItem(GENDER_ARMOR_CAPABILITY, (stack, ctx) -> this, items);
+        event.registerItem(GENDER_ARMOR_CAPABILITY, (_, _) -> this, items);
     }
 }

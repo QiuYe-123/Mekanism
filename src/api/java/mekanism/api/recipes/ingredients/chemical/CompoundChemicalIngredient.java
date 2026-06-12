@@ -4,22 +4,18 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.stream.Stream;
 import mekanism.api.SerializationConstants;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
 import net.minecraft.core.Holder;
 import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import net.neoforged.neoforge.common.util.NeoForgeExtraCodecs;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Base Chemical ingredient implementation that matches if any of the child ingredients match. This type additionally represents the array notation used in
- * {@linkplain mekanism.api.recipes.ingredients.creator.IChemicalIngredientCreator#codec} internally.
- *
- * @see CompoundIngredient CompoundIngredient, its item equivalent
- * @since 10.6.0
- */
-@NothingNullByDefault
+/// Base Chemical ingredient implementation that matches if any of the child ingredients match. This type additionally represents the array notation used in
+/// [mekanism.api.recipes.ingredients.creator.IChemicalIngredientCreator#codec][mekanism.api.recipes.ingredients.creator.IChemicalIngredientCreator#codec] internally.
+///
+/// @see CompoundIngredient CompoundIngredient, its item equivalent
+/// @since 10.6.0
 public non-sealed class CompoundChemicalIngredient extends ChemicalIngredient {
 
     public static final MapCodec<CompoundChemicalIngredient> CODEC = NeoForgeExtraCodecs.aliasedFieldOf(
@@ -30,9 +26,7 @@ public non-sealed class CompoundChemicalIngredient extends ChemicalIngredient {
 
     private final List<ChemicalIngredient> children;
 
-    /**
-     * @param children Ingredients to form a union from.
-     */
+    /// @param children Ingredients to form a union from.
     public CompoundChemicalIngredient(List<ChemicalIngredient> children) {
         if (children.size() < 2) {
             throw new IllegalArgumentException("Compound chemical ingredients must have at least two children");
@@ -57,9 +51,7 @@ public non-sealed class CompoundChemicalIngredient extends ChemicalIngredient {
         return false;
     }
 
-    /**
-     * {@return all the child ingredients that this ingredient is a union of}
-     */
+    /// {@return all the child ingredients that this ingredient is a union of}
     public final List<ChemicalIngredient> children() {
         return children;
     }

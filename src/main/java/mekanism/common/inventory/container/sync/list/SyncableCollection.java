@@ -9,28 +9,23 @@ import mekanism.common.network.to_client.container.property.ByteArrayPropertyDat
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.neoforge.common.util.FriendlyByteBufUtil;
-import org.jetbrains.annotations.NotNull;
 
-/**
- * Version of {@link net.minecraft.world.inventory.DataSlot} for handling Collections
- */
+/// Version of [net.minecraft.world.inventory.DataSlot] for handling Collections
 public abstract class SyncableCollection<TYPE, COLLECTION extends Collection<TYPE>> implements ISyncableData {
 
-    private final Supplier<? extends @NotNull Collection<TYPE>> getter;
-    private final Consumer<@NotNull COLLECTION> setter;
+    private final Supplier<? extends Collection<TYPE>> getter;
+    private final Consumer<COLLECTION> setter;
     private int lastKnownHashCode;
 
-    protected SyncableCollection(Supplier<? extends @NotNull Collection<TYPE>> getter, Consumer<@NotNull COLLECTION> setter) {
+    protected SyncableCollection(Supplier<? extends Collection<TYPE>> getter, Consumer<COLLECTION> setter) {
         this.getter = getter;
         this.setter = setter;
     }
 
-    @NotNull
     public Collection<TYPE> get() {
         return getRaw();
     }
 
-    @NotNull
     protected Collection<TYPE> getRaw() {
         return getter.get();
     }
@@ -51,7 +46,7 @@ public abstract class SyncableCollection<TYPE, COLLECTION extends Collection<TYP
     public ByteArrayPropertyData getPropertyData(RegistryAccess registryAccess, short property, DirtyType dirtyType) {
         //Note: We write it to a byte array so that we make sure to effectively copy it (force a serialization and deserialization)
         // whenever we send this as a packet rather than potentially allowing the list to leak from one side to the other in single player
-        byte[] rawData = FriendlyByteBufUtil.writeCustomData(buffer -> buffer.writeCollection(getRaw(), (buf, element) -> serializeListElement(buffer, element)), registryAccess);
+        byte[] rawData = FriendlyByteBufUtil.writeCustomData(buffer -> buffer.writeCollection(getRaw(), (_, element) -> serializeListElement(buffer, element)), registryAccess);
         return new ByteArrayPropertyData(property, rawData);
     }
 

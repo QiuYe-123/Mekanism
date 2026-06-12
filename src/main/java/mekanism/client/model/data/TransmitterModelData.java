@@ -6,6 +6,7 @@ import mekanism.common.lib.transmitter.ConnectionType;
 import mekanism.common.util.EnumUtils;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import org.jspecify.annotations.Nullable;
 
 public sealed class TransmitterModelData permits Diversion {
 
@@ -35,7 +36,7 @@ public sealed class TransmitterModelData permits Diversion {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         }
@@ -110,10 +111,10 @@ public sealed class TransmitterModelData permits Diversion {
 
         public static VisualConnectionStatus from(ConnectionType raw) {
             return switch (raw) {
-                case NORMAL -> VisualConnectionStatus.NORMAL;
-                case PUSH -> VisualConnectionStatus.PUSH;
-                case PULL -> VisualConnectionStatus.PULL;
-                case NONE -> VisualConnectionStatus.NONE;
+                case NORMAL -> NORMAL;
+                case PUSH -> PUSH;
+                case PULL -> PULL;
+                case NONE -> NONE;
             };
         }
     }

@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.resource.LargeResourceStack;
-import mekanism.common.attachments.FrequencyAware;
-import mekanism.common.attachments.qio.PortableDashboardContents;
+import mekanism.common.component.FrequencyAware;
+import mekanism.common.component.qio.PortableDashboardContents;
 import mekanism.common.registries.MekanismDataComponents;
 import mekanism.common.util.ItemAccessUtils;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.item.ItemResource;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class PortableQIODashboardInventory implements IQIOCraftingWindowHolder {
 

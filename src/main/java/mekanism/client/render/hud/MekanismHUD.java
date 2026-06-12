@@ -19,6 +19,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.TypedInstance;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -26,8 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.gui.GuiLayer;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import org.joml.Matrix4f;
@@ -62,7 +63,7 @@ public class MekanismHUD implements GuiLayer {
     }
 
     @Override
-    public void render(@NotNull GuiGraphicsExtractor graphics, @NotNull DeltaTracker delta) {
+    public void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
         if (player != null && !player.isSpectator() && !minecraft.options.hideGui && MekanismConfig.client.enableHUD.get()) {
@@ -83,7 +84,7 @@ public class MekanismHUD implements GuiLayer {
                         IItemHUDProvider hudProvider = getHudProvider(stack);
                         if (hudProvider != null) {
                             count += makeComponent(hudProvider, player, stack.toStack(), null, renderStrings,
-                                  (provider, l, plyr, s, ignored) -> provider.addCurioHUDStrings(l, plyr, s));
+                                  (provider, l, plyr, s, _) -> provider.addCurioHUDStrings(l, plyr, s));
                         }
                     }
                 }
@@ -119,7 +120,7 @@ public class MekanismHUD implements GuiLayer {
                         }
                     }
                     int x = reverseHud ? xScale - maxTextWidth - 2 : 2;
-                    GuiUtils.drawBackdrop(graphics, Minecraft.getInstance(), x, y, maxTextWidth, maxTextHeight, 0xFFFFFFFF);
+                    GuiUtils.drawBackdrop(graphics, Minecraft.getInstance(), x, y, maxTextWidth, maxTextHeight, CommonColors.WHITE);
                 }
 
                 Matrix3x2f matrix = new Matrix3x2f(pose);
@@ -175,7 +176,7 @@ public class MekanismHUD implements GuiLayer {
     public record DelayedString(Matrix4f matrix, Component component, float x, float y, int color, boolean dropShadow) {
 
         public DelayedString {
-            if ((color & 0xFF000000) == 0) {
+            if (ARGB.alpha(color) == 0) {
                 Mekanism.logger.warn("Possible missed alpha?", new Exception());
             }
         }

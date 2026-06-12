@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import mekanism.api.MekanismAPI;
@@ -119,6 +120,7 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.datamaps.DataMapsUpdatedEvent;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 @Mod(Mekanism.MODID)
@@ -128,43 +130,29 @@ public class Mekanism {
     public static final String MOD_NAME = "Mekanism";
     public static final String LOG_TAG = '[' + MOD_NAME + ']';
     public static final PlayerState playerState = new PlayerState();
-    /**
-     * Mekanism Packet Pipeline
-     */
+    /// Mekanism Packet Pipeline
     private final PacketHandler packetHandler;
-    /**
-     * Mekanism logger instance
-     */
+    /// Mekanism logger instance
     public static final Logger logger = LogUtils.getLogger();
 
-    /**
-     * Mekanism mod instance
-     */
+    /// Mekanism mod instance
+    @Nullable
     public static Mekanism instance;
-    /**
-     * Mekanism hooks instance
-     */
+    /// Mekanism hooks instance
     public static final MekanismHooks hooks = new MekanismHooks();
-    /**
-     * Mekanism version number
-     */
+    /// Mekanism version number
     public final Version versionNumber;
 
-    /**
-     * List of Mekanism modules loaded
-     */
+    /// List of Mekanism modules loaded
     public static final List<IModModule> modulesLoaded = new ArrayList<>();
-    /**
-     * The server's world tick handler.
-     */
+    /// The server's world tick handler.
     public static final CommonWorldTickHandler worldTickHandler = new CommonWorldTickHandler();
-    /**
-     * The GameProfile used by the dummy Mekanism player
-     */
+    /// The GameProfile used by the dummy Mekanism player
     public static final GameProfile gameProfile = new GameProfile(UUID.nameUUIDFromBytes("mekanism.common".getBytes(StandardCharsets.UTF_8)), LOG_TAG);
     public static final KeySync keyMap = new KeySync();
     public static final Set<GlobalPos> activeVibrators = new ObjectOpenHashSet<>();
 
+    @Nullable
     private ReloadListener recipeCacheManager;
 
     public Mekanism(ModContainer modContainer, IEventBus modEventBus) {
@@ -219,7 +207,7 @@ public class Mekanism {
     }
 
     public static PacketHandler packetHandler() {
-        return instance.packetHandler;
+        return Objects.requireNonNull(instance).packetHandler;
     }
 
     private void addRegistrationListeners(IEventBus modEventBus) {
@@ -275,8 +263,8 @@ public class Mekanism {
         }
     }
 
-    public ReloadListener getRecipeCacheManager() {
-        return recipeCacheManager;
+    private ReloadListener getRecipeCacheManager() {
+        return Objects.requireNonNull(recipeCacheManager, "Recipe cache manager not set.");
     }
 
     private void onTagsReload(TagsUpdatedEvent event) {

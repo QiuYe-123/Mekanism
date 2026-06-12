@@ -4,19 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.additions.client.model.ModelBabyCreeper;
 import mekanism.additions.client.render.entity.layer.BabyCreeperChargeLayer;
 import mekanism.additions.common.entity.baby.EntityBabyCreeper;
-import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.monster.Creeper;
-import org.jetbrains.annotations.NotNull;
 
-/**
- * Copy of vanilla's creeper render, modified to use our own model/layer that is properly scaled
- */
-@NothingNullByDefault
+/// Copy of vanilla's [creeper render][net.minecraft.client.renderer.entity.CreeperRenderer], modified to use our own model/layer that is properly scaled
 public class RenderBabyCreeper extends MobRenderer<EntityBabyCreeper, CreeperRenderState, ModelBabyCreeper> {
 
     private static final Identifier CREEPER_TEXTURES = Identifier.withDefaultNamespace("textures/entity/creeper/creeper.png");
@@ -42,7 +36,7 @@ public class RenderBabyCreeper extends MobRenderer<EntityBabyCreeper, CreeperRen
     protected void scale(CreeperRenderState state, PoseStack poseStack) {
         float swelling = state.swelling;
         float wobble = 1.0F + Mth.sin(swelling * 100.0F) * swelling * 0.01F;
-        swelling = Mth.clamp(swelling, 0.0F, 1.0F);
+        swelling = Math.clamp(swelling, 0.0F, 1.0F);
         swelling *= swelling;
         swelling *= swelling;
         float s = (1.0F + swelling * 0.4F) * wobble;
@@ -52,7 +46,7 @@ public class RenderBabyCreeper extends MobRenderer<EntityBabyCreeper, CreeperRen
 
     @Override
     protected float getWhiteOverlayProgress(CreeperRenderState state) {
-        return (int) (state.swelling * 10.0F) % 2 == 0 ? 0.0F : Mth.clamp(state.swelling, 0.5F, 1.0F);
+        return (int) (state.swelling * 10.0F) % 2 == 0 ? 0.0F : Math.clamp(state.swelling, 0.5F, 1.0F);
     }
 
     @Override

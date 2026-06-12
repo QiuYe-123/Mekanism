@@ -12,7 +12,7 @@ import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.client.render.MekanismRenderer;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.util.RegistryUtils;
 import mezz.jei.api.helpers.IColorHelper;
@@ -25,7 +25,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ChemicalStackHelper implements IIngredientHelper<ChemicalStack> {
 
@@ -72,7 +72,7 @@ public class ChemicalStackHelper implements IIngredientHelper<ChemicalStack> {
         if (colorHelper == null) {
             return IIngredientHelper.super.getColors(ingredient);
         }
-        return colorHelper.getColors(MekanismRenderer.getChemicalTexture(ingredient.typeHolder()), ingredient.getChemicalTint(), 1);
+        return colorHelper.getColors(MekanismRenderer.getChemicalTexture(ingredient.typeHolder()), ingredient.getChemical().getTint(), 1);
     }
 
     @Override

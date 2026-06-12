@@ -1,18 +1,16 @@
 package mekanism.common.util.text;
 
-import mekanism.api.annotations.MethodsAreNotNullByDefault;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.ILangEntry;
 import mekanism.common.MekanismLang;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ContainerType;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 
-@MethodsAreNotNullByDefault
 public abstract class BooleanStateDisplay implements IHasTextComponent {
 
     protected final boolean value;

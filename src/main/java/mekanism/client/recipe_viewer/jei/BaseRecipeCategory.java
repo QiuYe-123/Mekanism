@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.ChemicalStackTemplate;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.bar.GuiBar.IBarInfoHandler;
@@ -54,9 +55,8 @@ import net.neoforged.neoforge.fluids.FluidInstance;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidStackTemplate;
 import net.neoforged.neoforge.fluids.FluidType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
+import org.jspecify.annotations.Nullable;
 
 //TODO: Re-evaluate this extending AbstractContainerEventHandler
 public abstract class BaseRecipeCategory<RECIPE> extends AbstractContainerEventHandler implements IRecipeCategory<RECIPE>, IGuiWrapper {
@@ -112,13 +112,11 @@ public abstract class BaseRecipeCategory<RECIPE> extends AbstractContainerEventH
         return element;
     }
 
-    @NotNull
     @Override
     public List<GuiElement> children() {
         return guiElements;
     }
 
-    @NotNull
     @Override
     public ScreenRectangle getRectangle() {
         return new ScreenRectangle(getGuiLeft(), getGuiTop(), getXSize(), getYSize());
@@ -133,10 +131,8 @@ public abstract class BaseRecipeCategory<RECIPE> extends AbstractContainerEventH
         }
     }
 
-    /**
-     * @apiNote x and y are based on the values set in the tile, as the GUI then shifts the slots by one to account for the border. This method is mostly meant as a
-     * helper to make keeping track of the positioning numbers easier.
-     */
+    /// @apiNote x and y are based on the values set in the tile, as the GUI then shifts the slots by one to account for the border. This method is mostly meant as a
+    /// helper to make keeping track of the positioning numbers easier.
     protected GuiSlot addSlot(SlotType type, int x, int y) {
         return addElement(new GuiSlot(type, this, x - 1, y - 1));
     }
@@ -322,6 +318,10 @@ public abstract class BaseRecipeCategory<RECIPE> extends AbstractContainerEventH
         int max = stacks.stream().mapToInt(FluidInstance::amount).filter(stackSize -> stackSize > 0).max().orElse(FluidType.BUCKET_VOLUME);
         return init(builder, NeoForgeTypes.FLUID_STACK, role, gauge, stacks)
               .setFluidRenderer(max, false, width, height);
+    }
+
+    protected IRecipeSlotBuilder initChemical(IRecipeLayoutBuilder builder, GuiElement element, List<ChemicalStackTemplate> stacks) {
+        return initChemical(builder, RecipeIngredientRole.OUTPUT, element, stacks.stream().map(ChemicalStackTemplate::create).toList());
     }
 
     protected IRecipeSlotBuilder initChemical(IRecipeLayoutBuilder builder, RecipeIngredientRole role, GuiElement element, List<ChemicalStack> stacks) {

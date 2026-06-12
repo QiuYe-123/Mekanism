@@ -21,12 +21,9 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.item.ItemResource;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Used for informing the server that a click happened in a GUI and the gui window needs to change
- */
+/// Used for informing the server that a click happened in a GUI and the gui window needs to change
 public record PacketItemButtonPress(ClickedItemButton buttonClicked, InteractionHand hand) implements IMekanismPacket {
 
     public static final CustomPacketPayload.Type<PacketItemButtonPress> TYPE = new CustomPacketPayload.Type<>(Mekanism.rl("item_button"));
@@ -36,7 +33,6 @@ public record PacketItemButtonPress(ClickedItemButton buttonClicked, Interaction
           PacketItemButtonPress::new
     );
 
-    @NotNull
     @Override
     public CustomPacketPayload.Type<PacketItemButtonPress> type() {
         return TYPE;

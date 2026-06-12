@@ -3,7 +3,6 @@ package mekanism.api.recipes.basic;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.recipes.ItemStackChemicalToItemStackRecipe;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
@@ -13,9 +12,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public abstract class BasicItemStackChemicalToItemStackRecipe extends ItemStackChemicalToItemStackRecipe implements IBasicItemStackOutput {
 
     private final RecipeType<? extends ItemStackChemicalToItemStackRecipe> recipeType;
@@ -24,12 +22,10 @@ public abstract class BasicItemStackChemicalToItemStackRecipe extends ItemStackC
     protected final ItemStackTemplate output;
     private final boolean perTickUsage;
 
-    /**
-     * @param itemInput     Item input.
-     * @param chemicalInput Chemical input.
-     * @param output        Output.
-     * @param perTickUsage  Should the recipe consume the chemical input each tick it is processing.
-     */
+    /// @param itemInput     Item input.
+    /// @param chemicalInput Chemical input.
+    /// @param output        Output.
+    /// @param perTickUsage  Should the recipe consume the chemical input each tick it is processing.
     public BasicItemStackChemicalToItemStackRecipe(ItemStackIngredient itemInput, ChemicalStackIngredient chemicalInput, ItemStackTemplate output, boolean perTickUsage,
           RecipeType<? extends ItemStackChemicalToItemStackRecipe> recipeType) {
         this.recipeType = Objects.requireNonNull(recipeType, "Recipe type cannot be null");
@@ -67,7 +63,7 @@ public abstract class BasicItemStackChemicalToItemStackRecipe extends ItemStackC
     }
 
     @Override
-    public List<@NotNull ItemStackTemplate> getOutputDefinition() {
+    public List<ItemStackTemplate> getOutputDefinition() {
         return Collections.singletonList(output);
     }
 
@@ -77,7 +73,7 @@ public abstract class BasicItemStackChemicalToItemStackRecipe extends ItemStackC
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         } else if (o == null || getClass() != o.getClass()) {

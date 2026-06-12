@@ -60,7 +60,7 @@ import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class CommonPlayerTickHandler {
 
@@ -233,9 +233,7 @@ public class CommonPlayerTickHandler {
         }
     }
 
-    /**
-     * Based on the values and calculations that happen in {@link LivingEntity#calculateFallDamage(double, float)}
-     */
+    /// Based on the values and calculations that happen in [LivingEntity#calculateFallDamage(double, float)]
     @SubscribeEvent
     public void livingFall(LivingFallEvent event) {
         LivingEntity entity = event.getEntity();
@@ -319,9 +317,7 @@ public class CommonPlayerTickHandler {
         }
     }
 
-    /**
-     * @return null if free runners are not being worn, or they don't have an energy container for some reason
-     */
+    /// @return null if free runners are not being worn, or they don't have an energy container for some reason
     @Nullable
     private FallEnergyInfo getFallAbsorptionEnergyInfo(LivingEntity base) {
         ItemAccess feetAccess = ItemAccessUtils.forEntitySlot(base, EquipmentSlot.FEET);
@@ -364,7 +360,7 @@ public class CommonPlayerTickHandler {
                         float destroySpeed = entry.getValue().getDestroySpeed(player.level(), entry.getKey());
                         maxHardness = Math.max(maxHardness, destroySpeed);
                     }
-                    speed *= (targetHardness / maxHardness);
+                    speed *= targetHardness / maxHardness;
                 }
             }
         }

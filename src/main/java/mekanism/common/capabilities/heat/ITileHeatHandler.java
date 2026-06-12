@@ -1,6 +1,5 @@
 package mekanism.common.capabilities.heat;
 
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.heat.HeatAPI;
 import mekanism.api.heat.HeatAPI.HeatTransfer;
 import mekanism.api.heat.IHeatCapacitor;
@@ -8,9 +7,8 @@ import mekanism.api.heat.IHeatHandler;
 import mekanism.api.heat.IMekanismHeatHandler;
 import mekanism.common.util.EnumUtils;
 import net.minecraft.core.Direction;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public interface ITileHeatHandler extends IMekanismHeatHandler {
 
     default void updateHeatCapacitors(@Nullable Direction side) {
@@ -21,21 +19,17 @@ public interface ITileHeatHandler extends IMekanismHeatHandler {
         }
     }
 
-    /**
-     * Gets the {@link IHeatHandler} adjacent to this {@link ITileHeatHandler}.
-     *
-     * @param side The side of this {@link ITileHeatHandler} to look on.
-     *
-     * @return The {@link IHeatHandler} adjacent to this {@link ITileHeatHandler}, otherwise returns {@code null}.
-     */
+    /// Gets the [IHeatHandler] adjacent to this [ITileHeatHandler].
+    ///
+    /// @param side The side of this [ITileHeatHandler] to look on.
+    ///
+    /// @return The [IHeatHandler] adjacent to this [ITileHeatHandler], otherwise returns `null`.
     @Nullable
     default IHeatHandler getAdjacent(Direction side) {
         return null;
     }
 
-    /**
-     * Simulate heat transfers
-     */
+    /// Simulate heat transfers
     default HeatTransfer simulate() {
         return new HeatTransfer(simulateAdjacent(), simulateEnvironment());
     }

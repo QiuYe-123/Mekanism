@@ -2,7 +2,7 @@ package mekanism.common.content.qio;
 
 import mekanism.api.IContentsListener;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface IQIOCraftingWindowHolder extends IContentsListener {
 
@@ -13,9 +13,7 @@ public interface IQIOCraftingWindowHolder extends IContentsListener {
 
     QIOCraftingWindow[] getCraftingWindows();
 
-    /**
-     * @apiNote Only should be used on the server, so it is perfectly safe to always just be returning null when on the client.
-     */
+    /// @apiNote Only should be used on the server, so it is perfectly safe to always just be returning null when on the client.
     @Nullable
     QIOFrequency getFrequency();
 }

@@ -17,6 +17,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Util;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.DispensibleContainerItem;
@@ -42,7 +43,6 @@ import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import org.jetbrains.annotations.NotNull;
 
 public class FluidDeferredRegister {
 
@@ -52,9 +52,8 @@ public class FluidDeferredRegister {
     private static final Identifier LIQUID_FLOW = Mekanism.rl("mek_liquid/liquid_flow");
     //Copy of/based off of vanilla's lava/water bucket dispense behavior
     private static final DispenseItemBehavior BUCKET_DISPENSE_BEHAVIOR = new DefaultDispenseItemBehavior() {
-        @NotNull
         @Override
-        public ItemStack execute(@NotNull BlockSource source, @NotNull ItemStack stack) {
+        public ItemStack execute(BlockSource source, ItemStack stack) {
             Level world = source.level();
             DispensibleContainerItem bucket = (DispensibleContainerItem) stack.getItem();
             BlockPos pos = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
@@ -144,7 +143,7 @@ public class FluidDeferredRegister {
     }
 
     public static MapColor getClosestColor(int tint) {
-        if (tint == 0xFFFFFFFF) {
+        if (tint == CommonColors.WHITE) {
             return MapColor.NONE;
         }
         int red = ARGB.red(tint);
@@ -167,11 +166,10 @@ public class FluidDeferredRegister {
         return color;
     }
 
-    /**
-     * <a href="http://www.compuphase.com/cmetric.htm">Color Metric</a>
-     * <a href="http://stackoverflow.com/a/6334454">Stack Overflow</a>
-     * Returns 0 for equal colors, nonzero for colors that look different. The return value is farther from 0 the more different the colors look.
-     */
+    /// [Color Metric](http://www.compuphase.com/cmetric.htm)
+    /// [Stack Overflow](http://stackoverflow.com/a/6334454)
+    ///
+    /// {@return 0 for equal colors, nonzero for colors that look different. The return value is farther from 0 the more different the colors look}
     private static double perceptualColorDistanceSquared(int red1, int green1, int blue1, int red2, int green2, int blue2) {
         int redMean = (red1 + red2) >> 1;
         int r = red1 - red2;
@@ -226,7 +224,7 @@ public class FluidDeferredRegister {
         //For now all our fluids use the same "overlay" for being against glass as vanilla water.
         private Identifier overlayTexture = OVERLAY;
         private Identifier renderOverlayTexture = RENDER_OVERLAY;
-        private int color = 0xFFFFFFFF;
+        private int color = CommonColors.WHITE;
 
         private FluidTypeRenderProperties() {
         }

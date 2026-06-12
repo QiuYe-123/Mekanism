@@ -2,11 +2,10 @@ package mekanism.common.content.miner;
 
 import com.google.common.base.Suppliers;
 import com.mojang.logging.LogUtils;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
-import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
@@ -31,17 +30,15 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
-/**
- * Copy of PathNavigationRegion, but will force chunks to load as PathNavigationRegion won't do it (if anchor upgrade installed
- */
-@NothingNullByDefault
+/// Copy of PathNavigationRegion, but will force chunks to load as PathNavigationRegion won't do it (if anchor upgrade installed
 public class MinerRegionCache implements CollisionGetter {
     private static final Logger LOGGER = LogUtils.getLogger();
     protected final int centerX;
     protected final int centerZ;
-    protected final ChunkAccess[][] chunks;
+    protected final @Nullable ChunkAccess[][] chunks;
     protected boolean allEmpty;
     protected final Level level;
     private final Supplier<Holder<Biome>> plains;
@@ -63,7 +60,7 @@ public class MinerRegionCache implements CollisionGetter {
                 if (hasAnchor) {
                     try {
                         chunkAccess = chunksource.getChunkFuture(x, z, ChunkStatus.FULL, true).get().orElse(null);
-                    }catch (InterruptedException | ExecutionException ignored){
+                    }catch (InterruptedException | ExecutionException _){
                         chunkAccess = null;
                     }
                 } else {
@@ -96,7 +93,7 @@ public class MinerRegionCache implements CollisionGetter {
         int j = z - this.centerZ;
         if (i >= 0 && i < this.chunks.length && j >= 0 && j < this.chunks[i].length) {
             ChunkAccess chunkaccess = this.chunks[i][j];
-            return chunkaccess != null ? chunkaccess : new EmptyLevelChunk(this.level, new ChunkPos(x, z), this.plains.get());
+            return chunkaccess == null ? new EmptyLevelChunk(this.level, new ChunkPos(x, z), this.plains.get()) : chunkaccess;
         } else {
             return new EmptyLevelChunk(this.level, new ChunkPos(x, z), this.plains.get());
         }
@@ -114,7 +111,7 @@ public class MinerRegionCache implements CollisionGetter {
 
     @Override
     public List<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB collisionBox) {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Nullable

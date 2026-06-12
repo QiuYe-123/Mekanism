@@ -4,6 +4,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -11,20 +12,6 @@ import mekanism.api.gear.IModuleHelper;
 import mekanism.api.tier.ITier;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
-import mekanism.common.attachments.FilterAware;
-import mekanism.common.attachments.OverflowAware;
-import mekanism.common.attachments.StabilizedChunks;
-import mekanism.common.attachments.component.AttachedEjector;
-import mekanism.common.attachments.component.AttachedSideConfig;
-import mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo;
-import mekanism.common.attachments.containers.chemical.ChemicalTanksBuilder;
-import mekanism.common.attachments.containers.chemical.ComponentBackedChemicalTankTank;
-import mekanism.common.attachments.containers.fluid.ComponentBackedFluidTankFluidTank;
-import mekanism.common.attachments.containers.fluid.FluidTanksBuilder;
-import mekanism.common.attachments.containers.heat.HeatCapacitorsBuilder;
-import mekanism.common.attachments.containers.item.ComponentBackedBinInventorySlot;
-import mekanism.common.attachments.containers.item.ItemSlotsBuilder;
-import mekanism.common.attachments.containers.type.ContainerType;
 import mekanism.common.block.BlockBounding;
 import mekanism.common.block.BlockCardboardBox;
 import mekanism.common.block.BlockEnergyCube;
@@ -52,6 +39,20 @@ import mekanism.common.block.prefab.BlockTile.BlockTileModel;
 import mekanism.common.block.states.BlockStateHelper;
 import mekanism.common.block.transmitter.BlockLargeTransmitter;
 import mekanism.common.block.transmitter.BlockSmallTransmitter;
+import mekanism.common.component.FilterAware;
+import mekanism.common.component.OverflowAware;
+import mekanism.common.component.StabilizedChunks;
+import mekanism.common.component.component.AttachedEjector;
+import mekanism.common.component.component.AttachedSideConfig;
+import mekanism.common.component.component.AttachedSideConfig.LightConfigInfo;
+import mekanism.common.component.containers.chemical.ChemicalTanksBuilder;
+import mekanism.common.component.containers.chemical.ComponentBackedChemicalTankTank;
+import mekanism.common.component.containers.fluid.ComponentBackedFluidTankFluidTank;
+import mekanism.common.component.containers.fluid.FluidTanksBuilder;
+import mekanism.common.component.containers.heat.HeatCapacitorsBuilder;
+import mekanism.common.component.containers.item.ComponentBackedBinInventorySlot;
+import mekanism.common.component.containers.item.ItemSlotsBuilder;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.content.blocktype.BlockType;
 import mekanism.common.content.blocktype.BlockTypeTile;
 import mekanism.common.content.blocktype.Factory;
@@ -192,7 +193,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.transfer.item.ItemResource;
-import org.jetbrains.annotations.NotNull;
 
 public class MekanismBlocks {
 
@@ -1015,7 +1015,7 @@ public class MekanismBlocks {
     }
 
     private static <TILE extends TileEntityFactory<?>> BlockRegistryObject<BlockFactory<?>, ItemBlockFactory> registerFactory(Factory<TILE> type) {
-        FactoryTier tier = (FactoryTier) type.get(AttributeTier.class).tier();
+        FactoryTier tier = (FactoryTier) type.getOrThrow(AttributeTier.class).tier();
         BlockRegistryObject<BlockFactory<?>, ItemBlockFactory> factory = registerTieredBlock(tier, "_" + type.getFactoryType().getRegistryNameComponent() + "_factory", properties -> new BlockFactory<>(type, properties), ItemBlockFactory::new);
         factory.forItemHolder(holder -> {
             int processes = tier.processes;
@@ -1080,13 +1080,13 @@ public class MekanismBlocks {
 
     private static <BLOCK extends Block, ITEM extends BlockItem> BlockRegistryObject<BLOCK, ITEM> registerTieredBlock(BlockType type, String suffix,
           BiFunction<BlockBehaviour.Properties, MapColor, ? extends BLOCK> blockCreator, BiFunction<BLOCK, Item.Properties, ITEM> itemCreator) {
-        ITier tier = type.get(AttributeTier.class).tier();
+        ITier tier = type.getOrThrow(AttributeTier.class).tier();
         return registerTieredBlock(tier, suffix, properties -> blockCreator.apply(properties, tier.getBaseTier().getMapColor()), itemCreator);
     }
 
     private static <BLOCK extends Block, ITEM extends BlockItem> BlockRegistryObject<BLOCK, ITEM> registerTieredBlock(BlockType type, String suffix,
           Function<BlockBehaviour.Properties, ? extends BLOCK> blockCreator, BiFunction<BLOCK, Item.Properties, ITEM> itemCreator) {
-        return registerTieredBlock(type.get(AttributeTier.class).tier(), suffix, blockCreator, itemCreator);
+        return registerTieredBlock(type.getOrThrow(AttributeTier.class).tier(), suffix, blockCreator, itemCreator);
     }
 
     private static <BLOCK extends Block, ITEM extends BlockItem> BlockRegistryObject<BLOCK, ITEM> registerTieredBlock(ITier tier, String suffix,
@@ -1119,16 +1119,14 @@ public class MekanismBlocks {
         return BLOCKS.register(name, blockCreator, (block, props) -> new ItemBlockTooltip<>(block, props.rarity(rarity)));
     }
 
-    /**
-     * Retrieves a Factory with a defined tier and recipe type.
-     *
-     * @param tier - tier to add to the Factory
-     * @param type - recipe type to add to the Factory
-     *
-     * @return factory with defined tier and recipe type
-     */
-    public static BlockRegistryObject<BlockFactory<?>, ItemBlockFactory> getFactory(@NotNull FactoryTier tier, @NotNull FactoryType type) {
-        return FACTORIES.get(tier, type);
+    /// Retrieves a Factory with a defined tier and recipe type.
+    ///
+    /// @param tier tier to add to the Factory
+    /// @param type recipe type to add to the Factory
+    ///
+    /// @return factory with defined tier and recipe type
+    public static BlockRegistryObject<BlockFactory<?>, ItemBlockFactory> getFactory(FactoryTier tier, FactoryType type) {
+        return Objects.requireNonNull(FACTORIES.get(tier, type));
     }
 
     @SuppressWarnings("unchecked")

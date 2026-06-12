@@ -1,10 +1,10 @@
 package mekanism.common.integration.crafttweaker.recipe.manager;
 
 import com.blamejared.crafttweaker.api.annotation.ZenRegister;
-import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.ChemicalStackTemplate;
+import mekanism.api.recipes.ChemicalToChemicalRecipe;
 import mekanism.api.recipes.basic.BasicActivatingRecipe;
 import mekanism.api.recipes.basic.BasicCentrifugingRecipe;
-import mekanism.api.recipes.ChemicalToChemicalRecipe;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
 import mekanism.api.recipes.vanilla_input.SingleChemicalRecipeInput;
 import mekanism.common.integration.crafttweaker.CrTConstants;
@@ -22,33 +22,29 @@ public abstract class ChemicalToChemicalRecipeManager extends MekanismRecipeMana
         super(recipeType);
     }
 
-    /**
-     * Adds a recipe that converts a chemical into another chemical.
-     * <br>
-     * If this is called from the activating recipe manager, this will be an activating recipe and able to be processed in a solar neutron activator.
-     * <br>
-     * If this is called from the centrifuging recipe manager, this will be a centrifuging recipe and able to be processed in an isotopic centrifuge.
-     *
-     * @param name   Name of the new recipe.
-     * @param input  {@link ChemicalStackIngredient} representing the input of the recipe.
-     * @param output {@link ICrTChemicalStack} representing the output of the recipe.
-     */
+    /// Adds a recipe that converts a chemical into another chemical.
+    ///
+    /// If this is called from the activating recipe manager, this will be an activating recipe and able to be processed in a solar neutron activator.
+    ///
+    /// If this is called from the centrifuging recipe manager, this will be a centrifuging recipe and able to be processed in an isotopic centrifuge.
+    ///
+    /// @param name   Name of the new recipe.
+    /// @param input  [ChemicalStackIngredient] representing the input of the recipe.
+    /// @param output [ICrTChemicalStack] representing the output of the recipe.
     @ZenCodeType.Method
     public void addRecipe(String name, ChemicalStackIngredient input, ICrTChemicalStack output) {
         addRecipe(name, makeRecipe(input, output));
     }
 
-    /**
-     * Creates a recipe that converts a chemical into another chemical.
-     *
-     * @param input  {@link ChemicalStackIngredient} representing the input of the recipe.
-     * @param output {@link ICrTChemicalStack} representing the output of the recipe. Will be validated as not empty.
-     */
+    /// Creates a recipe that converts a chemical into another chemical.
+    ///
+    /// @param input  [ChemicalStackIngredient] representing the input of the recipe.
+    /// @param output [ICrTChemicalStack] representing the output of the recipe. Will be validated as not empty.
     public final ChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient input, ICrTChemicalStack output) {
         return makeRecipe(input, getAndValidateNotEmpty(output));
     }
 
-    protected abstract ChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient ingredient, ChemicalStack output);
+    protected abstract ChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient ingredient, ChemicalStackTemplate output);
 
     @Override
     protected String describeOutputs(ChemicalToChemicalRecipe recipe) {
@@ -66,7 +62,7 @@ public abstract class ChemicalToChemicalRecipeManager extends MekanismRecipeMana
         }
 
         @Override
-        protected ChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient ingredient, ChemicalStack output) {
+        protected ChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient ingredient, ChemicalStackTemplate output) {
             return new BasicActivatingRecipe(ingredient, output);
         }
     }
@@ -82,7 +78,7 @@ public abstract class ChemicalToChemicalRecipeManager extends MekanismRecipeMana
         }
 
         @Override
-        protected ChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient ingredient, ChemicalStack output) {
+        protected ChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient ingredient, ChemicalStackTemplate output) {
             return new BasicCentrifugingRecipe(ingredient, output);
         }
     }

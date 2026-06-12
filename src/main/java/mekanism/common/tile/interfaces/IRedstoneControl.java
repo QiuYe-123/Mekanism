@@ -5,7 +5,6 @@ import io.netty.buffer.ByteBuf;
 import java.util.Locale;
 import java.util.function.IntFunction;
 import mekanism.api.IIncrementalEnum;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.IHasTextComponent.IHasEnumNameTextComponent;
 import mekanism.api.text.ILangEntry;
 import mekanism.common.MekanismLang;
@@ -17,38 +16,27 @@ import net.minecraft.util.StringRepresentable;
 
 public interface IRedstoneControl {
 
-    /**
-     * Gets the RedstoneControl type from this block.
-     *
-     * @return this block's RedstoneControl type
-     */
+    /// Gets the RedstoneControl type from this block.
+    ///
+    /// @return this block's RedstoneControl type
     RedstoneControl getControlType();
 
-    /**
-     * Sets this block's RedstoneControl type to a new value.
-     *
-     * @param type - RedstoneControl type to set
-     */
+    /// Sets this block's RedstoneControl type to a new value.
+    ///
+    /// @param type RedstoneControl type to set
     void setControlType(RedstoneControl type);
 
-    /**
-     * If the block is getting powered or not by redstone (indirectly).
-     *
-     * @return if the block is getting powered indirectly
-     */
+    /// If the block is getting powered or not by redstone (indirectly).
+    ///
+    /// @return if the block is getting powered indirectly
     boolean isPowered();
 
-    /**
-     * If the block was getting powered or not by redstone, last tick. Used for PULSE mode.
-     */
+    /// If the block was getting powered or not by redstone, last tick. Used for PULSE mode.
     boolean wasPowered();
 
-    /**
-     * If the machine supports the given redstone control mode.
-     */
+    /// If the machine supports the given redstone control mode.
     boolean supportsMode(RedstoneControl mode);
 
-    @NothingNullByDefault
     enum RedstoneControl implements IIncrementalEnum<RedstoneControl>, IHasEnumNameTextComponent, StringRepresentable {
         DISABLED(MekanismLang.REDSTONE_CONTROL_DISABLED),
         HIGH(MekanismLang.REDSTONE_CONTROL_HIGH),

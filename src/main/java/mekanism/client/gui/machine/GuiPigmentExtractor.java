@@ -1,11 +1,11 @@
 package mekanism.client.gui.machine;
 
 import java.lang.ref.WeakReference;
+import mekanism.api.chemical.ChemicalStackTemplate;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.recipes.ItemStackToChemicalRecipe;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
 import mekanism.client.gui.GuiConfigurableTile;
-import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.bar.GuiHorizontalPowerBar;
 import mekanism.client.gui.element.gauge.GaugeType;
 import mekanism.client.gui.element.gauge.GuiChemicalGauge;
@@ -18,13 +18,14 @@ import mekanism.common.inventory.warning.WarningTracker.WarningType;
 import mekanism.common.tile.machine.TileEntityPigmentExtractor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.transfer.item.ItemResource;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 public class GuiPigmentExtractor extends GuiConfigurableTile<TileEntityPigmentExtractor, MekanismTileContainer<TileEntityPigmentExtractor>> {
 
-    private GuiElement energyBar;
+    private static final int ENERGY_BAR_X = 115;
 
     public GuiPigmentExtractor(MekanismTileContainer<TileEntityPigmentExtractor> container, Inventory inv, Component title) {
         super(container, inv, title);
@@ -34,7 +35,7 @@ public class GuiPigmentExtractor extends GuiConfigurableTile<TileEntityPigmentEx
     @Override
     protected void addGuiElements() {
         super.addGuiElements();
-        energyBar = addRenderableWidget(new GuiHorizontalPowerBar(this, tile.energyContainer(), 115, 75))
+        addRenderableWidget(new GuiHorizontalPowerBar(this, tile.energyContainer(), ENERGY_BAR_X, 75))
               .warning(WarningType.NOT_ENOUGH_ENERGY, tile.getWarningCheck(RecipeError.NOT_ENOUGH_ENERGY));
         addRenderableWidget(new GuiEnergyTab(this, tile.energyContainer(), tile::getActive));
         addRenderableWidget(new GuiChemicalGauge(() -> tile.pigmentTank, tile::getChemicalTanks, GaugeType.STANDARD, this, 131, 13))
@@ -44,27 +45,24 @@ public class GuiPigmentExtractor extends GuiConfigurableTile<TileEntityPigmentEx
     }
 
     @Override
-    protected void drawForegroundText(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+    protected void drawForegroundText(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         renderTitleText(guiGraphics);
-        renderInventoryText(guiGraphics, energyBar.getRelativeX());
+        renderInventoryText(guiGraphics, ENERGY_BAR_X);
         super.drawForegroundText(guiGraphics, mouseX, mouseY);
     }
 
     private class PigmentColorDetails implements ColorDetails {
 
+        @Nullable
         private WeakReference<ItemStackToChemicalRecipe> cachedRecipe;
 
         @Override
         public int getColorFrom() {
-            return 0xFFFFFFFF;
+            return CommonColors.WHITE;
         }
 
         @Override
         public int getColorTo() {
-            if (tile == null) {
-                //Should never actually be null, but just in case check it to make intellij happy
-                return 0xFFFFFFFF;
-            }
             if (tile.pigmentTank.isEmpty()) {
                 //If the pigment tank is empty, try looking up the recipe and grabbing the color from it
                 IInventorySlot inputSlot = tile.getInputSlot();
@@ -80,14 +78,16 @@ public class GuiPigmentExtractor extends GuiConfigurableTile<TileEntityPigmentEx
                         }
                     }
                     if (recipe != null) {
-                        return getColor(recipe.getOutput(input.toStack(inputSlot.amountAsInt())).getChemicalColorRepresentation());
+                        ChemicalStackTemplate output = recipe.getOutput(input.toStack(inputSlot.amountAsInt()));
+                        return output.typeHolder().value().getColorRepresentation();
                     }
                 }
-                return 0xFFFFFFFF;
+                return CommonColors.WHITE;
             }
-            return getColor(tile.pigmentTank.resource().getChemicalColorRepresentation());
+            return tile.pigmentTank.resource().getChemicalColorRepresentation();
         }
 
+        @Nullable
         private ItemStackToChemicalRecipe getRecipeAndCache() {
             ItemStackToChemicalRecipe recipe = tile.getRecipe(0);
             if (recipe == null) {
@@ -96,13 +96,6 @@ public class GuiPigmentExtractor extends GuiConfigurableTile<TileEntityPigmentEx
                 cachedRecipe = new WeakReference<>(recipe);
             }
             return recipe;
-        }
-
-        private int getColor(int tint) {
-            if ((tint & 0xFF000000) == 0) {
-                return 0xFF000000 | tint;
-            }
-            return tint;
         }
     }
 }

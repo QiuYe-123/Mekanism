@@ -5,6 +5,7 @@ import com.google.common.collect.Table;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.common.Mekanism;
@@ -45,11 +46,9 @@ public class MekanismTags {
             for (PrimaryResource resource : EnumUtils.PRIMARY_RESOURCES) {
                 for (ResourceType type : EnumUtils.RESOURCE_TYPES) {
                     if (type.usedByPrimary(resource)) {
-                        if (type.isVanilla() || type == ResourceType.DUST) {
-                            PROCESSED_RESOURCES.put(type, resource, commonTag(type.getBaseTagPath() + "/" + resource.getRegistrySuffix()));
-                        } else {
-                            PROCESSED_RESOURCES.put(type, resource, commonTag(type.getBaseTagPath() + "/" + resource.getRegistrySuffix()));
-                        }
+                        String name = type.getBaseTagPath() + "/" + resource.getRegistrySuffix();
+                        TagKey<Item> tagKey = type.isVanilla() || type == ResourceType.DUST ? commonTag(name) : tag(name);
+                        PROCESSED_RESOURCES.put(type, resource, tagKey);
                     }
                 }
                 if (!resource.isVanilla()) {
@@ -63,6 +62,10 @@ public class MekanismTags {
             for (OreType ore : EnumUtils.ORE_TYPES) {
                 ORES.put(ore, commonTag("ores/" + ore.getResource().getRegistrySuffix()));
             }
+        }
+
+        public static TagKey<Item> getProcessedResource(ResourceType resourceType, PrimaryResource resource) {
+            return Objects.requireNonNull(PROCESSED_RESOURCES.get(resourceType, resource));
         }
 
         public static final TagKey<Item> CONFIGURATORS = tag("configurators");
@@ -196,9 +199,7 @@ public class MekanismTags {
         public static final TagKey<Block> ATOMIC_DISASSEMBLER_ORE = tag("atomic_disassembler_ore");
         public static final TagKey<Block> INCORRECT_FOR_DISASSEMBLER = tag("incorrect_for_disassembler");
         public static final TagKey<Block> INCORRECT_FOR_MEKA_TOOL = tag("incorrect_for_meka_tool");
-        /**
-         * For use in the farming module to target blocks that should be effectively ignored when checking if the block below should be targeted.
-         */
+        /// For use in the farming module to target blocks that should be effectively ignored when checking if the block below should be targeted.
         public static final TagKey<Block> FARMING_OVERRIDE = tag("farming_override");
 
         public static final TagKey<Block> CHESTS_ELECTRIC = commonTag("chests/electric");

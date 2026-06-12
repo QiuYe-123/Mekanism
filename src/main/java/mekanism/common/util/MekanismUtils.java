@@ -12,11 +12,12 @@ import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
@@ -31,9 +32,9 @@ import mekanism.api.text.EnumColor;
 import mekanism.client.MekanismClient;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
-import mekanism.common.attachments.FrequencyAware;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.block.attribute.AttributeFactoryType;
+import mekanism.common.component.FrequencyAware;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.frequency.IFrequencyItem;
 import mekanism.common.registries.MekanismDataComponents;
@@ -95,14 +96,9 @@ import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.resource.Resource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Utilities used by Mekanism. All miscellaneous methods are located here.
- *
- * @author AidanBrady
- */
+/// Utilities used by Mekanism. All miscellaneous methods are located here.
 public final class MekanismUtils {
 
     public static final float ONE_OVER_ROOT_TWO = 1 / Mth.SQRT_OF_TWO;
@@ -125,7 +121,7 @@ public final class MekanismUtils {
         return level == null ? 0 : level.getGameTime();
     };
 
-    private static final List<UUID> warnedFails = new ArrayList<>();
+    private static final Set<UUID> warnedFails = new HashSet<>();
 
     public static Component logFormat(Object message) {
         return logFormat(EnumColor.GRAY, message);
@@ -140,14 +136,6 @@ public final class MekanismUtils {
         return level == null || level.tickRateManager().runsNormally();
     }
 
-    public static LongSupplier getGameTimeSupplier(BlockEntity blockEntity) {
-        Objects.requireNonNull(blockEntity);
-        return () -> {
-            Level level = blockEntity.getLevel();
-            return level == null ? 0 : level.getGameTime();
-        };
-    }
-
     @Nullable
     public static Player tryGetClientPlayer() {
         if (FMLEnvironment.getDist().isClient()) {
@@ -158,13 +146,10 @@ public final class MekanismUtils {
         return null;
     }
 
-    /**
-     * Gets the creator's modid if it exists, or falls back to the registry name.
-     *
-     * @implNote While the default implementation of getCreatorModId falls back to the registry name, it is possible someone is overriding this and not falling back.
-     */
-    @NotNull
-    public static String getModId(@NotNull HolderLookup.Provider registries, @NotNull ItemStack stack) {
+    /// Gets the creator's modid if it exists, or falls back to the registry name.
+    ///
+    /// @implNote While the default implementation of getCreatorModId falls back to the registry name, it is possible someone is overriding this and not falling back.
+    public static String getModId(HolderLookup.Provider registries, ItemStack stack) {
         Item item = stack.getItem();
         String modid = item.getCreatorModId(registries, stack);
         if (modid == null) {
@@ -178,24 +163,20 @@ public final class MekanismUtils {
         return (entity.getMainArm() == HumanoidArm.RIGHT) == (hand == InteractionHand.MAIN_HAND);
     }
 
-    /**
-     * Gets the left side of a certain orientation.
-     *
-     * @param orientation Current orientation of the machine
-     *
-     * @return left side
-     */
+    /// Gets the left side of a certain orientation.
+    ///
+    /// @param orientation Current orientation of the machine
+    ///
+    /// @return left side
     public static Direction getLeft(Direction orientation) {
         return orientation.getClockWise();
     }
 
-    /**
-     * Gets the right side of a certain orientation.
-     *
-     * @param orientation Current orientation of the machine
-     *
-     * @return right side
-     */
+    /// Gets the right side of a certain orientation.
+    ///
+    /// @param orientation Current orientation of the machine
+    ///
+    /// @return right side
     public static Direction getRight(Direction orientation) {
         return orientation.getCounterClockWise();
     }
@@ -216,7 +197,7 @@ public final class MekanismUtils {
 
     public static double fractionUpgrades(IUpgradeTile tile, Upgrade type) {
         if (tile.supportsUpgrade(type)) {
-            return tile.getComponent().getUpgrades(type) / (double) type.getMax();
+            return tile.getUpgrades(type) / (double) type.getMax();
         }
         return 0;
     }
@@ -288,14 +269,12 @@ public final class MekanismUtils {
         return def;
     }
 
-    /**
-     * Gets the operating ticks required for a machine via its upgrades.
-     *
-     * @param tile - tile containing upgrades
-     * @param def  - the original, default ticks required
-     *
-     * @return required operating ticks
-     */
+    /// Gets the operating ticks required for a machine via its upgrades.
+    ///
+    /// @param tile tile containing upgrades
+    /// @param def  the original, default ticks required
+    ///
+    /// @return required operating ticks
     public static int getTicks(IUpgradeTile tile, int def) {
         if (tile.supportsUpgrades()) {
             return Math.max(1, MathUtils.clampToInt(getTicksD(tile, def)));
@@ -303,27 +282,23 @@ public final class MekanismUtils {
         return def;
     }
 
-    /**
-     * Gets the operating ticks required for a machine via its upgrades.
-     *
-     * @param tile - tile containing upgrades
-     * @param def  - the original, default ticks required
-     *
-     * @return required operating ticks
-     */
+    /// Gets the operating ticks required for a machine via its upgrades.
+    ///
+    /// @param tile tile containing upgrades
+    /// @param def  the original, default ticks required
+    ///
+    /// @return required operating ticks
     public static double getTicksD(IUpgradeTile tile, int def) {
         return def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), -fractionUpgrades(tile, Upgrade.SPEED));
     }
 
-    /**
-     * Get the amount of operations per tick, accounting for bonus operations from non-default upgrade modifiers. Fractional operations are ignored
-     *
-     * @param tile              - tile containing upgrades
-     * @param defTicks          - the original, default ticks required
-     * @param defaultOperations - the original, default operations (usually 1)
-     *
-     * @return max operations to do in one tick. If speed is not < 1 tick return the default
-     */
+    /// Get the amount of operations per tick, accounting for bonus operations from non-default upgrade modifiers. Fractional operations are ignored
+    ///
+    /// @param tile              tile containing upgrades
+    /// @param defTicks          the original, default ticks required
+    /// @param defaultOperations the original, default operations (usually 1)
+    ///
+    /// @return max operations to do in one tick. If speed is not < 1 tick return the default
     public static int getOperationsPerTick(IUpgradeTile tile, int defTicks, int defaultOperations) {
         double ticksD = getTicksD(tile, defTicks);
         if (ticksD >= 1) {
@@ -332,14 +307,12 @@ public final class MekanismUtils {
         return MathUtils.clampToInt(Math.max(1, 1 / ticksD) * defaultOperations);
     }
 
-    /**
-     * Gets the energy required per tick for a machine via its upgrades.
-     *
-     * @param tile - tile containing upgrades
-     * @param def  - the original, default energy required
-     *
-     * @return required energy per tick
-     */
+    /// Gets the energy required per tick for a machine via its upgrades.
+    ///
+    /// @param tile tile containing upgrades
+    /// @param def  the original, default energy required
+    ///
+    /// @return required energy per tick
     public static int getEnergyPerTick(IUpgradeTile tile, int def) {
         if (tile.supportsUpgrades()) {
             return Mth.ceil(def * Math.pow(
@@ -350,13 +323,11 @@ public final class MekanismUtils {
         return def;
     }
 
-    /**
-     * Gets the secondary energy multiplier required per tick for a machine via upgrades.
-     *
-     * @param tile - tile containing upgrades
-     *
-     * @return max secondary energy per tick
-     */
+    /// Gets the secondary energy multiplier required per tick for a machine via upgrades.
+    ///
+    /// @param tile tile containing upgrades
+    ///
+    /// @return max secondary energy per tick
     public static double getGasPerTickMeanMultiplier(IUpgradeTile tile) {
         if (tile.supportsUpgrades()) {
             if (tile.supportsUpgrade(Upgrade.CHEMICAL)) {
@@ -367,41 +338,35 @@ public final class MekanismUtils {
         return 1;
     }
 
-    /**
-     * Gets the maximum energy for a machine via its upgrades.
-     *
-     * @param tile - tile containing upgrades
-     * @param def  - original, default max energy
-     *
-     * @return max energy
-     */
+    /// Gets the maximum energy for a machine via its upgrades.
+    ///
+    /// @param tile tile containing upgrades
+    /// @param def  original, default max energy
+    ///
+    /// @return max energy
     public static long getMaxEnergy(IUpgradeTile tile, long def) {
         if (tile.supportsUpgrades()) {
-            return MathUtils.clampToLong(def * (Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), fractionUpgrades(tile, Upgrade.ENERGY))));
+            return MathUtils.clampToLong(def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), fractionUpgrades(tile, Upgrade.ENERGY)));
         }
         return def;
     }
 
-    /**
-     * Gets the maximum energy for a machine's item form via its upgrades.
-     *
-     * @param energyUpgrades number of installed energy upgrades
-     * @param def            original, default max energy
-     *
-     * @return max energy
-     */
+    /// Gets the maximum energy for a machine's item form via its upgrades.
+    ///
+    /// @param energyUpgrades number of installed energy upgrades
+    /// @param def            original, default max energy
+    ///
+    /// @return max energy
     public static long getMaxEnergy(int energyUpgrades, long def) {
-        return MathUtils.clampToLong(def * (Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), energyUpgrades / (double) Upgrade.ENERGY.getMax())));
+        return MathUtils.clampToLong(def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), energyUpgrades / (double) Upgrade.ENERGY.getMax()));
     }
 
-    /**
-     * Gets a ResourceLocation with a defined resource type and name.
-     *
-     * @param type - type of resource to retrieve
-     * @param name - simple name of file to retrieve as a ResourceLocation
-     *
-     * @return the corresponding ResourceLocation
-     */
+    /// Gets a ResourceLocation with a defined resource type and name.
+    ///
+    /// @param type type of resource to retrieve
+    /// @param name simple name of file to retrieve as a ResourceLocation
+    ///
+    /// @return the corresponding ResourceLocation
     public static Identifier getResource(ResourceType type, String name) {
         return Mekanism.rl(type.getPrefix() + name);
     }
@@ -415,13 +380,11 @@ public final class MekanismUtils {
         return block instanceof LiquidBlock || block instanceof BubbleColumnBlock;
     }
 
-    /**
-     * Ray-traces what block a player is looking at.
-     *
-     * @param player - player to raytrace
-     *
-     * @return raytraced value
-     */
+    /// Ray-traces what block a player is looking at.
+    ///
+    /// @param player player to raytrace
+    ///
+    /// @return raytraced value
     public static BlockHitResult rayTrace(Player player) {
         return rayTrace(player, ClipContext.Fluid.NONE);
     }
@@ -441,13 +404,11 @@ public final class MekanismUtils {
         return player.level().clip(new ClipContext(headVec, endVec, ClipContext.Block.OUTLINE, fluidMode, player));
     }
 
-    /**
-     * Gets the head vector of a player for a ray trace.
-     *
-     * @param player - player to check
-     *
-     * @return head location
-     */
+    /// Gets the head vector of a player for a ray trace.
+    ///
+    /// @param player player to check
+    ///
+    /// @return head location
     private static Vec3 getHeadVec(Player player) {
         double posY = player.getY() + player.getEyeHeight();
         if (player.isCrouching()) {
@@ -456,10 +417,8 @@ public final class MekanismUtils {
         return new Vec3(player.getX(), posY, player.getZ());
     }
 
-    /**
-     * @apiNote Only call on the client.
-     */
-    public static void addFrequencyItemTooltip(ItemStack stack, @NotNull Item.TooltipContext context, @NotNull TooltipDisplay tooltipDisplay, @NotNull Consumer<Component> tooltipAdder, @NotNull TooltipFlag flag) {
+    /// @apiNote Only call on the client.
+    public static void addFrequencyItemTooltip(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag flag) {
         if (stack.isEmpty() || !(stack.getItem() instanceof IFrequencyItem frequencyItem)) {//Note: This shouldn't be empty, but we validate it just in case
             return;
         }
@@ -473,23 +432,17 @@ public final class MekanismUtils {
         return Math.max(1, MathUtils.clampToInt(0.005 * capacity));
     }
 
-    /**
-     * Gets a rounded energy display of a defined amount of energy.
-     *
-     * @param temp - temperature to display
-     *
-     * @return rounded energy display
-     */
+    /// Gets a rounded energy display of a defined amount of energy.
+    ///
+    /// @param temp temperature to display
+    ///
+    /// @return rounded energy display
     public static Component getTemperatureDisplay(double temp, TemperatureUnit unit, boolean shift) {
         double tempKelvin = unit.convertToK(temp, true);
         return UnitDisplayUtils.getDisplayShort(tempKelvin, MekanismConfig.common.tempUnit.get(), shift);
     }
 
-    /**
-     * Converts a list of slots into a simple crafting input.
-     *
-     * @param resize True to clamp the stacks to a size of one.
-     */
+    /// Converts a list of slots into a simple crafting input.
     public static CraftingInput.Positioned getCraftingInput(int width, int height, List<ItemResource> slots) {
         if (width * height != slots.size()) {
             throw new IllegalStateException("Expected there to be a slot for every index in a " + width + " by " + height + " grid.");
@@ -501,11 +454,9 @@ public final class MekanismUtils {
         return CraftingInput.ofPositioned(width, height, stacks);
     }
 
-    /**
-     * Converts a list of slots into a simple crafting input.
-     *
-     * @param resize True to clamp the stacks to a size of one.
-     */
+    /// Converts a list of slots into a simple crafting input.
+    ///
+    /// @param resize True to clamp the stacks to a size of one.
     public static CraftingInput.Positioned getCraftingInputSlots(int width, int height, List<IInventorySlot> slots, boolean resize) {
         if (width * height != slots.size()) {
             throw new IllegalStateException("Expected there to be a slot for every index in a " + width + " by " + height + " grid.");
@@ -518,9 +469,7 @@ public final class MekanismUtils {
         return CraftingInput.ofPositioned(width, height, stacks);
     }
 
-    /**
-     * Checks if the stack can be used as a wrench for dismantling purposes
-     */
+    /// Checks if the stack can be used as a wrench for dismantling purposes
     public static boolean canUseAsWrench(ItemStack stack) {
         if (stack.isEmpty()) {
             return false;
@@ -536,28 +485,27 @@ public final class MekanismUtils {
         return false;
     }
 
-    @NotNull
     public static String getLastKnownUsername(@Nullable UUID uuid) {
         if (uuid == null) {
             return "<???>";
         }
         String ret = UsernameCache.getLastKnownUsername(uuid);
-        if (ret == null && !warnedFails.contains(uuid) && EffectiveSide.get().isServer()) { // see if MC/Yggdrasil knows about it?!
-            Optional<NameAndId> nameToIdCache = ServerLifecycleHooks.getCurrentServer().services().nameToIdCache().get(uuid);
-            if (nameToIdCache.isPresent()) {
-                ret = nameToIdCache.get().name();
+        if (ret == null && EffectiveSide.get().isServer() && !warnedFails.contains(uuid)) { // see if MC/Yggdrasil knows about it?!
+            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+            if (server != null) {
+                Optional<NameAndId> nameToIdCache = server.services().nameToIdCache().get(uuid);
+                if (nameToIdCache.isPresent()) {
+                    ret = nameToIdCache.get().name();
+                }
             }
         }
-        if (ret == null && !warnedFails.contains(uuid)) {
+        if (ret == null && warnedFails.add(uuid)) {
             Mekanism.logger.warn("Failed to retrieve username for UUID {}, you might want to add it to the JSON cache", uuid);
-            warnedFails.add(uuid);
         }
         return ret == null ? "<" + uuid + ">" : ret;
     }
 
-    /**
-     * Copy of {@link MobEffectInstance#tick(LivingEntity, Runnable)}, but modified to not apply the effect to avoid extra damage and the like.
-     */
+    /// Copy of [MobEffectInstance#tick(LivingEntity, Runnable)], but modified to not apply the effect to avoid extra damage and the like.
     public static void speedUpEffectSafely(LivingEntity entity, MobEffectInstance effectInstance) {
         if (effectInstance.getDuration() > 0) {
             effectInstance.tickDownDuration();
@@ -576,9 +524,7 @@ public final class MekanismUtils {
         return !effectInstance.getEffect().is(MekanismAPITags.MobEffects.SPEED_UP_BLACKLIST);
     }
 
-    /**
-     * Copy of {@link LivingEntity#onEffectUpdated(MobEffectInstance, boolean, Entity)} due to not being able to AT the method as it is protected.
-     */
+    /// Copy of [LivingEntity#onEffectUpdated(MobEffectInstance, boolean, Entity)] due to not being able to AT the method as it is protected.
     @SuppressWarnings("JavadocReference")
     private static void onChangedPotionEffect(LivingEntity entity, MobEffectInstance effectInstance, boolean reapply) {
         entity.effectsDirty = true;
@@ -606,32 +552,26 @@ public final class MekanismUtils {
         return false;
     }
 
-    /**
-     * @param amount   Amount currently stored
-     * @param capacity Total amount that can be stored.
-     *
-     * @return A redstone level based on the percentage of the amount stored.
-     */
+    /// @param amount   Amount currently stored
+    /// @param capacity Total amount that can be stored.
+    ///
+    /// @return A redstone level based on the percentage of the amount stored.
     public static int redstoneLevelFromContents(long amount, long capacity) {
         double fractionFull = capacity == 0 ? 0 : ((double) amount / capacity);
         return Mth.lerpDiscrete((float) fractionFull, Redstone.SIGNAL_NONE, Redstone.SIGNAL_MAX);
     }
 
-    /**
-     * Checks whether the player is in creative or spectator mode.
-     *
-     * @param player the player to check.
-     *
-     * @return true if the player is neither in creative mode, nor in spectator mode.
-     */
+    /// Checks whether the player is in creative or spectator mode.
+    ///
+    /// @param player the player to check.
+    ///
+    /// @return true if the player is neither in creative mode, nor in spectator mode.
     public static boolean isPlayingMode(Player player) {
         //TODO - 26.1: Look at calls to Player#isCreative, and see what should potentially be going through here
         return !player.isCreative() && !player.isSpectator();
     }
 
-    /**
-     * Helper to read the parameter names from the format saved by our annotation processor param name mapper.
-     */
+    /// Helper to read the parameter names from the format saved by our annotation processor param name mapper.
     public static List<String> getParameterNames(@Nullable JsonObject classMethods, String method, String signature) {
         if (classMethods != null) {
             JsonObject signatures = classMethods.getAsJsonObject(method);
@@ -659,10 +599,8 @@ public final class MekanismUtils {
         AABB modify(AABB bounding, double data);
     }
 
-    /**
-     * Similar in concept to {@link net.minecraft.world.entity.Entity#updateFluidHeightAndDoFluidPushing()} except calculates if a given portion of the player is in the
-     * fluids.
-     */
+    /// Similar in concept to [net.minecraft.world.entity.Entity#updateFluidHeightAndDoFluidPushing()] except calculates if a given portion of the player is in the
+    /// fluids.
     public static Map<FluidType, FluidInDetails> getFluidsIn(Player player, double data, ModifyPlayerBounding modifyBoundingBox) {
         AABB bb = modifyBoundingBox.modify(player.getBoundingBox().deflate(0.001), data);
         int xMin = Mth.floor(bb.minX);

@@ -37,8 +37,9 @@ public class MekanismModelCache extends BaseModelCache {
     private MekanismModelCache() {
         super(Mekanism.MODID);
         for (DriveStatus status : EnumUtils.DRIVE_STATUSES) {
-            if (status != DriveStatus.NONE) {
-                QIO_DRIVES[status.ordinal()] = registerJSON(status.getModel());
+            Identifier model = status.getModel();
+            if (model != null) {
+                QIO_DRIVES[status.ordinal()] = registerJSON(model);
             }
         }
     }
@@ -53,9 +54,7 @@ public class MekanismModelCache extends BaseModelCache {
         callbacks.add(callback);
     }
 
-    /**
-     * Call via {@link IModuleHelper#addMekaSuitModuleModels(Identifier)}.
-     */
+    /// Call via [IModuleHelper#addMekaSuitModuleModels(Identifier)].
     public ModuleOBJModelData registerMekaSuitModuleModel(Identifier rl) {
         ModuleOBJModelData data = register(rl, ModuleOBJModelData::new);
         mekaSuitModules.add(data);

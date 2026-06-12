@@ -14,6 +14,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 class EnumToggle<TYPE extends Enum<TYPE> & IHasTextComponent> extends MiniElement<TYPE> {
@@ -32,7 +33,7 @@ class EnumToggle<TYPE extends Enum<TYPE> & IHasTextComponent> extends MiniElemen
         super(parent, data, description, xPos, yPos);
         BAR_LENGTH = this.parent.getScreenWidth() - 24;
         enumConstants = data.getEnumConstants();
-        this.optionDistance = (BAR_LENGTH / (enumConstants.size() - 1));
+        this.optionDistance = BAR_LENGTH / (enumConstants.size() - 1);
         this.usesIcons = !enumConstants.isEmpty() && enumConstants.getFirst() instanceof IHasModeIcon;
     }
 
@@ -62,7 +63,7 @@ class EnumToggle<TYPE extends Enum<TYPE> & IHasTextComponent> extends MiniElemen
             int optionCenter = BAR_START + optionDistance * option.ordinal();
             int color = textColor;
             if (text.getStyle().getColor() != null) {
-                color = 0xFF000000 | text.getStyle().getColor().getValue();
+                color = ARGB.opaque(text.getStyle().getColor().getValue());
             }
             GuiUtils.fill(guiGraphics, getRelativeX() + optionCenter, getRelativeY() + 17, 1, 3, color);
             if (usesIcons) {
@@ -115,7 +116,7 @@ class EnumToggle<TYPE extends Enum<TYPE> & IHasTextComponent> extends MiniElemen
         List<TYPE> options = enumConstants;
         int size = options.size() - 1;
         int cur = (int) Math.round(((mouseX - getX() - BAR_START) / BAR_LENGTH) * size);
-        cur = Mth.clamp(cur, 0, size);
+        cur = Math.clamp(cur, 0, size);
         if (cur != data.get().ordinal()) {
             setData(options.get(cur));
         }

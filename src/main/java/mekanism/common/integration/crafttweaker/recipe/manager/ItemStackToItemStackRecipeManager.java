@@ -12,7 +12,7 @@ import mekanism.common.integration.crafttweaker.CrTConstants;
 import mekanism.common.integration.crafttweaker.CrTUtils;
 import mekanism.common.recipe.IMekanismRecipeTypeProvider;
 import mekanism.common.recipe.MekanismRecipeType;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import org.openzen.zencode.java.ZenCodeType;
 
@@ -24,40 +24,36 @@ public abstract class ItemStackToItemStackRecipeManager extends MekanismRecipeMa
         super(recipeType);
     }
 
-    /**
-     * Adds a recipe that converts an item into another item.
-     * <br>
-     * If this is called from the crushing recipe manager, this will be a crushing recipe. Crushers and Crushing Factories can process this recipe type.
-     * <br>
-     * If this is called from the enriching recipe manager, this will be an enriching recipe. Enrichment Chambers and Enriching Factories can process this recipe type.
-     * <br>
-     * If this is called from the smelting recipe manager, this will be a smelting recipe. Energized Smelters, Smelting Factories, and Robits can process this recipe
-     * type.
-     *
-     * @param name   Name of the new recipe.
-     * @param input  {@link IIngredientWithAmount} representing the input of the recipe.
-     * @param output {@link IItemStack} representing the output of the recipe.
-     */
+    /// Adds a recipe that converts an item into another item.
+    ///
+    /// If this is called from the crushing recipe manager, this will be a crushing recipe. Crushers and Crushing Factories can process this recipe type.
+    ///
+    /// If this is called from the enriching recipe manager, this will be an enriching recipe. Enrichment Chambers and Enriching Factories can process this recipe type.
+    ///
+    /// If this is called from the smelting recipe manager, this will be a smelting recipe. Energized Smelters, Smelting Factories, and Robits can process this recipe
+    /// type.
+    ///
+    /// @param name   Name of the new recipe.
+    /// @param input  [IIngredientWithAmount] representing the input of the recipe.
+    /// @param output [IItemStack] representing the output of the recipe.
     @ZenCodeType.Method
     public void addRecipe(String name, IIngredientWithAmount input, IItemStack output) {
         addRecipe(name, makeRecipe(input, output));
     }
 
-    /**
-     * Creates a recipe that converts an item into another item.
-     *
-     * @param input  {@link IIngredientWithAmount} representing the input of the recipe.
-     * @param output {@link IItemStack} representing the output of the recipe. Will be validated as not empty.
-     */
+    /// Creates a recipe that converts an item into another item.
+    ///
+    /// @param input  [IIngredientWithAmount] representing the input of the recipe.
+    /// @param output [IItemStack] representing the output of the recipe. Will be validated as not empty.
     public final ItemStackToItemStackRecipe makeRecipe(IIngredientWithAmount input, IItemStack output) {
         return makeRecipe(input, getAndValidateNotEmpty(output));
     }
 
-    protected abstract ItemStackToItemStackRecipe makeRecipe(IIngredientWithAmount input, ItemStack output);
+    protected abstract ItemStackToItemStackRecipe makeRecipe(IIngredientWithAmount input, ItemStackTemplate output);
 
     @Override
     protected String describeOutputs(ItemStackToItemStackRecipe recipe) {
-        return CrTUtils.describeOutputs(recipe.getOutputDefinition(), ItemStackUtil::getCommandString);
+        return CrTUtils.describeOutputs(recipe.getOutputDefinition(), template -> ItemStackUtil.getCommandString(template.create()));
     }
 
     @ZenRegister
@@ -71,7 +67,7 @@ public abstract class ItemStackToItemStackRecipeManager extends MekanismRecipeMa
         }
 
         @Override
-        protected ItemStackToItemStackRecipe makeRecipe(IIngredientWithAmount input, ItemStack output) {
+        protected ItemStackToItemStackRecipe makeRecipe(IIngredientWithAmount input, ItemStackTemplate output) {
             return new BasicCrushingRecipe(CrTUtils.fromCrT(input), output);
         }
     }
@@ -87,7 +83,7 @@ public abstract class ItemStackToItemStackRecipeManager extends MekanismRecipeMa
         }
 
         @Override
-        protected ItemStackToItemStackRecipe makeRecipe(IIngredientWithAmount input, ItemStack output) {
+        protected ItemStackToItemStackRecipe makeRecipe(IIngredientWithAmount input, ItemStackTemplate output) {
             return new BasicEnrichingRecipe(CrTUtils.fromCrT(input), output);
         }
     }
@@ -103,7 +99,7 @@ public abstract class ItemStackToItemStackRecipeManager extends MekanismRecipeMa
         }
 
         @Override
-        protected ItemStackToItemStackRecipe makeRecipe(IIngredientWithAmount input, ItemStack output) {
+        protected ItemStackToItemStackRecipe makeRecipe(IIngredientWithAmount input, ItemStackTemplate output) {
             return new BasicSmeltingRecipe(CrTUtils.fromCrT(input), output);
         }
     }

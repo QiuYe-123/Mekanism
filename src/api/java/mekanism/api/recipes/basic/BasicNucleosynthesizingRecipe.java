@@ -3,7 +3,6 @@ package mekanism.api.recipes.basic;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.recipes.MekanismRecipeSerializers;
 import mekanism.api.recipes.NucleosynthesizingRecipe;
@@ -14,8 +13,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class BasicNucleosynthesizingRecipe extends NucleosynthesizingRecipe implements IBasicItemStackOutput {
 
     protected final ItemStackIngredient itemInput;
@@ -24,13 +23,11 @@ public class BasicNucleosynthesizingRecipe extends NucleosynthesizingRecipe impl
     private final int duration;
     private final boolean perTickUsage;
 
-    /**
-     * @param itemInput     Item input.
-     * @param chemicalInput Chemical input.
-     * @param output        Output.
-     * @param duration      Duration in ticks that it takes the recipe to complete. Must be greater than zero.
-     * @param perTickUsage  Should the recipe consume the chemical input each tick it is processing.
-     */
+    /// @param itemInput     Item input.
+    /// @param chemicalInput Chemical input.
+    /// @param output        Output.
+    /// @param duration      Duration in ticks that it takes the recipe to complete. Must be greater than zero.
+    /// @param perTickUsage  Should the recipe consume the chemical input each tick it is processing.
     public BasicNucleosynthesizingRecipe(ItemStackIngredient itemInput, ChemicalStackIngredient chemicalInput, ItemStackTemplate output, int duration, boolean perTickUsage) {
         this.itemInput = Objects.requireNonNull(itemInput, "Item input cannot be null.");
         this.chemicalInput = Objects.requireNonNull(chemicalInput, "Chemical input cannot be null.");
@@ -84,7 +81,7 @@ public class BasicNucleosynthesizingRecipe extends NucleosynthesizingRecipe impl
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         } else if (o == null || getClass() != o.getClass()) {

@@ -3,9 +3,9 @@ package mekanism.common.item.block.machine;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import mekanism.common.attachments.component.AttachedEjector;
-import mekanism.common.attachments.component.AttachedSideConfig;
-import mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo;
+import mekanism.common.component.component.AttachedEjector;
+import mekanism.common.component.component.AttachedSideConfig;
+import mekanism.common.component.component.AttachedSideConfig.LightConfigInfo;
 import mekanism.common.block.prefab.BlockTile.BlockTileModel;
 import mekanism.common.content.blocktype.BlockTypeTile;
 import mekanism.common.item.block.ItemBlockTooltip;
@@ -23,7 +23,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
-import org.jetbrains.annotations.NotNull;
 
 public class ItemBlockQuantumEntangloporter extends ItemBlockTooltip<BlockTileModel<TileEntityQuantumEntangloporter, BlockTypeTile<TileEntityQuantumEntangloporter>>>
       implements IFrequencyItem {
@@ -46,8 +45,8 @@ public class ItemBlockQuantumEntangloporter extends ItemBlockTooltip<BlockTileMo
     }
 
     @Override
-    protected void addStats(@NotNull ItemStack stack, @NotNull ItemAccess itemAccess, @NotNull Item.TooltipContext context, @NotNull TooltipDisplay tooltipDisplay,
-          @NotNull Consumer<Component> tooltipAdder, @NotNull TooltipFlag flag) {
+    protected void addStats(ItemStack stack, ItemAccess itemAccess, Item.TooltipContext context, TooltipDisplay tooltipDisplay,
+          Consumer<Component> tooltipAdder, TooltipFlag flag) {
         MekanismUtils.addFrequencyItemTooltip(stack, context, tooltipDisplay, tooltipAdder, flag);
     }
 

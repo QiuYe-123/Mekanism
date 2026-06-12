@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import mekanism.api.MekanismAPI;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
+import mekanism.api.chemical.ChemicalInstance;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
@@ -28,12 +28,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.item.TooltipFlag;
 
-@NothingNullByDefault
 public class ChemicalEmiStack extends EmiStack {
 
     private final Holder<Chemical> chemical;
 
-    public ChemicalEmiStack(ChemicalStack stack) {
+    public ChemicalEmiStack(ChemicalInstance stack) {
         this(stack.typeHolder(), stack.amount());
     }
 

@@ -14,7 +14,7 @@ import mekanism.client.gui.element.gauge.GuiChemicalGauge;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
 import mekanism.client.gui.tooltip.TooltipUtils;
 import mekanism.common.MekanismLang;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.util.text.EnergyDisplay;
 import mekanism.common.util.text.TextUtils;
@@ -27,7 +27,6 @@ import mekanism.generators.common.tile.turbine.TileEntityTurbineCasing;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import org.jetbrains.annotations.NotNull;
 
 public class GuiIndustrialTurbine extends GuiMekanismTile<TileEntityTurbineCasing, MekanismTileContainer<TileEntityTurbineCasing>> {
 
@@ -114,7 +113,7 @@ public class GuiIndustrialTurbine extends GuiMekanismTile<TileEntityTurbineCasin
     }
 
     @Override
-    protected void drawForegroundText(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+    protected void drawForegroundText(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         renderTitleText(guiGraphics);
         renderInventoryText(guiGraphics, 99);
         super.drawForegroundText(guiGraphics, mouseX, mouseY);

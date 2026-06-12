@@ -7,18 +7,18 @@ import java.util.function.UnaryOperator;
 import mekanism.common.Mekanism;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.fml.util.ObfuscationReflectionHelper.UnableToFindFieldException;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Helper  to make reflecting and grabbing the value of fields in a cached way easier
- *
- * @param <CLASS> Class the field is in.
- * @param <TYPE>  Type of the field.
- */
-public class FieldReflectionHelper<CLASS, TYPE> {
+/// Helper  to make reflecting and grabbing the value of fields in a cached way easier
+///
+/// @param <CLASS> Class the field is in.
+/// @param <TYPE>  Type of the field.
+public class FieldReflectionHelper<CLASS, TYPE extends @Nullable Object> {
 
     private final Class<CLASS> clazz;
     private final String fieldName;
     private final Supplier<TYPE> fallback;
+    @Nullable
     private Field field;
 
     public FieldReflectionHelper(Class<CLASS> clazz, String fieldName, Supplier<TYPE> fallback) {

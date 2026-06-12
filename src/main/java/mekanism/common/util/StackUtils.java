@@ -14,31 +14,27 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class StackUtils {
 
     private StackUtils() {
     }
 
-    /**
-     * Get state for placement for a generic item, with our fake player
-     *
-     * @param stack  the item to place
-     * @param pos    where
-     * @param player our fake player, usually
-     *
-     * @return the result of {@link Block#getStateForPlacement(BlockPlaceContext)}, or null if it cannot be placed in that location
-     */
+    /// Get state for placement for a generic item, with our fake player
+    ///
+    /// @param stack  the item to place
+    /// @param pos    where
+    /// @param player our fake player, usually
+    ///
+    /// @return the result of [Block#getStateForPlacement(BlockPlaceContext)], or null if it cannot be placed in that location
     @Nullable
     public static BlockState getStateForPlacement(ItemStack stack, BlockPos pos, Player player) {
         return Block.byItem(stack.getItem()).getStateForPlacement(new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND,
               new BlockHitResult(Vec3.ZERO, Direction.UP, pos, false))));
     }
 
-    /**
-     * @implNote Renderable check based on {@link net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer#shouldRender(Equippable, EquipmentSlot)}
-     */
+    /// @implNote Renderable check based on [net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer#shouldRender(Equippable, EquipmentSlot)]
     @Contract(value = "null -> false", pure = true)
     public static boolean isRenderableArmor(@Nullable Equippable equippable) {
         //Valid slot check based on HumanoidArmorLayer#shouldRender

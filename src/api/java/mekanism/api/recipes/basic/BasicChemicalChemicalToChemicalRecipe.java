@@ -3,40 +3,34 @@ package mekanism.api.recipes.basic;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.ChemicalStackTemplate;
 import mekanism.api.recipes.ChemicalChemicalToChemicalRecipe;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
 import net.minecraft.core.TypedInstance;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public abstract class BasicChemicalChemicalToChemicalRecipe extends ChemicalChemicalToChemicalRecipe implements IBasicChemicalOutput {
 
     private final RecipeType<ChemicalChemicalToChemicalRecipe> recipeType;
     protected final ChemicalStackIngredient leftInput;
     protected final ChemicalStackIngredient rightInput;
-    protected final ChemicalStack output;
+    protected final ChemicalStackTemplate output;
 
-    /**
-     * @param leftInput  Left input.
-     * @param rightInput Right input.
-     * @param output     Output.
-     *
-     * @apiNote The order of the inputs does not matter.
-     */
-    public BasicChemicalChemicalToChemicalRecipe(ChemicalStackIngredient leftInput, ChemicalStackIngredient rightInput, ChemicalStack output,
+    /// @param leftInput  Left input.
+    /// @param rightInput Right input.
+    /// @param output     Output.
+    ///
+    /// @apiNote The order of the inputs does not matter.
+    public BasicChemicalChemicalToChemicalRecipe(ChemicalStackIngredient leftInput, ChemicalStackIngredient rightInput, ChemicalStackTemplate output,
           RecipeType<ChemicalChemicalToChemicalRecipe> recipeType) {
         this.recipeType = Objects.requireNonNull(recipeType, "Recipe type cannot be null");
         this.leftInput = Objects.requireNonNull(leftInput, "Left input cannot be null.");
         this.rightInput = Objects.requireNonNull(rightInput, "Right input cannot be null.");
-        Objects.requireNonNull(output, "Output cannot be null.");
-        if (output.isEmpty()) {
-            throw new IllegalArgumentException("Output cannot be empty.");
-        }
-        this.output = output.copy();
+        this.output = Objects.requireNonNull(output, "Output cannot be null.");
     }
 
     @Override
@@ -51,8 +45,8 @@ public abstract class BasicChemicalChemicalToChemicalRecipe extends ChemicalChem
 
     @Override
     @Contract(value = "_, _ -> new", pure = true)
-    public ChemicalStack getOutput(TypedInstance<Chemical> input1, TypedInstance<Chemical> input2) {
-        return output.copy();
+    public ChemicalStackTemplate getOutput(TypedInstance<Chemical> input1, TypedInstance<Chemical> input2) {
+        return output;
     }
 
     @Override
@@ -66,17 +60,17 @@ public abstract class BasicChemicalChemicalToChemicalRecipe extends ChemicalChem
     }
 
     @Override
-    public List<ChemicalStack> getOutputDefinition() {
+    public List<ChemicalStackTemplate> getOutputDefinition() {
         return Collections.singletonList(output);
     }
 
     @Override
-    public ChemicalStack getOutputRaw() {
+    public ChemicalStackTemplate getOutputRaw() {
         return output;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         } else if (o == null || getClass() != o.getClass()) {

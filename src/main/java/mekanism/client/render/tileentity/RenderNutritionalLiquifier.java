@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.MekanismRenderer.FluidTextureType;
 import mekanism.client.render.ModelRenderer;
@@ -30,20 +29,19 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.Material.Baked;
 import net.minecraft.data.AtlasIds;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class RenderNutritionalLiquifier extends MekanismTileEntityRenderer<TileEntityNutritionalLiquifier, LiquifierRenderState> {
 
     private static final Map<TileEntityNutritionalLiquifier, PseudoParticleData> particles = new WeakHashMap<>();
@@ -65,9 +63,8 @@ public class RenderNutritionalLiquifier extends MekanismTileEntityRenderer<TileE
 
     @Override
     public void extractRenderState(TileEntityNutritionalLiquifier liquifier, LiquifierRenderState state, float partialTick, Vec3 cameraPosition,
-          @Nullable ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+          ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         super.extractRenderState(liquifier, state, partialTick, cameraPosition, breakProgress);
-        Level level = liquifier.getLevel();
         if (!liquifier.fluidTank.isEmpty()) {
             FluidResource paste = liquifier.fluidTank.resource();
             float fluidScale = liquifier.fluidTank.amountAsLong() / (float) liquifier.fluidTank.capacityAsLong(paste);
@@ -79,7 +76,7 @@ public class RenderNutritionalLiquifier extends MekanismTileEntityRenderer<TileE
         }
         state.active = liquifier.getActive();
         if (state.active) {
-            long gameTime = level.getGameTime();
+            long gameTime = liquifier.getGameTime();
             state.bladeRotation = ((gameTime + partialTick) * BLADE_SPEED) % 360;
             state.itemRotation = ((gameTime + partialTick) * ROTATE_SPEED) % 360;
         }
@@ -87,7 +84,7 @@ public class RenderNutritionalLiquifier extends MekanismTileEntityRenderer<TileE
         if (!stack.isEmpty()) {
             //TODO - 26.1: Evaluate the seed we are passing, and if we want to use this as the seed for transporters or if maybe we should be using zero here as well?
             int seed = Ints.saturatedCast(state.blockPos.asLong());
-            this.itemModelResolver.updateForTopItem(state.item, stack, ItemDisplayContext.GROUND, level, null, seed);
+            this.itemModelResolver.updateForTopItem(state.item, stack, ItemDisplayContext.GROUND, liquifier.getLevel(), null, seed);
         }
     }
 
@@ -166,9 +163,8 @@ public class RenderNutritionalLiquifier extends MekanismTileEntityRenderer<TileE
         public float bladeRotation;
         public float itemRotation;
         public boolean active;
-        public int pasteTint = 0xFFFFFFFF;
-        @Nullable
-        public RenderResizableCuboid.TexturePicker pasteTexture;
+        public int pasteTint = CommonColors.WHITE;
+        public RenderResizableCuboid.@Nullable TexturePicker pasteTexture;
         public int stage;
     }
 
@@ -292,7 +288,7 @@ public class RenderNutritionalLiquifier extends MekanismTileEntityRenderer<TileE
             Vector3f vector3f = new Vector3f(xOffset, yOffset, 0.0F).rotate(quaternion).mul(quadSize).add(x, y, z);
             buffer.addVertex(poseStack, vector3f.x(), vector3f.y(), vector3f.z())
                   .setUv(u, v)
-                  .setColor(0xFFFFFFFF)
+                  .setColor(CommonColors.WHITE)
                   .setLight(light);
         }
 

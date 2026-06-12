@@ -12,7 +12,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.NotNull;
 
 public class GuiSlider extends GuiElement {
 
@@ -44,14 +43,14 @@ public class GuiSlider extends GuiElement {
     }
 
     @Override
-    public void onClick(@NotNull MouseButtonEvent event, boolean isDoubleClick) {
+    public void onClick(MouseButtonEvent event, boolean isDoubleClick) {
         super.onClick(event, isDoubleClick);
         set(event.x());
         setDragging(true);
     }
 
     @Override
-    protected void onDrag(@NotNull MouseButtonEvent event, double deltaX, double deltaY) {
+    protected void onDrag(MouseButtonEvent event, double deltaX, double deltaY) {
         super.onDrag(event, deltaX, deltaY);
         if (isDragging()) {
             set(event.x());
@@ -59,7 +58,7 @@ public class GuiSlider extends GuiElement {
     }
 
     @Override
-    public boolean keyPressed(@NotNull KeyEvent event) {
+    public boolean keyPressed(KeyEvent event) {
         if (super.keyPressed(event)) {
             return true;
         }
@@ -71,14 +70,14 @@ public class GuiSlider extends GuiElement {
         } else {
             return false;
         }
-        value = Mth.clamp(value + shift, 0, 1);
+        value = Math.clamp(value + shift, 0, 1);
         callback.accept(value);
         return true;
     }
 
     private void set(double mouseX) {
         double oldValue = value;
-        value = Mth.clamp(((mouseX - getX() - 2) / (width - 6)), 0, 1);
+        value = Math.clamp((mouseX - getX() - 2) / (width - 6), 0, 1);
         if (!Mth.equal(value, oldValue)) {
             callback.accept(value);
         }

@@ -5,7 +5,6 @@ import java.util.function.BiPredicate;
 import java.util.function.ToIntFunction;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.fluid.IFluidTank;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.inventory.slot.FluidInventorySlot;
@@ -20,12 +19,9 @@ import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Extension of FluidInventorySlot to make it be able to handle raw items as fuels
- */
-@NothingNullByDefault
+/// Extension of FluidInventorySlot to make it be able to handle raw items as fuels
 public class FluidFuelInventorySlot extends FluidInventorySlot {
 
     private static final ResourceKey<Fluid> EMPTY_KEY = ResourceKey.create(Registries.FLUID, Identifier.withDefaultNamespace("empty"));
@@ -64,9 +60,7 @@ public class FluidFuelInventorySlot extends FluidInventorySlot {
         this.fuelValue = fuelValue;
     }
 
-    /**
-     * Fills tank from slot, allowing for the item to also be converted to fluid if need be
-     */
+    /// Fills tank from slot, allowing for the item to also be converted to fluid if need be
     public void fillOrBurn(@Nullable TransactionContext transaction) {
         if (!isEmpty()) {
             int needed = fluidTank.getNeededAsInt(FluidResource.EMPTY);

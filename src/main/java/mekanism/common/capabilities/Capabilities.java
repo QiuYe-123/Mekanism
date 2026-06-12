@@ -35,14 +35,14 @@ import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class Capabilities {
 
     private Capabilities() {
     }
 
-    public static final ICapabilityProvider<?, ?, ?> SIMPLE_PROVIDER = (obj, context) -> obj;
+    public static final ICapabilityProvider<?, ?, ?> SIMPLE_PROVIDER = (obj, _) -> obj;
 
     public static final MultiTypeCapability<EnergyHandler> ENERGY = new MultiTypeCapability<>(Energy.BLOCK, Energy.ITEM, Energy.ENTITY);
     public static final MultiTypeCapability<ResourceHandler<FluidResource>> FLUID = new MultiTypeCapability<>(Fluid.BLOCK, Fluid.ITEM, Fluid.ENTITY);
@@ -59,15 +59,15 @@ public class Capabilities {
 
     public static final BlockCapability<IConfigCardAccess, @Nullable Direction> CONFIG_CARD = BlockCapability.createSided(Mekanism.rl("config_card"), IConfigCardAccess.class);
 
-    public static final BlockCapability<IEvaporationSolar, Void> EVAPORATION_SOLAR = BlockCapability.createVoid(Mekanism.rl("evaporation_solar"), IEvaporationSolar.class);
+    public static final BlockCapability<IEvaporationSolar, @Nullable Void> EVAPORATION_SOLAR = BlockCapability.createVoid(Mekanism.rl("evaporation_solar"), IEvaporationSolar.class);
 
     public static final BlockCapability<ILaserReceptor, @Nullable Direction> LASER_RECEPTOR = BlockCapability.createSided(Mekanism.rl("laser_receptor"), ILaserReceptor.class);
 
-    public static final ItemCapability<ILaserDissipation, Void> LASER_DISSIPATION = ItemCapability.createVoid(Mekanism.rl("laser_dissipation"), ILaserDissipation.class);
+    public static final ItemCapability<ILaserDissipation, @Nullable Void> LASER_DISSIPATION = ItemCapability.createVoid(Mekanism.rl("laser_dissipation"), ILaserDissipation.class);
 
-    public static final ItemCapability<IRadiationShielding, Void> RADIATION_SHIELDING = ItemCapability.createVoid(Mekanism.rl("radiation_shielding"), IRadiationShielding.class);
+    public static final ItemCapability<IRadiationShielding, @Nullable Void> RADIATION_SHIELDING = ItemCapability.createVoid(Mekanism.rl("radiation_shielding"), IRadiationShielding.class);
 
-    public static final EntityCapability<IRadiationEntity, Void> RADIATION_ENTITY = EntityCapability.createVoid(Mekanism.rl("radiation"), IRadiationEntity.class);
+    public static final EntityCapability<IRadiationEntity, @Nullable Void> RADIATION_ENTITY = EntityCapability.createVoid(Mekanism.rl("radiation"), IRadiationEntity.class);
 
     public static final Identifier OWNER_OBJECT_NAME = Mekanism.rl("owner_object");
     public static final Identifier SECURITY_OBJECT_NAME = Mekanism.rl("security_object");
@@ -80,13 +80,13 @@ public class Capabilities {
         Mekanism.hooks.hookCapabilityRegistration(event);
 
         EntityType<EntityRobit> robitEntityType = MekanismEntityTypes.ROBIT.get();
-        event.registerEntity(IEntitySecurityUtils.INSTANCE.ownerCapability(), robitEntityType, (robit, ctx) -> robit);
-        event.registerEntity(IEntitySecurityUtils.INSTANCE.securityCapability(), robitEntityType, (robit, ctx) -> robit);
-        event.registerEntity(ENERGY.entity(), robitEntityType, (robit, ctx) -> robit.getEnergyContainer());
+        event.registerEntity(IEntitySecurityUtils.INSTANCE.ownerCapability(), robitEntityType, (robit, _) -> robit);
+        event.registerEntity(IEntitySecurityUtils.INSTANCE.securityCapability(), robitEntityType, (robit, _) -> robit);
+        event.registerEntity(ENERGY.entity(), robitEntityType, (robit, _) -> robit.getEnergyContainer());
 
         for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
             //Note: The jvm will reuse the lambda between types
-            event.registerEntity(RADIATION_ENTITY, entityType, (entity, ctx) -> entity instanceof LivingEntity living ? new RadiationEntity(living) : null);
+            event.registerEntity(RADIATION_ENTITY, entityType, (entity, _) -> entity instanceof LivingEntity living ? new RadiationEntity(living) : null);
         }
 
         //Register bounding block proxies

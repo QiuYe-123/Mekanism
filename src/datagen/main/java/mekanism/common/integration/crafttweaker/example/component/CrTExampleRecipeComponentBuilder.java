@@ -17,13 +17,13 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SequencedMap;
 import mekanism.common.integration.crafttweaker.example.BaseCrTExampleProvider;
 import mekanism.common.integration.crafttweaker.example.CrTExampleBuilder;
 import mekanism.common.integration.crafttweaker.recipe.manager.MekanismRecipeManager;
 import mekanism.common.util.MekanismUtils;
 import net.neoforged.neoforge.common.util.Lazy;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.openzen.zencode.java.ZenCodeType;
 
 public class CrTExampleRecipeComponentBuilder<BUILDER_TYPE extends CrTExampleBuilder<BUILDER_TYPE>> extends CrTBaseExampleRecipeComponent {
@@ -155,7 +155,6 @@ public class CrTExampleRecipeComponentBuilder<BUILDER_TYPE extends CrTExampleBui
         throw new IllegalArgumentException("No matching recipe signature found for recipe type '" + recipeType + "'");
     }
 
-    @NotNull
     @Override
     public String asString() {
         validate();
@@ -290,7 +289,7 @@ public class CrTExampleRecipeComponentBuilder<BUILDER_TYPE extends CrTExampleBui
         }
     }
 
-    private void addParameter(LinkedHashMap<String, ParameterData> parameters, List<String> parameterNames, MethodParameter parameter, int index) {
+    private void addParameter(SequencedMap<String, ParameterData> parameters, List<String> parameterNames, MethodParameter parameter, int index) {
         String name;
         if (index < parameterNames.size()) {
             name = parameterNames.get(index);
@@ -329,7 +328,7 @@ public class CrTExampleRecipeComponentBuilder<BUILDER_TYPE extends CrTExampleBui
         private final String methodName;
         private boolean hasExample;
 
-        public RecipeMethod(String methodName, LinkedHashMap<String, ParameterData> parameters) {
+        public RecipeMethod(String methodName, SequencedMap<String, ParameterData> parameters) {
             this.methodName = methodName;
             for (Map.Entry<String, ParameterData> entry : parameters.entrySet()) {
                 parameterNames.add(entry.getKey());
@@ -356,10 +355,8 @@ public class CrTExampleRecipeComponentBuilder<BUILDER_TYPE extends CrTExampleBui
 
     private record MethodParameter(String name, Type type) {
 
-        /**
-         * Helper to get a method parameter (name, type pair) either using the existing parameter, or if there is a subclass, and the parameter was a generic, using the
-         * more specific type if possible.
-         */
+        /// Helper to get a method parameter (name, type pair) either using the existing parameter, or if there is a subclass, and the parameter was a generic, using the
+        /// more specific type if possible.
         private static MethodParameter get(Parameter parameter, Type genericParameterType, Lazy<Map<String, Type>> lazyLocalTypeLookup,
               Lazy<Map<String, Type>> lazyMethodTypeLookup) {
             Type type = null;
@@ -399,7 +396,7 @@ public class CrTExampleRecipeComponentBuilder<BUILDER_TYPE extends CrTExampleBui
     private record RecipeExample(RecipeMethod method, Object[] params) {
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) {
                 return true;
             }

@@ -9,8 +9,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
-import mekanism.api.annotations.MethodsAreNotNullByDefault;
-import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.security.IItemSecurityUtils;
 import mekanism.common.Mekanism;
@@ -26,10 +24,8 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@MethodsAreNotNullByDefault
-@ParametersAreNotNullByDefault
 @EventBusSubscriber(modid = Mekanism.MODID)
 public class PersonalStorageManager {
 
@@ -52,13 +48,11 @@ public class PersonalStorageManager {
         return Objects.requireNonNull(DATA_STORAGE, "Illegal state");
     }
 
-    /**
-     * Only call on the server. Gets or creates an inventory for the supplied stack
-     *
-     * @param itemAccess Personal storage Item Access (type not checked) - will be modified if it didn't have an inventory id
-     *
-     * @return the existing or new inventory
-     */
+    /// Only call on the server. Gets or creates an inventory for the supplied stack
+    ///
+    /// @param itemAccess Personal storage Item Access (type not checked) - will be modified if it didn't have an inventory id
+    ///
+    /// @return the existing or new inventory
     @Nullable
     public static AbstractPersonalStorageItemInventory getInventoryFor(ItemAccess itemAccess, @Nullable TransactionContext transaction) {
         UUID owner = IItemSecurityUtils.INSTANCE.getOwnerUUID(itemAccess);
@@ -69,28 +63,24 @@ public class PersonalStorageManager {
         return getInventoryFor(itemAccess, owner, transaction);
     }
 
-    /**
-     * Only call on the server. Gets or creates an inventory for the supplied stack
-     *
-     * @param itemAccess Personal storage Item Access (type not checked) - will be modified if it didn't have an inventory id
-     * @param owner      The owner of the stack
-     *
-     * @return the existing or new inventory
-     */
+    /// Only call on the server. Gets or creates an inventory for the supplied stack
+    ///
+    /// @param itemAccess Personal storage Item Access (type not checked) - will be modified if it didn't have an inventory id
+    /// @param owner      The owner of the stack
+    ///
+    /// @return the existing or new inventory
     @Nullable
     public static AbstractPersonalStorageItemInventory getInventoryFor(ItemAccess itemAccess, UUID owner, @Nullable TransactionContext transaction) {
         UUID invId = getInventoryId(itemAccess, transaction);
         return getInventoryForUnchecked(invId, owner);
     }
 
-    /**
-     * Only call on the server. Gets an inventory for the supplied stack
-     *
-     * @param inventoryId Personal storage inventory id
-     * @param owner       The owner of the stack
-     *
-     * @return the existing or new inventory
-     */
+    /// Only call on the server. Gets an inventory for the supplied stack
+    ///
+    /// @param inventoryId Personal storage inventory id
+    /// @param owner       The owner of the stack
+    ///
+    /// @return the existing or new inventory
     @Nullable
     public static AbstractPersonalStorageItemInventory getInventoryForUnchecked(@Nullable UUID inventoryId, UUID owner) {
         if (inventoryId == null) {
@@ -118,16 +108,14 @@ public class PersonalStorageManager {
         return false;
     }
 
-    /**
-     * Only call on the server
-     * <p>
-     * Version of {@link #getInventoryFor(ItemAccess, TransactionContext)} which will NOT create an inventory if none exists already. The stack will only be modified if
-     * it contained a legacy inventory
-     *
-     * @param itemAccess Personal storage Item Access
-     *
-     * @return the existing or converted inventory, or null if none exists in saved data nor legacy data
-     */
+    /// Only call on the server
+    ///
+    /// Version of [#getInventoryFor(ItemAccess, TransactionContext)] which will NOT create an inventory if none exists already. The stack will only be modified if it
+    /// contained a legacy inventory
+    ///
+    /// @param itemAccess Personal storage Item Access
+    ///
+    /// @return the existing or converted inventory, or null if none exists in saved data nor legacy data
     @Nullable
     public static AbstractPersonalStorageItemInventory getInventoryIfPresent(ItemAccess itemAccess, @Nullable TransactionContext transaction) {
         UUID owner = IItemSecurityUtils.INSTANCE.getOwnerUUID(itemAccess);

@@ -4,21 +4,17 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.stream.Stream;
 import mekanism.api.SerializationConstants;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
 import net.minecraft.core.Holder;
 import net.neoforged.neoforge.common.crafting.DifferenceIngredient;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Base Chemical ingredient implementation that matches the difference of two provided chemical ingredients, i.e. anything contained in {@code base} that is not in
- * {@code subtracted}.
- *
- * @see DifferenceIngredient DifferenceIngredient, its item equivalent
- * @since 10.6.0
- */
-@NothingNullByDefault
+/// Base Chemical ingredient implementation that matches the difference of two provided chemical ingredients, i.e. anything contained in `base` that is not in
+/// `subtracted`.
+///
+/// @see DifferenceIngredient DifferenceIngredient, its item equivalent
+/// @since 10.6.0
 public non-sealed class DifferenceChemicalIngredient extends ChemicalIngredient {
 
     public static final MapCodec<DifferenceChemicalIngredient> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
@@ -29,10 +25,8 @@ public non-sealed class DifferenceChemicalIngredient extends ChemicalIngredient 
     private final ChemicalIngredient base;
     private final ChemicalIngredient subtracted;
 
-    /**
-     * @param base       ingredient the chemical must match
-     * @param subtracted ingredient the chemical must not match
-     */
+    /// @param base       ingredient the chemical must match
+    /// @param subtracted ingredient the chemical must not match
     public DifferenceChemicalIngredient(ChemicalIngredient base, ChemicalIngredient subtracted) {
         this.base = base;
         this.subtracted = subtracted;
@@ -53,16 +47,12 @@ public non-sealed class DifferenceChemicalIngredient extends ChemicalIngredient 
         return base().test(chemical) && !subtracted().test(chemical);
     }
 
-    /**
-     * {@return ingredient the chemical must match}
-     */
+    /// {@return ingredient the chemical must match}
     public final ChemicalIngredient base() {
         return base;
     }
 
-    /**
-     * {@return ingredient the chemical must not match}
-     */
+    /// {@return ingredient the chemical must not match}
     public final ChemicalIngredient subtracted() {
         return subtracted;
     }

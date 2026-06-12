@@ -2,10 +2,9 @@ package mekanism.client.recipe_viewer.alias;
 
 import java.util.List;
 import java.util.Map;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.IHasTranslationKey;
 import mekanism.common.Mekanism;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.content.blocktype.FactoryType;
 import mekanism.common.item.block.ItemBlockEnergyCube;
 import mekanism.common.registration.impl.BlockRegistryObject;
@@ -25,7 +24,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 
-@NothingNullByDefault
 public final class MekanismAliasMapping implements IAliasMapping {
 
     @Override

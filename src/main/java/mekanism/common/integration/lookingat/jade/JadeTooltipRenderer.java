@@ -9,7 +9,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.CommonColors;
+import org.jspecify.annotations.Nullable;
 import snownee.jade.api.Accessor;
 import snownee.jade.api.IComponentProvider;
 import snownee.jade.api.ITooltip;
@@ -86,7 +87,7 @@ public class JadeTooltipRenderer<ACCESSOR extends Accessor<?>> implements ICompo
             int x = getX();
             int y = getY();
             if (text != null) {
-                element.drawScrollingString(guiGraphics, text, x, y + 3, TextAlignment.LEFT, 0xFFFFFFFF, 4, false);
+                element.drawScrollingString(guiGraphics, text, x, y + 3, TextAlignment.LEFT, CommonColors.WHITE, 4, false);
                 y += 13;
             }
             element.render(guiGraphics, x, y + 1);

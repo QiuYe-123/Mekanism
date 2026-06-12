@@ -4,13 +4,11 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.capabilities.holder.IHolder;
 import net.minecraft.core.Direction;
 import net.neoforged.neoforge.capabilities.BlockCapability;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@NothingNullByDefault
 public class BasicSidedCapabilityResolver<HOLDER extends IHolder, HANDLER> implements ICapabilityResolver<@Nullable Direction> {
 
     private final ProxyCreator<HOLDER, HANDLER> proxyCreator;
@@ -35,9 +33,7 @@ public class BasicSidedCapabilityResolver<HOLDER extends IHolder, HANDLER> imple
         return holder;
     }
 
-    /**
-     * Lazily get and cache a handler instance for the given side, and make it be read only if something else is trying to interact with us using the null side
-     */
+    /// Lazily get and cache a handler instance for the given side, and make it be read only if something else is trying to interact with us using the null side
     @Nullable
     @Override
     public <T> T resolve(BlockCapability<T, @Nullable Direction> capability, @Nullable Direction side) {

@@ -21,11 +21,8 @@ import net.minecraft.util.ByIdMap;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import org.jetbrains.annotations.NotNull;
 
-/**
- * Used for informing the server that an action happened in a GUI
- */
+/// Used for informing the server that an action happened in a GUI
 public record PacketGeneratorsGuiInteract(GeneratorsGuiInteraction interaction, BlockPos tilePosition, double extra) implements IMekanismPacket {
 
     public static final CustomPacketPayload.Type<PacketGeneratorsGuiInteract> TYPE = new CustomPacketPayload.Type<>(MekanismGenerators.rl("gui_interact"));
@@ -48,7 +45,6 @@ public record PacketGeneratorsGuiInteract(GeneratorsGuiInteraction interaction, 
         this(interaction, tilePosition, 0);
     }
 
-    @NotNull
     @Override
     public CustomPacketPayload.Type<PacketGeneratorsGuiInteract> type() {
         return TYPE;
@@ -64,21 +60,21 @@ public record PacketGeneratorsGuiInteract(GeneratorsGuiInteraction interaction, 
     }
 
     public enum GeneratorsGuiInteraction {
-        INJECTION_RATE((tile, player, extra) -> {
+        INJECTION_RATE((tile, _, extra) -> {
             if (tile instanceof TileEntityFusionReactorBlock reactorBlock) {
                 reactorBlock.setInjectionRateFromPacket((int) Math.round(extra));
             } else if (tile instanceof TileEntityFissionReactorCasing reactorCasing) {
                 reactorCasing.setRateLimitFromPacket(extra);
             }
         }),
-        LOGIC_TYPE((tile, player, extra) -> {
+        LOGIC_TYPE((tile, _, extra) -> {
             if (tile instanceof TileEntityFissionReactorLogicAdapter logicAdapter) {
                 logicAdapter.setLogicTypeFromPacket(FissionReactorLogic.BY_ID.apply((int) Math.round(extra)));
             } else if (tile instanceof TileEntityFusionReactorLogicAdapter logicAdapter) {
                 logicAdapter.setLogicTypeFromPacket(FusionReactorLogic.BY_ID.apply((int) Math.round(extra)));
             }
         }),
-        FISSION_ACTIVE((tile, player, extra) -> {
+        FISSION_ACTIVE((tile, _, extra) -> {
             if (tile instanceof TileEntityFissionReactorCasing reactorCasing) {
                 reactorCasing.setReactorActive(Math.round(extra) == 1);
             }

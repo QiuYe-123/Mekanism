@@ -6,19 +6,15 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 
-/**
- * Copied from org.antlr.v4.runtime.misc.OrderedHashSet. A HashMap that remembers the order that the elements were added. You can alter the ith element with set(i,value)
- * too :) Unique list.
- *
- * @param <T> element type
- */
+/// Copied from `org.antlr.v4.runtime.misc.OrderedHashSet`. A HashMap that remembers the order that the elements were added. You can alter the ith element with
+/// `set(i,value)` too :) Unique list.
+///
+/// @param <T> element type
 public class HashList<T> extends LinkedHashSet<T> {
 
-    @NotNull
     protected List<T> list;
 
     public HashList() {
@@ -35,9 +31,7 @@ public class HashList<T> extends LinkedHashSet<T> {
         list = new ArrayList<>(initialCapacity);
     }
 
-    /**
-     * Replace an existing value with a new value; updates the element list and the hash table.
-     */
+    /// Replace an existing value with a new value; updates the element list and the hash table.
     public T set(int i, T value) {
         T oldElement = list.get(i);
         list.set(i, value); // update list
@@ -46,9 +40,7 @@ public class HashList<T> extends LinkedHashSet<T> {
         return oldElement;
     }
 
-    /**
-     * Add a value to list; keep in hashtable for consistency also; Key is object itself.  Good for say asking if a certain string is in a list of strings.
-     */
+    /// Add a value to list; keep in hashtable for consistency also; Key is object itself.  Good for say asking if a certain string is in a list of strings.
     @Override
     public boolean add(T value) {
         boolean result = super.add(value);
@@ -80,9 +72,7 @@ public class HashList<T> extends LinkedHashSet<T> {
         return index >= 0 && index < size() ? get(index) : null;
     }
 
-    /**
-     * Return the List holding list of table elements.  Note that you are NOT getting a copy so don't write to the list.
-     */
+    /// Return the List holding list of table elements.  Note that you are NOT getting a copy so don't write to the list.
     public List<T> elements() {
         return list;
     }
@@ -96,7 +86,7 @@ public class HashList<T> extends LinkedHashSet<T> {
     }
 
     @Override
-    public Object @NotNull [] toArray() {
+    public Object [] toArray() {
         return list.toArray();
     }
 
@@ -164,7 +154,7 @@ public class HashList<T> extends LinkedHashSet<T> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) {
             return true;
         }
@@ -174,7 +164,6 @@ public class HashList<T> extends LinkedHashSet<T> {
         return list.equals(((HashList<?>) o).list);
     }
 
-    @NotNull
     @Override
     public Iterator<T> iterator() {
         return list.iterator();

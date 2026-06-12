@@ -208,7 +208,6 @@ import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
-import org.jetbrains.annotations.NotNull;
 
 @EventBusSubscriber(modid = Mekanism.MODID, value = Dist.CLIENT)
 public class ClientRegistration {
@@ -470,7 +469,7 @@ public class ClientRegistration {
 
     @SubscribeEvent
     public static void registerBlockColorHandlers(RegisterColorHandlersEvent.BlockTintSources event) {
-        ClientRegistrationUtil.registerBlockColorHandler(event, (state) -> {
+        ClientRegistrationUtil.registerBlockColorHandler(event, state -> {
                   BaseTier tier = Attribute.getBaseTier(state.typeHolder());
                   if (tier != null) {
                       return tier.getPackedColor();
@@ -485,7 +484,7 @@ public class ClientRegistration {
         for (Map.Entry<IResource, BlockRegistryObject<?, ?>> entry : MekanismBlocks.PROCESSED_RESOURCE_BLOCKS.entrySet()) {
             if (entry.getKey() instanceof PrimaryResource primaryResource) {
                 int tint = primaryResource.getTint();
-                ClientRegistrationUtil.registerBlockColorHandler(event, (state) -> tint, entry.getValue());
+                ClientRegistrationUtil.registerBlockColorHandler(event, _ -> tint, entry.getValue());
             }
         }
     }
@@ -545,8 +544,8 @@ public class ClientRegistration {
         }
     }
 
-    private static <STATE extends HumanoidRenderState, MODEL extends EntityModel<STATE>> void addCustomLayers(@NotNull EntityType<?> type,
-          @NotNull LivingEntityRenderer<?, STATE, MODEL> renderer, @NotNull EntityRendererProvider.Context context) {
+    private static <STATE extends HumanoidRenderState, MODEL extends EntityModel<STATE>> void addCustomLayers(EntityType<?> type,
+          LivingEntityRenderer<?, STATE, MODEL> renderer, EntityRendererProvider.Context context) {
         int layerTypes = 2;
         Map<String, RenderLayer<STATE, MODEL>> layersToAdd = new HashMap<>(layerTypes);
         for (RenderLayer<STATE, MODEL> layerRenderer : renderer.layers) {

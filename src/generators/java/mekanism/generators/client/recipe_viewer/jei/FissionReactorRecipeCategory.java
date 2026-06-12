@@ -27,8 +27,7 @@ import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.context.ContextMap;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class FissionReactorRecipeCategory extends BaseRecipeCategory<FissionRecipeViewerRecipe> {
 
@@ -53,7 +52,7 @@ public class FissionReactorRecipeCategory extends BaseRecipeCategory<FissionReci
     }
 
     @Override
-    public void setRecipe(@NotNull IRecipeLayoutBuilder builder, FissionRecipeViewerRecipe recipe, @NotNull IFocusGroup focusGroup) {
+    public void setRecipe(IRecipeLayoutBuilder builder, FissionRecipeViewerRecipe recipe, IFocusGroup focusGroup) {
         ContextMap slotDisplayContext = getSlotDisplayContext();
         //Handle the coolant either special cased water or the proper coolant
         if (recipe.inputCoolant() == null) {
@@ -62,19 +61,18 @@ public class FissionReactorRecipeCategory extends BaseRecipeCategory<FissionReci
             initChemical(builder, RecipeIngredientRole.INPUT, coolantTank, recipe.inputCoolant().getRepresentations(slotDisplayContext));
         }
         initChemical(builder, RecipeIngredientRole.INPUT, fuelTank, recipe.fuel().getRepresentations(slotDisplayContext));
-        initChemical(builder, RecipeIngredientRole.OUTPUT, heatedCoolantTank, Collections.singletonList(recipe.outputCoolant()));
-        initChemical(builder, RecipeIngredientRole.OUTPUT, wasteTank, Collections.singletonList(recipe.waste()));
+        initChemical(builder, heatedCoolantTank, Collections.singletonList(recipe.outputCoolant()));
+        initChemical(builder, wasteTank, Collections.singletonList(recipe.waste()));
     }
 
     @Nullable
     @Override
-    public Identifier getIdentifier(@NotNull FissionRecipeViewerRecipe recipe) {
+    public Identifier getIdentifier(FissionRecipeViewerRecipe recipe) {
         return recipe.id();
     }
 
-    @NotNull
     @Override
-    public Codec<FissionRecipeViewerRecipe> getCodec(@NotNull ICodecHelper codecHelper, @NotNull IRecipeManager recipeManager) {
+    public Codec<FissionRecipeViewerRecipe> getCodec(ICodecHelper codecHelper, IRecipeManager recipeManager) {
         return FissionRecipeViewerRecipe.CODEC;
     }
 }

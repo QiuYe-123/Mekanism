@@ -34,8 +34,7 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RecipesReceivedEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @Mod(value = Mekanism.MODID, dist = Dist.CLIENT)
 @EventBusSubscriber(modid = Mekanism.MODID, value = Dist.CLIENT)
@@ -67,9 +66,7 @@ public class MekanismClient {
         }
     }
 
-    /**
-     * Reset things that aren't needed between levels or would leak
-     */
+    /// Reset things that aren't needed between levels or would leak
     public static void resetDimensionChange() {
         Mekanism.playerState.clear(true);
         Mekanism.activeVibrators.clear();
@@ -122,8 +119,7 @@ public class MekanismClient {
         }
     }
 
-    @NotNull
-    public static String getModId(@NotNull ItemStack stack) {
+    public static String getModId(ItemStack stack) {
         return MekanismUtils.getModId(Objects.requireNonNull(Minecraft.getInstance().level, "No active Level").registryAccess(), stack);
     }
 
@@ -131,7 +127,7 @@ public class MekanismClient {
     public static void onJoinServer(ClientPlayerNetworkEvent.LoggingIn event) {
         if (!isConnected) {//Note: This should always be true when the event is fired
             isConnected = true;
-            MekanismClient.launchClient(event.getConnection());
+            launchClient(event.getConnection());
         }
     }
 
@@ -140,7 +136,7 @@ public class MekanismClient {
         //Note: We check if the client has actually connected before handling this, as this event is also called when the client is setting up the server
         if (isConnected) {
             isConnected = false;
-            MekanismClient.reset();
+            reset();
         }
     }
 

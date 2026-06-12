@@ -1,7 +1,7 @@
 package mekanism.common.integration.crafttweaker.recipe.manager;
 
 import com.blamejared.crafttweaker.api.annotation.ZenRegister;
-import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.ChemicalStackTemplate;
 import mekanism.api.recipes.ChemicalChemicalToChemicalRecipe;
 import mekanism.api.recipes.basic.BasicChemicalInfuserRecipe;
 import mekanism.api.recipes.basic.BasicPigmentMixingRecipe;
@@ -22,37 +22,33 @@ public abstract class ChemicalChemicalToChemicalRecipeManager extends MekanismRe
         super(recipeType);
     }
 
-    /**
-     * Adds a recipe that combines two chemicals of the same type into another chemical of the same type.
-     * <br>
-     * If this is called from the pigment mixing recipe manager, this will be a pigment mixing recipe. Pigment Mixers can process this recipe type and the chemicals can
-     * be put in any order into the mixer.
-     * <br>
-     * If this is called from the chemical infuser recipe manager, this will be a chemical infuser recipe. Chemical Infusers can process this recipe type and the
-     * chemicals can be put in any order into the infuser.
-     *
-     * @param name       Name of the new recipe.
-     * @param leftInput  Chemical stack ingredient representing the "left" chemical input of the recipe.
-     * @param rightInput Chemical stack ingredient representing the "right" chemical input of the recipe.
-     * @param output     Chemical stack representing the output of the recipe.
-     */
+    /// Adds a recipe that combines two chemicals of the same type into another chemical of the same type.
+    ///
+    /// If this is called from the pigment mixing recipe manager, this will be a pigment mixing recipe. Pigment Mixers can process this recipe type and the chemicals can
+    /// be put in any order into the mixer.
+    ///
+    /// If this is called from the chemical infuser recipe manager, this will be a chemical infuser recipe. Chemical Infusers can process this recipe type and the
+    /// chemicals can be put in any order into the infuser.
+    ///
+    /// @param name       Name of the new recipe.
+    /// @param leftInput  Chemical stack ingredient representing the "left" chemical input of the recipe.
+    /// @param rightInput Chemical stack ingredient representing the "right" chemical input of the recipe.
+    /// @param output     Chemical stack representing the output of the recipe.
     @ZenCodeType.Method
     public void addRecipe(String name, ChemicalStackIngredient leftInput, ChemicalStackIngredient rightInput, ICrTChemicalStack output) {
         addRecipe(name, makeRecipe(leftInput, rightInput, output));
     }
 
-    /**
-     * Creates a recipe that combines two chemicals of the same type into another chemical of the same type.
-     *
-     * @param leftInput  Chemical stack ingredient representing the "left" chemical input of the recipe.
-     * @param rightInput Chemical stack ingredient representing the "right" chemical input of the recipe.
-     * @param output     Chemical stack representing the output of the recipe. Will be validated as not empty.
-     */
+    /// Creates a recipe that combines two chemicals of the same type into another chemical of the same type.
+    ///
+    /// @param leftInput  Chemical stack ingredient representing the "left" chemical input of the recipe.
+    /// @param rightInput Chemical stack ingredient representing the "right" chemical input of the recipe.
+    /// @param output     Chemical stack representing the output of the recipe. Will be validated as not empty.
     public final ChemicalChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient leftInput, ChemicalStackIngredient rightInput, ICrTChemicalStack output) {
         return makeRecipe(leftInput, rightInput, getAndValidateNotEmpty(output));
     }
 
-    protected abstract ChemicalChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient leftInput, ChemicalStackIngredient rightInput, ChemicalStack output);
+    protected abstract ChemicalChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient leftInput, ChemicalStackIngredient rightInput, ChemicalStackTemplate output);
 
     @Override
     protected String describeOutputs(ChemicalChemicalToChemicalRecipe recipe) {
@@ -70,7 +66,7 @@ public abstract class ChemicalChemicalToChemicalRecipeManager extends MekanismRe
         }
 
         @Override
-        protected ChemicalChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient left, ChemicalStackIngredient right, ChemicalStack output) {
+        protected ChemicalChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient left, ChemicalStackIngredient right, ChemicalStackTemplate output) {
             return new BasicChemicalInfuserRecipe(left, right, output);
         }
     }
@@ -86,7 +82,7 @@ public abstract class ChemicalChemicalToChemicalRecipeManager extends MekanismRe
         }
 
         @Override
-        protected ChemicalChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient left, ChemicalStackIngredient right, ChemicalStack output) {
+        protected ChemicalChemicalToChemicalRecipe makeRecipe(ChemicalStackIngredient left, ChemicalStackIngredient right, ChemicalStackTemplate output) {
             return new BasicPigmentMixingRecipe(left, right, output);
         }
     }

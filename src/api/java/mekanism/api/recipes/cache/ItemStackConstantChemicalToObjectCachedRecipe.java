@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.math.MathUtils;
@@ -14,19 +13,15 @@ import mekanism.api.recipes.outputs.IOutputHandler;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Base class to help implement handling of item chemical to object recipes. Unlike {@link TwoInputCachedRecipe} this variant has constant chemical usage.
- *
- * @since 10.7.0
- */
-@NothingNullByDefault
+/// Base class to help implement handling of item chemical to object recipes. Unlike [TwoInputCachedRecipe] this variant has constant chemical usage.
+///
+/// @since 10.7.0
 public class ItemStackConstantChemicalToObjectCachedRecipe<OUTPUT, RECIPE extends ItemStackChemicalToObjectRecipe<OUTPUT>> extends CachedRecipe<RECIPE> {
 
-    private final IOutputHandler<@NotNull OUTPUT> outputHandler;
-    private final IInputHandler<Item, @NotNull ItemStack> itemInputHandler;
+    private final IOutputHandler<OUTPUT> outputHandler;
+    private final IInputHandler<Item, ItemStack> itemInputHandler;
     private final IInputHandler<Chemical, ChemicalStack> chemicalInputHandler;
     private final ChemicalUsageMultiplier chemicalUsage;
     private final IntConsumer chemicalUsedSoFarChanged;
@@ -39,19 +34,17 @@ public class ItemStackConstantChemicalToObjectCachedRecipe<OUTPUT, RECIPE extend
     @Nullable
     private OUTPUT output;
 
-    /**
-     * @param recipe                   Recipe.
-     * @param recheckAllErrors         Returns {@code true} if processing should be continued even if an error is hit in order to gather all the errors. It is recommended
-     *                                 to not do this every tick or if there is no one viewing recipes.
-     * @param itemInputHandler         Item input handler.
-     * @param chemicalInputHandler     Chemical input handler.
-     * @param chemicalUsage            Chemical usage multiplier.
-     * @param chemicalUsedSoFarChanged Called when the number chemical usage so far changes.
-     * @param outputHandler            Output handler.
-     */
-    public ItemStackConstantChemicalToObjectCachedRecipe(RECIPE recipe, BooleanSupplier recheckAllErrors, IInputHandler<Item, @NotNull ItemStack> itemInputHandler,
+    /// @param recipe                   Recipe.
+    /// @param recheckAllErrors         Returns `true` if processing should be continued even if an error is hit in order to gather all the errors. It is recommended to
+    /// to not do this every tick or if there is no one viewing recipes.
+    /// @param itemInputHandler         Item input handler.
+    /// @param chemicalInputHandler     Chemical input handler.
+    /// @param chemicalUsage            Chemical usage multiplier.
+    /// @param chemicalUsedSoFarChanged Called when the number chemical usage so far changes.
+    /// @param outputHandler            Output handler.
+    public ItemStackConstantChemicalToObjectCachedRecipe(RECIPE recipe, BooleanSupplier recheckAllErrors, IInputHandler<Item, ItemStack> itemInputHandler,
           IInputHandler<Chemical, ChemicalStack> chemicalInputHandler, ChemicalUsageMultiplier chemicalUsage, IntConsumer chemicalUsedSoFarChanged,
-          IOutputHandler<@NotNull OUTPUT> outputHandler) {
+          IOutputHandler<OUTPUT> outputHandler) {
         super(recipe, recheckAllErrors);
         this.itemInputHandler = Objects.requireNonNull(itemInputHandler, "Item input handler cannot be null.");
         this.chemicalInputHandler = Objects.requireNonNull(chemicalInputHandler, "Chemical input handler cannot be null.");
@@ -60,11 +53,9 @@ public class ItemStackConstantChemicalToObjectCachedRecipe<OUTPUT, RECIPE extend
         this.outputHandler = Objects.requireNonNull(outputHandler, "Output handler cannot be null.");
     }
 
-    /**
-     * Sets the amount of chemical that have been used so far. This is used to allow {@link CachedRecipe} holders to persist and load recipe progress.
-     *
-     * @param chemicalUsedSoFar Amount of chemical that has been used so far.
-     */
+    /// Sets the amount of chemical that have been used so far. This is used to allow [CachedRecipe] holders to persist and load recipe progress.
+    ///
+    /// @param chemicalUsedSoFar Amount of chemical that has been used so far.
     public void loadSavedUsageSoFar(int chemicalUsedSoFar) {
         if (chemicalUsedSoFar > 0) {
             this.chemicalUsedSoFar = chemicalUsedSoFar;
@@ -181,18 +172,16 @@ public class ItemStackConstantChemicalToObjectCachedRecipe<OUTPUT, RECIPE extend
         }
     }
 
-    /**
-     * @param recipe                   Recipe.
-     * @param recheckAllErrors         Returns {@code true} if processing should be continued even if an error is hit in order to gather all the errors. It is recommended
-     *                                 to not do this every tick or if there is no one viewing recipes.
-     * @param itemInputHandler         Item input handler.
-     * @param chemicalInputHandler     Chemical input handler.
-     * @param chemicalUsage            Chemical usage multiplier.
-     * @param chemicalUsedSoFarChanged Called when the number chemical usage so far changes.
-     * @param outputHandler            Output handler.
-     *
-     * @since 10.8.0
-     */
+    /// @param recipe                   Recipe.
+    /// @param recheckAllErrors         Returns `true` if processing should be continued even if an error is hit in order to gather all the errors. It is recommended
+    ///                                 to not do this every tick or if there is no one viewing recipes.
+    /// @param itemInputHandler         Item input handler.
+    /// @param chemicalInputHandler     Chemical input handler.
+    /// @param chemicalUsage            Chemical usage multiplier.
+    /// @param chemicalUsedSoFarChanged Called when the number chemical usage so far changes.
+    /// @param outputHandler            Output handler.
+    ///
+    /// @since 10.8.0
     public static <OUTPUT, RECIPE extends ItemStackChemicalToObjectRecipe<OUTPUT>> ItemStackConstantChemicalToObjectCachedRecipe<OUTPUT, RECIPE> create(RECIPE recipe,
           BooleanSupplier recheckAllErrors, IInputHandler<Item, ItemStack> itemInputHandler, IInputHandler<Chemical, ChemicalStack> chemicalInputHandler,
           ChemicalUsageMultiplier chemicalUsage, IntConsumer chemicalUsedSoFarChanged, IOutputHandler<OUTPUT> outputHandler) {

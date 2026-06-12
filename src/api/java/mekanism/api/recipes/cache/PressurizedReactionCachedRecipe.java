@@ -2,7 +2,6 @@ package mekanism.api.recipes.cache;
 
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
-import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.recipes.PressurizedReactionRecipe;
@@ -14,19 +13,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-/**
- * Base class to help implement handling of reaction recipes.
- */
-@NothingNullByDefault
+/// Base class to help implement handling of reaction recipes.
 public class PressurizedReactionCachedRecipe extends CachedRecipe<PressurizedReactionRecipe> {
 
-    private final IOutputHandler<@NotNull PressurizedReactionRecipeOutput> outputHandler;
-    private final IInputHandler<Item, @NotNull ItemStack> itemInputHandler;
-    private final IInputHandler<Fluid, @NotNull FluidStack> fluidInputHandler;
-    private final IInputHandler<Chemical, @NotNull ChemicalStack> chemicalInputHandler;
+    private final IOutputHandler<PressurizedReactionRecipeOutput> outputHandler;
+    private final IInputHandler<Item, ItemStack> itemInputHandler;
+    private final IInputHandler<Fluid, FluidStack> fluidInputHandler;
+    private final IInputHandler<Chemical, ChemicalStack> chemicalInputHandler;
 
     private ItemStack recipeItem = ItemStack.EMPTY;
     private FluidStack recipeFluid = FluidStack.EMPTY;
@@ -35,18 +30,16 @@ public class PressurizedReactionCachedRecipe extends CachedRecipe<PressurizedRea
     @Nullable
     private PressurizedReactionRecipeOutput output;
 
-    /**
-     * @param recipe               Recipe.
-     * @param recheckAllErrors     Returns {@code true} if processing should be continued even if an error is hit in order to gather all the errors. It is recommended to
-     *                             not do this every tick or if there is no one viewing recipes.
-     * @param itemInputHandler     Item input handler.
-     * @param fluidInputHandler    Fluid input handler.
-     * @param chemicalInputHandler Chemical input handler.
-     * @param outputHandler        Output handler, handles both the item and chemical outputs.
-     */
-    public PressurizedReactionCachedRecipe(PressurizedReactionRecipe recipe, BooleanSupplier recheckAllErrors, IInputHandler<Item, @NotNull ItemStack> itemInputHandler,
-          IInputHandler<Fluid, @NotNull FluidStack> fluidInputHandler, IInputHandler<Chemical, @NotNull ChemicalStack> chemicalInputHandler,
-          IOutputHandler<@NotNull PressurizedReactionRecipeOutput> outputHandler) {
+    /// @param recipe               Recipe.
+    /// @param recheckAllErrors     Returns `true` if processing should be continued even if an error is hit in order to gather all the errors. It is recommended to not
+    /// not do this every tick or if there is no one viewing recipes.
+    /// @param itemInputHandler     Item input handler.
+    /// @param fluidInputHandler    Fluid input handler.
+    /// @param chemicalInputHandler Chemical input handler.
+    /// @param outputHandler        Output handler, handles both the item and chemical outputs.
+    public PressurizedReactionCachedRecipe(PressurizedReactionRecipe recipe, BooleanSupplier recheckAllErrors, IInputHandler<Item, ItemStack> itemInputHandler,
+          IInputHandler<Fluid, FluidStack> fluidInputHandler, IInputHandler<Chemical, ChemicalStack> chemicalInputHandler,
+          IOutputHandler<PressurizedReactionRecipeOutput> outputHandler) {
         super(recipe, recheckAllErrors);
         this.itemInputHandler = Objects.requireNonNull(itemInputHandler, "Item input handler cannot be null.");
         this.fluidInputHandler = Objects.requireNonNull(fluidInputHandler, "Fluid input handler cannot be null.");

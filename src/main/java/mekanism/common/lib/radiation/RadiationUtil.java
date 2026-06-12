@@ -15,16 +15,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
-import org.jetbrains.annotations.Nullable;
 
 public class RadiationUtil {
 
-    /**
-     * Calculates approximately how long in ticks radiation will take to decay
-     *
-     * @param magnitude Magnitude
-     * @param source    {@code true} for if it is a {@link IRadiationSource} or an {@link IRadiationEntity} decaying
-     */
+    /// Calculates approximately how long in ticks radiation will take to decay
+    ///
+    /// @param magnitude    Magnitude
+    /// @param source`true` for if it is a [IRadiationSource] or an [IRadiationEntity] decaying
     public static long getDecayTime(double magnitude, boolean source) {
         double decayRate = source ? MekanismConfig.general.radiationSourceDecayRate.get() : MekanismConfig.general.radiationTargetDecayRate.get();
         long ticks = 0;
@@ -48,7 +45,7 @@ public class RadiationUtil {
             }
         }
         if (resistance < 1 && Mekanism.hooks.curios.isLoaded()) {
-            @Nullable ResourceHandler<ItemResource> handler = CuriosIntegration.getCuriosInventory(entity);
+            ResourceHandler<ItemResource> handler = CuriosIntegration.getCuriosInventory(entity);
             if (handler != null) {
                 for (int i = 0, slots = handler.size(); i < slots; i++) {
                     ItemStack stack = handler.getResource(i).toStack();

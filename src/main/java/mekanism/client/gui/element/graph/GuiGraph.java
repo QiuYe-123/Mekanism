@@ -15,8 +15,8 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.CommonColors;
+import org.jspecify.annotations.Nullable;
 
 public abstract class GuiGraph<COLLECTION extends Collection<?>, HANDLER extends GraphDataHandler> extends GuiTexturedElement {
 
@@ -42,7 +42,7 @@ public abstract class GuiGraph<COLLECTION extends Collection<?>, HANDLER extends
     }
 
     @Override
-    public void drawBackground(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(guiGraphics, mouseX, mouseY, partialTicks);
         //Draw Black and border
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, GuiInnerScreen.SCREEN, getButtonX(), getButtonY(), getButtonWidth(), getButtonHeight());
@@ -60,12 +60,12 @@ public abstract class GuiGraph<COLLECTION extends Collection<?>, HANDLER extends
             //RenderSystem.enableBlend();
             //RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
 
-            MekanismRenderer.color(0xFFFFFF, 0.2F + 0.8F * i / size);
+            MekanismRenderer.color(CommonColors.WHITE, 0.2F + 0.8F * i / size);
             guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture, x + i, y + height - relativeHeight, 1, 0, 1, relativeHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
             int hoverIndex = mouseX - getX();
             if (hoverIndex == i && mouseY >= getY() && mouseY < getY() + height) {
-                MekanismRenderer.color(0xFFFFFF, 0.5F);
+                MekanismRenderer.color(CommonColors.WHITE, 0.5F);
                 guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture, x + i, y, 2, 0, 1, height, TEXTURE_WIDTH, TEXTURE_HEIGHT);
                 MekanismRenderer.resetColor(guiGraphics);
                 guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture, x + i, y + height - relativeHeight, 0, 1, 1, 1, TEXTURE_WIDTH, TEXTURE_HEIGHT);
@@ -82,7 +82,6 @@ public abstract class GuiGraph<COLLECTION extends Collection<?>, HANDLER extends
 
     protected abstract Component getDataDisplay(int hoverIndex);
 
-    @NotNull
     @Override
     protected ScreenRectangle getTooltipRectangle(int mouseX, int mouseY) {
         return cachedTooltipRect == null ? super.getTooltipRectangle(mouseX, mouseY) : cachedTooltipRect;

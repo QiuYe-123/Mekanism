@@ -16,8 +16,8 @@ import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.math.MathUtils;
 import mekanism.api.resource.LargeResourceStack;
 import mekanism.api.security.IItemSecurityUtils;
-import mekanism.common.attachments.component.UpgradeAware;
-import mekanism.common.attachments.containers.type.ContainerType;
+import mekanism.common.component.component.UpgradeAware;
+import mekanism.common.component.containers.type.ContainerType;
 import mekanism.common.item.interfaces.IDroppableContents;
 import mekanism.common.lib.inventory.HandlerTransitRequest;
 import mekanism.common.lib.transaction.TransactionHelper;
@@ -42,9 +42,7 @@ public final class InventoryUtils {
     private InventoryUtils() {
     }
 
-    /**
-     * Helper to drop the contents of an inventory when it is destroyed if it is public or the cause of the destruction has access to the inventory.
-     */
+    /// Helper to drop the contents of an inventory when it is destroyed if it is public or the cause of the destruction has access to the inventory.
     public static void dropItemContents(ItemEntity entity, DamageSource source) {
         ItemStack stack = entity.getItem();
         Level level = entity.level();
@@ -62,7 +60,7 @@ public final class InventoryUtils {
             }
             int scalar = itemAccess.getAmount();
             BlockPos blockPos = entity.blockPosition();
-            ItemDropper<BlockPos> dropper = (lvl, pos, ignored, slotStack) -> lvl.addFreshEntity(new ItemEntity(lvl, pos.getX(), pos.getY(), pos.getZ(), slotStack));
+            ItemDropper<BlockPos> dropper = (lvl, pos, _, slotStack) -> lvl.addFreshEntity(new ItemEntity(lvl, pos.getX(), pos.getY(), pos.getZ(), slotStack));
             //Note: This instanceof check must be checked before the container type to allow overriding what contents can be dropped
             if (itemType.getItem() instanceof IDroppableContents inventory) {
                 if (inventory.canContentsDrop(itemType)) {
@@ -122,7 +120,7 @@ public final class InventoryUtils {
     /// @param itemType Item type to drop.
     /// @param amount   Amount of the item to drop.
     /// @param dropper  Called to drop the item.
-    public static <POS> void dropStack(Level level, POS pos, Direction side, ItemResource itemType, final long amount, ItemDropper<POS> dropper) {
+    public static <POS> void dropStack(Level level, POS pos, @Nullable Direction side, ItemResource itemType, final long amount, ItemDropper<POS> dropper) {
         if (amount > Integer.MAX_VALUE) {
             //TODO: This never *really* would happen because of how our multiblock's inventories are currently setup... but maybe we should declare more explicit behavior?
             return;
@@ -141,14 +139,12 @@ public final class InventoryUtils {
         }
     }
 
-    /**
-     * Like {@link ItemStack#isSameItemSameComponents(ItemStack, ItemStack)} but empty stacks mean equal (either param). Thiakil: not sure why.
-     *
-     * @param toInsert stack a
-     * @param inSlot   stack b
-     *
-     * @return true if they are compatible
-     */
+    /// Like [ItemStack#isSameItemSameComponents(ItemStack, ItemStack)] but empty stacks mean equal (either param). Thiakil: not sure why.
+    ///
+    /// @param toInsert stack a
+    /// @param inSlot   stack b
+    ///
+    /// @return true if they are compatible
     public static boolean areItemsStackable(ItemStack toInsert, ItemResource inSlot) {
         if (toInsert.isEmpty() || inSlot.isEmpty()) {
             return true;
@@ -183,6 +179,6 @@ public final class InventoryUtils {
     @FunctionalInterface
     public interface ItemDropper<POS> {
 
-        void drop(Level level, POS pos, Direction side, ItemStack stack);
+        void drop(Level level, POS pos, @Nullable Direction side, ItemStack stack);
     }
 }

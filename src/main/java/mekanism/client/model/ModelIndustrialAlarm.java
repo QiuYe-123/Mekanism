@@ -15,8 +15,8 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.NotNull;
 
 public class ModelIndustrialAlarm extends MekanismJavaModel<IndustrialAlarmRenderState> {
 
@@ -55,15 +55,16 @@ public class ModelIndustrialAlarm extends MekanismJavaModel<IndustrialAlarmRende
         bulb.setRotation(0, yRot, 0);*/
     }
 
-    public void collect(IndustrialAlarmRenderState state, @NotNull PoseStack poseStack, @NotNull SubmitNodeCollector collector, int light, int overlayLight, boolean hasFoil) {
+    @Override
+    public void collect(IndustrialAlarmRenderState state, PoseStack poseStack, SubmitNodeCollector collector, int light, int overlayLight, boolean hasFoil) {
         setupAnim(state);
-        collectParts(allParts, poseStack, RENDER_TYPE, collector, light, overlayLight, 0xFFFFFFFF, null, hasFoil);
+        collectParts(allParts, poseStack, RENDER_TYPE, collector, light, overlayLight, CommonColors.WHITE, null, hasFoil);
     }
 
     public static class IndustrialAlarmRenderState {
 
         private float rotation;
-        private int tint = 0xFFFFFFFF;
+        private int tint = CommonColors.WHITE;
 
         public void setRotation(float rotation) {
             this.rotation = rotation;
