@@ -48,5 +48,4 @@ public class TileEntityLogisticalTransporter extends TileEntityLogisticalTranspo
             default -> null;
         });
     }
-
 }

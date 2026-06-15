@@ -46,40 +46,43 @@ public class RenderThermoelectricBoiler extends MultiblockTileEntityRenderer<Boi
           ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         super.extractRenderState(boiler, state, partialTick, cameraPosition, breakProgress);
         BoilerMultiblockData multiblock = boiler.getMultiblock();
+        state.waterTexture = null;
+        state.valveTexture = null;
+        state.steamTexture = null;
+        state.valves.clear();
+        if (multiblock.renderLocation == null || multiblock.upperRenderLocation == null) {
+            return;
+        }
         state.gather(multiblock);
 
         FluidResource water = multiblock.waterTank.resource();
         ChemicalResource steam = multiblock.steamTank.resource();
-        if (water.isEmpty() && steam.isEmpty() || multiblock.renderLocation == null || multiblock.upperRenderLocation == null) {
+        if (water.isEmpty() && steam.isEmpty()) {
             return;
         }
+        float waterScale = multiblock.waterTank.isEmpty() ? 0 : multiblock.prevWaterScale;
+        float steamScale = multiblock.steamTank.isEmpty() ? 0 : multiblock.prevSteamScale;
 
         state.height = multiblock.upperRenderLocation.getY() - 1 - multiblock.renderLocation.getY();
         if (state.height > 0 && !water.isEmpty()) {
             state.waterTexture = MekanismRenderer.getSinglePicker(MekanismRenderer.getFluidTexture(water, MekanismRenderer.FluidTextureType.STILL));
             state.valveTexture = MekanismRenderer.getValveTexture(water);
             state.waterGlow = MekanismRenderer.calculateGlowLight(LightCoordsUtil.FULL_SKY, water);
-            state.waterColor = MekanismRenderer.getColorARGB(water, multiblock.prevWaterScale);
-            state.waterMaxY = ModelRenderer.getMaxY(state.height, multiblock.prevWaterScale, MekanismUtils.lighterThanAirGas(water));
-            state.valves.clear();
-            if (multiblock.prevWaterScale > 0) {
+            state.waterColor = MekanismRenderer.getColorARGB(water, waterScale);
+            state.waterMaxY = ModelRenderer.getMaxY(state.height, waterScale, MekanismUtils.lighterThanAirGas(water));
+            if (waterScale > 0) {
                 for (Map.Entry<BlockPos, IValveHandler.ValveData> entry : multiblock.valves.entrySet()) {//todo - 26.1: are these always active? (when not empty) Should they be?
                     state.valves.add(ValveRenderData.get(entry.getValue(), entry.getKey(), state.waterMaxY - 0.01F, state.renderLocation, state.height));
                 }
             }
-        } else {
-            state.waterTexture = null;
-            state.valveTexture = null;
         }
 
         state.steamHeight = multiblock.renderLocation.getY() + multiblock.height() - 2 - multiblock.upperRenderLocation.getY();
         if (state.steamHeight > 0 && !steam.isEmpty()) {
             state.upperRenderLocation = multiblock.upperRenderLocation.offset(1, 0, 1);
             state.steamTexture = MekanismRenderer.getSinglePicker(MekanismRenderer.getChemicalTexture(steam));
-            state.steamColor = MekanismRenderer.getColorARGB(steam, multiblock.prevSteamScale);
-            state.steamMaxY = ModelRenderer.getMaxY(state.steamHeight, multiblock.prevSteamScale, steam.is(MekanismAPITags.Chemicals.GASEOUS));
-        } else {
-            state.steamTexture = null;
+            state.steamColor = MekanismRenderer.getColorARGB(steam, steamScale);
+            state.steamMaxY = ModelRenderer.getMaxY(state.steamHeight, steamScale, steam.is(MekanismAPITags.Chemicals.GASEOUS));
         }
     }
 

@@ -9,7 +9,6 @@ import mekanism.api.robit.RobitSkin;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.common.MekanismLang;
-import mekanism.common.entity.RobitPrideSkinData;
 import mekanism.common.registries.MekanismRobitSkins;
 import mekanism.common.registries.MekanismSounds;
 import mekanism.common.util.EnumUtils;
@@ -65,12 +64,7 @@ public enum Holiday implements StringRepresentable {
     Pride(new MonthlyDate(Month.JUNE)) {
         @Override
         HolidayMessage getMessage(Player player) {
-            return new HolidayMessage(getThemedLines(12, RobitPrideSkinData.PRIDE.getColor()),
-                  MekanismLang.PRIDE_LINE_ONE.translateColored(EnumColor.PINK, EnumColor.DARK_BLUE, player.getName()),
-                  MekanismLang.PRIDE_LINE_TWO.translateColored(EnumColor.PINK),
-                  MekanismLang.PRIDE_LINE_THREE.translateColored(EnumColor.PINK),
-                  MekanismLang.HOLIDAY_SIGNATURE.translateColored(EnumColor.DARK_GRAY)
-            );
+            return null;
         }
 
         @Override

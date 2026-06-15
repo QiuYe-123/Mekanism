@@ -1,5 +1,7 @@
 package mekanism.client.model.robit;
 
+import com.google.common.collect.Interner;
+import com.google.common.collect.Interners;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import java.util.Collections;
@@ -26,19 +28,22 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelDebugName;
-import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ResolvedModel;
 import net.minecraft.client.resources.model.SimpleModelWrapper;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.geometry.QuadCollection;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.client.resources.model.sprite.MaterialBaker;
 import net.minecraft.client.resources.model.sprite.TextureSlots;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Unit;
 import net.minecraft.util.context.ContextMap;
+import net.neoforged.neoforge.client.model.quad.BakedColors;
+import net.neoforged.neoforge.client.model.quad.BakedNormals;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
@@ -53,6 +58,7 @@ public class RobitSkinManager {
     @Nullable
     private static RobitSkinManager INSTANCE = null;
     private static final ModelGatherer GATHERER = new ModelGatherer();
+    private static final FileToIdConverter MODEL_LISTER = FileToIdConverter.json("models");
 
     public static RobitSkinManager get() {
         return Objects.requireNonNull(INSTANCE, "Not initialized");
@@ -73,17 +79,15 @@ public class RobitSkinManager {
         event.register(new StandaloneModelKey<>(()->"robit_model_bridge"), new FakeStandaloneModel());
     }
 
-    private final Map<Identifier, ResolvedModel> resolvedModelMap;
     private final Table<Identifier, Identifier, BakeResult> bakedCache = HashBasedTable.create();
     private final BlockStateModelPart missingModelPart;
     private final BakeResult bakedMissingModel;
     private final ModelBaker modelBaker;
 
     private RobitSkinManager(ModelBakery bakery, ModelBakery.MissingModels missingModels) {
-        this.resolvedModelMap = bakery.resolvedModels;
         missingModelPart = missingModels.blockPart();
         this.bakedMissingModel = new BakeResult(Collections.singletonList(missingModelPart), Sheets.cutoutBlockSheet());
-        modelBaker = bakery.new ModelBakerImpl(new RobitLateMaterialBaker(), new ModelBakery.InternerImpl(), missingModels);
+        modelBaker = bakery.new ModelBakerImpl(new RobitLateMaterialBaker(), new RobitModelInterner(), missingModels);
     }
 
     public BakeResult getMissing() {
@@ -112,12 +116,8 @@ public class RobitSkinManager {
     }
 
     private BakeResult bake(Identifier skin, @Nullable Identifier activeTexture) {
-        ResolvedModel resolved = resolvedModelMap.get(skin);
-        if (resolved == null) {
-            Mekanism.logger.error("Requested robit model not found: {}", skin);
-            return bakedMissingModel;
-        }
         try {
+            ResolvedModel resolved = modelBaker.getModel(skin);
             //nb: can't use bakeTopGeometry as that is the vanilla-baked one
             QuadCollection quadCollection = resolved.getTopGeometry().bake(makeTextureSlots(resolved, activeTexture), modelBaker, BlockModelRotation.IDENTITY, resolved, ContextMap.EMPTY);
             BlockStateModelPart bakedModel = new SimpleModelWrapper(
@@ -158,6 +158,34 @@ public class RobitSkinManager {
     /// @param renderType Render type to use - the one for missing will be different, this lets the renderer not care
     public record BakeResult(List<BlockStateModelPart> model, RenderType renderType) {}
 
+    private static class RobitModelInterner implements ModelBaker.Interner {
+
+        private final Interner<Vector3fc> vectors = Interners.newStrongInterner();
+        private final Interner<BakedQuad.MaterialInfo> materialInfos = Interners.newStrongInterner();
+        private final Interner<BakedNormals> normals = Interners.newStrongInterner();
+        private final Interner<BakedColors> colors = Interners.newStrongInterner();
+
+        @Override
+        public Vector3fc vector(Vector3fc v) {
+            return vectors.intern(v);
+        }
+
+        @Override
+        public BakedQuad.MaterialInfo materialInfo(BakedQuad.MaterialInfo material) {
+            return materialInfos.intern(material);
+        }
+
+        @Override
+        public BakedNormals normals(BakedNormals normals) {
+            return this.normals.intern(normals);
+        }
+
+        @Override
+        public BakedColors colors(BakedColors colors) {
+            return this.colors.intern(colors);
+        }
+    }
+
     public static class RobitLateMaterialBaker implements MaterialBaker {
 
         private final Map<Material, Material.Baked> bakedMaterials = new ConcurrentHashMap<>();
@@ -194,12 +222,12 @@ public class RobitSkinManager {
         @Override
         public CompletableFuture<Void> reload(SharedState currentReload, Executor taskExecutor, PreparationBarrier preparationBarrier, Executor reloadExecutor) {
             ResourceManager manager = currentReload.resourceManager();
-            return CompletableFuture.supplyAsync(() -> ModelManager.MODEL_LISTER.listMatchingResources(manager), taskExecutor)
+            return CompletableFuture.<Map<Identifier, Resource>>supplyAsync(() -> MODEL_LISTER.listMatchingResources(manager), taskExecutor)
             .thenAccept(
                 resources -> {
                     Set<Identifier> robitModels = new HashSet<>();
                     for (Map.Entry<Identifier, Resource> resource : resources.entrySet()) {
-                        Identifier modelId = ModelManager.MODEL_LISTER.fileToId(resource.getKey());
+                        Identifier modelId = MODEL_LISTER.fileToId(resource.getKey());
                         if (modelId.getPath().startsWith("robit/")) {
                             robitModels.add(modelId);
                         }
