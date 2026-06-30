@@ -65,7 +65,7 @@ import net.neoforged.neoforge.client.event.ModelEvent.BakingCompleted;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jspecify.annotations.Nullable;
 
-public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
+public class MekaSuitGearArmor implements ICustomArmor, ISpecialGear {
 
     private static final String LED_TAG = "led";
     private static final String INACTIVE_TAG = "inactive_";
@@ -74,10 +74,10 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
     private static final String SHARED_TAG = "shared_";
     private static final String GLASS_TAG = "glass";
 
-    public static final MekaSuitArmor HELMET = new MekaSuitArmor(EquipmentSlot.HEAD, EquipmentSlot.CHEST);
-    public static final MekaSuitArmor BODYARMOR = new MekaSuitArmor(EquipmentSlot.CHEST, EquipmentSlot.HEAD);
-    public static final MekaSuitArmor PANTS = new MekaSuitArmor(EquipmentSlot.LEGS, EquipmentSlot.FEET);
-    public static final MekaSuitArmor BOOTS = new MekaSuitArmor(EquipmentSlot.FEET, EquipmentSlot.LEGS);
+    public static final MekaSuitGearArmor HELMET = new MekaSuitGearArmor(EquipmentSlot.HEAD, EquipmentSlot.CHEST);
+    public static final MekaSuitGearArmor BODYARMOR = new MekaSuitGearArmor(EquipmentSlot.CHEST, EquipmentSlot.HEAD);
+    public static final MekaSuitGearArmor PANTS = new MekaSuitGearArmor(EquipmentSlot.LEGS, EquipmentSlot.FEET);
+    public static final MekaSuitGearArmor BOOTS = new MekaSuitGearArmor(EquipmentSlot.FEET, EquipmentSlot.LEGS);
 
     private static final Table<EquipmentSlot, Holder<ModuleData<?>>, ModuleModelSpec> moduleModelSpec = HashBasedTable.create();
 
@@ -96,7 +96,7 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
     private final EquipmentSlot type;
     private final EquipmentSlot adjacentType;
 
-    private MekaSuitArmor(EquipmentSlot type, EquipmentSlot adjacentType) {
+    private MekaSuitGearArmor(EquipmentSlot type, EquipmentSlot adjacentType) {
         this.type = type;
         this.adjacentType = adjacentType;
         MekanismModelCache.INSTANCE.reloadCallback(cache::invalidateAll);
@@ -153,8 +153,8 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
     private void render(HumanoidModel<?> baseModel, MultiBufferSource bufferSource, PoseStack poseStack, int lightCoords, int overlayCoords, Color color,
                         boolean hasEffect, LivingEntity state, Map<ModelPos, List<BakedQuad>> quadMap, boolean transparent) {
         RenderType renderType = MekanismRenderType.MEKASUIT;
-        Mekanism.logger.error("Legacy MekaSuitArmor render hook was invoked unexpectedly: " + renderType);
-        throw new IllegalStateException("Legacy MekaSuitArmor render hook should not be called.");
+        Mekanism.logger.error("Legacy MekaSuitGearArmor render hook was invoked unexpectedly: " + renderType);
+        throw new IllegalStateException("Legacy MekaSuitGearArmor render hook should not be called.");
     }
 
     private <STATE extends HumanoidRenderState> void renderMekaSuit(HumanoidModel<STATE> baseModel, PoseStack poseStack, SubmitNodeCollector nodeCollector,
@@ -539,7 +539,7 @@ public class MekaSuitArmor implements ICustomArmor, ISpecialGear {
         }
 
         public String processOverrideName(String part) {
-            return MekaSuitArmor.processOverrideName(part, name);
+            return MekaSuitGearArmor.processOverrideName(part, name);
         }
     }
 
