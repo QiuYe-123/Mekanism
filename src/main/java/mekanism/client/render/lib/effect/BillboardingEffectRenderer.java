@@ -3,13 +3,17 @@ package mekanism.client.render.lib.effect;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import mekanism.client.render.MekanismRenderType;
+import mekanism.common.Mekanism;
 import mekanism.common.lib.effect.CustomEffect;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+
+import java.util.function.Supplier;
 
 public class BillboardingEffectRenderer {
 
@@ -26,7 +30,7 @@ public class BillboardingEffectRenderer {
         int yIndex = tick / gridSize;
         float spriteSize = 1F / gridSize;
         Vector3f[] vertexPos = {new Vector3f(1.0F, -1.0F, 0.0F), new Vector3f(1.0F, 1.0F, 0.0F),
-                                new Vector3f(-1.0F, 1.0F, 0.0F), new Vector3f(-1.0F, -1.0F, 0.0F)};
+                new Vector3f(-1.0F, 1.0F, 0.0F), new Vector3f(-1.0F, -1.0F, 0.0F)};
         Vec3 pos = effect.getPos(partialTick);
         for (Vector3f vector3f : vertexPos) {
             vector3f.rotate(camera.orientation);
@@ -42,16 +46,23 @@ public class BillboardingEffectRenderer {
 
         Matrix4f matrix = poseStack.last().pose();
         buffer.addVertex(matrix, vertexPos[0].x(), vertexPos[0].y(), vertexPos[0].z())
-              .setUv(minU, maxV)
-              .setColor(argb);
+                .setUv(minU, maxV)
+                .setColor(argb);
         buffer.addVertex(matrix, vertexPos[1].x(), vertexPos[1].y(), vertexPos[1].z())
-              .setUv(maxU, maxV)
-              .setColor(argb);
+                .setUv(maxU, maxV)
+                .setColor(argb);
         buffer.addVertex(matrix, vertexPos[2].x(), vertexPos[2].y(), vertexPos[2].z())
-              .setUv(maxU, minV)
-              .setColor(argb);
+                .setUv(maxU, minV)
+                .setColor(argb);
         buffer.addVertex(matrix, vertexPos[3].x(), vertexPos[3].y(), vertexPos[3].z())
-              .setUv(minU, minV)
-              .setColor(argb);
+                .setUv(minU, minV)
+                .setColor(argb);
+    }
+
+    @SuppressWarnings("unused")
+    private static void render(Identifier texture, String name, Supplier<CustomEffect> effectSupplier) {
+        RenderType renderType = MekanismRenderType.SPS.apply(texture);
+        Mekanism.logger.error("Legacy BillboardingEffectRenderer render hook was invoked unexpectedly: " + renderType);
+        throw new IllegalStateException("Legacy BillboardingEffectRenderer render hook should not be called.");
     }
 }

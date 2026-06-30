@@ -4,9 +4,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import mekanism.client.render.MekanismRenderType;
 import mekanism.client.render.entity.RenderFlame.FlameRenderState;
+import mekanism.common.Mekanism;
 import mekanism.common.entity.EntityFlame;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -14,6 +16,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 
@@ -55,19 +58,26 @@ public class RenderFlame extends EntityRenderer<EntityFlame, FlameRenderState> {
         poseStack.scale(state.scale, state.scale, state.scale);
 
         nodeCollector.submitModel(
-              this.model,
-              state,
-              poseStack,
-              MekanismRenderType.FLAME.apply(TEXTURE),
-              state.lightCoords,
-              OverlayTexture.NO_OVERLAY,
-              state.tintColor,
-              null,
-              state.outlineColor,
-              null
+                this.model,
+                state,
+                poseStack,
+                MekanismRenderType.FLAME.apply(TEXTURE),
+                state.lightCoords,
+                OverlayTexture.NO_OVERLAY,
+                state.tintColor,
+                null,
+                state.outlineColor,
+                null
         );
         poseStack.popPose();
         super.submit(state, poseStack, nodeCollector, camera);
+    }
+
+    @SuppressWarnings("unused")
+    private void render(EntityFlame flame, float yRot, float xRot, PoseStack poseStack, MultiBufferSource renderer, int lightCoords) {
+        RenderType renderType = MekanismRenderType.FLAME.apply(TEXTURE);
+        Mekanism.logger.error("Legacy RenderFlame render hook was invoked unexpectedly: " + renderType);
+        throw new IllegalStateException("Legacy RenderFlame render hook should not be called.");
     }
 
     @Override
