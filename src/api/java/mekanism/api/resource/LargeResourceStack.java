@@ -125,9 +125,9 @@ public record LargeResourceStack<RESOURCE extends Resource>(RESOURCE resource, @
         ///
         /// @return Large resource stack, or the empty instance if the resource is empty or the amount is zero.
         public LargeResourceStack<RESOURCE> createStack(RESOURCE resource, @Range(from = 0, to = Long.MAX_VALUE) long amount) {
-            MekanismPreconditions.checkNonNegative(amount);
+//            MekanismPreconditions.checkNonNegative(amount);
             Objects.requireNonNull(resource, "Resource cannot be null");
-            if (resource.isEmpty() || amount == 0) {
+            if (resource.isEmpty() || amount <= 0) {
                 return empty;
             }
             return new LargeResourceStack<>(resource, amount);
