@@ -92,6 +92,7 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
     private final BiPredicate<Object, AutomationType> notExternalFormedBiPred = (_, automationType) -> !automationType.isExternal() && isFormed();
 
     private boolean dirty;
+    private boolean valveDataChanged;
 
     public MultiblockData(BlockEntity tile) {
         worldSupplier = tile::getLevel;
@@ -145,7 +146,10 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
     public boolean tick(ServerLevel world) {
         boolean needsPacket = false;
         for (ValveData data : valves.values()) {
-            needsPacket |= data.tick();
+            if (data.tick()) {
+                valveDataChanged = true;
+                needsPacket = true;
+            }
         }
         return needsPacket;
     }
@@ -278,6 +282,24 @@ public class MultiblockData implements IMultiblockContents, ITileHeatHandler, IC
         output.store(SerializationConstants.MIN, BlockPos.CODEC, bounds.getMinPos());
         output.store(SerializationConstants.MAX, BlockPos.CODEC, bounds.getMaxPos());
         output.storeNullable(SerializationConstants.INVENTORY_ID, UUIDUtil.CODEC, inventoryID);
+    }
+
+    /// Applies sparse runtime state from a reduced update packet. Subclasses override this for renderer-facing values that can change while formed.
+    public void readDynamicUpdateTag(ValueInput input) {
+    }
+
+    /// Writes only runtime state marked dirty during the current tick. Values are absolute so multiple requests can be coalesced safely.
+    public void writeDynamicUpdateTag(ValueOutput output) {
+    }
+
+    /// Clears the runtime dirty markers after the queued update has either been sent or discarded because nobody tracks the chunk.
+    public void clearDynamicUpdateData() {
+        valveDataChanged = false;
+    }
+
+    /// Returns whether a valve changed between active and inactive during the current tick.
+    protected boolean hasValveDataChanged() {
+        return valveDataChanged;
     }
 
     @ComputerMethod(nameOverride = "getLength")

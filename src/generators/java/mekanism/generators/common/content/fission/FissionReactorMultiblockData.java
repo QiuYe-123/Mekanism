@@ -65,6 +65,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueOutput.TypedOutputList;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.resource.Resource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
@@ -74,6 +75,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
 
     private static final double INVERSE_INSULATION_COEFFICIENT = 10_000;
     private static final double INVERSE_CONDUCTION_COEFFICIENT = 10;
+    private static final String CHEMICAL_COOLANT = "chemical_coolant";
 
     private static final double waterConductivity = 0.5;
 
@@ -149,6 +151,12 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
     private float prevFuelScale;
     public float prevHeatedCoolantScale;
     private float prevWasteScale;
+    private FluidResource lastRenderCoolantFluid;
+    private ChemicalResource lastRenderCoolantChemical;
+    private ChemicalResource lastRenderFuel;
+    private ChemicalResource lastRenderHeatedCoolant;
+    private ChemicalResource lastRenderWaste;
+    private boolean renderDataChanged;
 
     public FissionReactorMultiblockData(TileEntityFissionReactorCasing tile) {
         super(tile);
@@ -172,6 +180,11 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         Collections.addAll(chemicalTanks, fuelTank, heatedCoolantTank, wasteTank, coolantTank.getChemicalTank());
         heatCapacitor = VariableHeatCapacitor.create(MekanismGeneratorsConfig.generators.fissionCasingHeatCapacity.get(),
               () -> INVERSE_CONDUCTION_COEFFICIENT, () -> INVERSE_INSULATION_COEFFICIENT, () -> biomeAmbientTemp, this);
+        lastRenderCoolantFluid = coolantTank.getFluidTank().resource();
+        lastRenderCoolantChemical = coolantTank.getChemicalTank().resource();
+        lastRenderFuel = fuelTank.resource();
+        lastRenderHeatedCoolant = heatedCoolantTank.resource();
+        lastRenderWaste = wasteTank.resource();
     }
 
     @Override
@@ -220,14 +233,28 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         float coolantScale = MekanismUtils.getScale(prevCoolantScale, coolantTank.getCurrentContainer());
         float fuelScale = MekanismUtils.getScale(prevFuelScale, fuelTank);
         float steamScale = MekanismUtils.getScale(prevHeatedCoolantScale, heatedCoolantTank), wasteScale = MekanismUtils.getScale(prevWasteScale, wasteTank);
+        FluidResource renderCoolantFluid = coolantTank.getFluidTank().resource();
+        ChemicalResource renderCoolantChemical = coolantTank.getChemicalTank().resource();
+        ChemicalResource renderFuel = fuelTank.resource();
+        ChemicalResource renderHeatedCoolant = heatedCoolantTank.resource();
+        ChemicalResource renderWaste = wasteTank.resource();
+        boolean renderResourceChanged = !lastRenderCoolantFluid.equals(renderCoolantFluid) || !lastRenderCoolantChemical.equals(renderCoolantChemical) ||
+                                        !lastRenderFuel.equals(renderFuel) || !lastRenderHeatedCoolant.equals(renderHeatedCoolant) ||
+                                        !lastRenderWaste.equals(renderWaste);
+        lastRenderCoolantFluid = renderCoolantFluid;
+        lastRenderCoolantChemical = renderCoolantChemical;
+        lastRenderFuel = renderFuel;
+        lastRenderHeatedCoolant = renderHeatedCoolant;
+        lastRenderWaste = renderWaste;
         if (burning != clientBurning || MekanismUtils.scaleChanged(coolantScale, prevCoolantScale) || MekanismUtils.scaleChanged(fuelScale, prevFuelScale) ||
-            MekanismUtils.scaleChanged(steamScale, prevHeatedCoolantScale) || MekanismUtils.scaleChanged(wasteScale, prevWasteScale)) {
+            MekanismUtils.scaleChanged(steamScale, prevHeatedCoolantScale) || MekanismUtils.scaleChanged(wasteScale, prevWasteScale) || renderResourceChanged) {
             needsPacket = true;
             prevCoolantScale = coolantScale;
             prevFuelScale = fuelScale;
             prevHeatedCoolantScale = steamScale;
             prevWasteScale = wasteScale;
             clientBurning = burning;
+            renderDataChanged = true;
         }
         return needsPacket;
     }
@@ -279,9 +306,11 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         prevWasteScale = input.getFloatOr(SerializationConstants.SCALE_ALT_3, prevWasteScale);
         input.getInt(SerializationConstants.VOLUME).ifPresent(this::setVolume);
         NBTUtils.readOrEmpty(input, SerializationConstants.FLUID, coolantTank.getFluidTank());
+        NBTUtils.readOrEmpty(input, CHEMICAL_COOLANT, coolantTank.getChemicalTank());
         NBTUtils.readOrEmpty(input, SerializationConstants.CHEMICAL, fuelTank);
         NBTUtils.readOrEmpty(input, SerializationConstants.CHEMICAL_STORED_ALT, heatedCoolantTank);
         NBTUtils.readOrEmpty(input, SerializationConstants.CHEMICAL_STORED_ALT_2, wasteTank);
+        clientBurning = input.getBooleanOr(SerializationConstants.BURNING, clientBurning);
         readValves(input);
         assemblies.clear();
         for (FormedAssembly assembly : input.listOrEmpty(SerializationConstants.ASSEMBLIES, FormedAssembly.CODEC)) {
@@ -298,9 +327,11 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         output.putFloat(SerializationConstants.SCALE_ALT_3, prevWasteScale);
         output.putInt(SerializationConstants.VOLUME, getVolume());
         NBTUtils.storeNonEmpty(output, SerializationConstants.FLUID, coolantTank.getFluidTank());
+        NBTUtils.storeNonEmpty(output, CHEMICAL_COOLANT, coolantTank.getChemicalTank());
         NBTUtils.storeNonEmpty(output, SerializationConstants.CHEMICAL, fuelTank);
         NBTUtils.storeNonEmpty(output, SerializationConstants.CHEMICAL_STORED_ALT, heatedCoolantTank);
         NBTUtils.storeNonEmpty(output, SerializationConstants.CHEMICAL_STORED_ALT_2, wasteTank);
+        output.putBoolean(SerializationConstants.BURNING, isBurning());
         writeValves(output);
         if (!assemblies.isEmpty()) {
             TypedOutputList<FormedAssembly> serializedAssemblies = output.list(SerializationConstants.ASSEMBLIES, FormedAssembly.CODEC);
@@ -308,6 +339,49 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
                 serializedAssemblies.add(assembly);
             }
         }
+    }
+
+    @Override
+    public void readDynamicUpdateTag(ValueInput input) {
+        input.child(SerializationConstants.STORED).ifPresent(renderInput -> {
+            prevCoolantScale = renderInput.getFloatOr(SerializationConstants.SCALE, prevCoolantScale);
+            prevFuelScale = renderInput.getFloatOr(SerializationConstants.SCALE_ALT, prevFuelScale);
+            prevHeatedCoolantScale = renderInput.getFloatOr(SerializationConstants.SCALE_ALT_2, prevHeatedCoolantScale);
+            prevWasteScale = renderInput.getFloatOr(SerializationConstants.SCALE_ALT_3, prevWasteScale);
+            NBTUtils.readOrEmpty(renderInput, SerializationConstants.FLUID, coolantTank.getFluidTank());
+            NBTUtils.readOrEmpty(renderInput, CHEMICAL_COOLANT, coolantTank.getChemicalTank());
+            NBTUtils.readOrEmpty(renderInput, SerializationConstants.CHEMICAL, fuelTank);
+            NBTUtils.readOrEmpty(renderInput, SerializationConstants.CHEMICAL_STORED_ALT, heatedCoolantTank);
+            NBTUtils.readOrEmpty(renderInput, SerializationConstants.CHEMICAL_STORED_ALT_2, wasteTank);
+            clientBurning = renderInput.getBooleanOr(SerializationConstants.BURNING, clientBurning);
+        });
+        input.child(SerializationConstants.VALVE).ifPresent(this::readValves);
+    }
+
+    @Override
+    public void writeDynamicUpdateTag(ValueOutput output) {
+        if (renderDataChanged) {
+            ValueOutput renderOutput = output.child(SerializationConstants.STORED);
+            renderOutput.putFloat(SerializationConstants.SCALE, prevCoolantScale);
+            renderOutput.putFloat(SerializationConstants.SCALE_ALT, prevFuelScale);
+            renderOutput.putFloat(SerializationConstants.SCALE_ALT_2, prevHeatedCoolantScale);
+            renderOutput.putFloat(SerializationConstants.SCALE_ALT_3, prevWasteScale);
+            NBTUtils.storeNonEmpty(renderOutput, SerializationConstants.FLUID, coolantTank.getFluidTank());
+            NBTUtils.storeNonEmpty(renderOutput, CHEMICAL_COOLANT, coolantTank.getChemicalTank());
+            NBTUtils.storeNonEmpty(renderOutput, SerializationConstants.CHEMICAL, fuelTank);
+            NBTUtils.storeNonEmpty(renderOutput, SerializationConstants.CHEMICAL_STORED_ALT, heatedCoolantTank);
+            NBTUtils.storeNonEmpty(renderOutput, SerializationConstants.CHEMICAL_STORED_ALT_2, wasteTank);
+            renderOutput.putBoolean(SerializationConstants.BURNING, clientBurning);
+        }
+        if (hasValveDataChanged()) {
+            writeValves(output.child(SerializationConstants.VALVE));
+        }
+    }
+
+    @Override
+    public void clearDynamicUpdateData() {
+        super.clearDynamicUpdateData();
+        renderDataChanged = false;
     }
 
     private void handleDamage(Level world) {
@@ -562,6 +636,11 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
 
     public boolean isBurning() {
         return lastBurnRate > 0;
+    }
+
+    /// Returns the synchronized burning snapshot used by client rendering.
+    public boolean isBurningForRendering() {
+        return clientBurning;
     }
 
     public boolean handlesSound(TileEntityFissionReactorCasing tile) {

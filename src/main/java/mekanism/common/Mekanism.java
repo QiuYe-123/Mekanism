@@ -301,6 +301,7 @@ public class Mekanism {
         //Clear all cache data, wait until server stopper though so that we make sure saving can use any data it needs
         playerState.clear(false);
         activeVibrators.clear();
+        PacketUtils.clearBlockEntityUpdates();
         worldTickHandler.resetChunkData();
         BoilerMultiblockData.hotMap.clear();
 
@@ -426,6 +427,7 @@ public class Mekanism {
         // Make sure the global fake player drops its reference to the World
         // when the server shuts down
         if (event.getLevel() instanceof ServerLevel level) {
+            PacketUtils.clearBlockEntityUpdates(level);
             MekFakePlayer.releaseInstance(level);
         }
         if (event.getLevel() instanceof Level level && MekanismConfig.general.validOredictionificatorFilters.hasInvalidationListeners()) {

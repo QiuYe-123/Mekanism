@@ -118,6 +118,9 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
 
     public float prevWaterScale;
     public float prevSteamScale;
+    private FluidResource lastRenderWater;
+    private ChemicalResource lastRenderSteam;
+    private boolean renderDataChanged;
 
     public BoilerMultiblockData(TileEntityBoilerCasing tile) {
         super(tile);
@@ -135,6 +138,8 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
         Collections.addAll(chemicalTanks, steamTank, superheatedCoolantTank, cooledCoolantTank);
         heatCapacitor = VariableHeatCapacitor.create(CASING_HEAT_CAPACITY, () -> CASING_INVERSE_CONDUCTION_COEFFICIENT, () -> CASING_INVERSE_INSULATION_COEFFICIENT,
               () -> biomeAmbientTemp, this);
+        lastRenderWater = waterTank.resource();
+        lastRenderSteam = steamTank.resource();
     }
 
     @Override
@@ -219,14 +224,22 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
             }
         }
         float waterScale = MekanismUtils.getScale(prevWaterScale, waterTank);
-        if (MekanismUtils.scaleChanged(waterScale, prevWaterScale)) {
+        FluidResource renderWater = waterTank.resource();
+        boolean waterRenderChanged = MekanismUtils.scaleChanged(waterScale, prevWaterScale) || !lastRenderWater.equals(renderWater);
+        lastRenderWater = renderWater;
+        if (waterRenderChanged) {
             needsPacket = true;
             prevWaterScale = waterScale;
+            renderDataChanged = true;
         }
         float steamScale = MekanismUtils.getScale(prevSteamScale, steamTank);
-        if (MekanismUtils.scaleChanged(steamScale, prevSteamScale)) {
+        ChemicalResource renderSteam = steamTank.resource();
+        boolean steamRenderChanged = MekanismUtils.scaleChanged(steamScale, prevSteamScale) || !lastRenderSteam.equals(renderSteam);
+        lastRenderSteam = renderSteam;
+        if (steamRenderChanged) {
             needsPacket = true;
             prevSteamScale = steamScale;
+            renderDataChanged = true;
         }
         return needsPacket;
     }
@@ -291,6 +304,37 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
             output.store(SerializationConstants.RENDER_Y, BlockPos.CODEC, upperRenderLocation);
         }
         writeValves(output);
+    }
+
+    @Override
+    public void readDynamicUpdateTag(ValueInput input) {
+        input.child(SerializationConstants.STORED).ifPresent(renderInput -> {
+            prevWaterScale = renderInput.getFloatOr(SerializationConstants.SCALE, prevWaterScale);
+            prevSteamScale = renderInput.getFloatOr(SerializationConstants.SCALE_ALT, prevSteamScale);
+            NBTUtils.readOrEmpty(renderInput, SerializationConstants.FLUID, waterTank);
+            NBTUtils.readOrEmpty(renderInput, SerializationConstants.CHEMICAL, steamTank);
+        });
+        input.child(SerializationConstants.VALVE).ifPresent(this::readValves);
+    }
+
+    @Override
+    public void writeDynamicUpdateTag(ValueOutput output) {
+        if (renderDataChanged) {
+            ValueOutput renderOutput = output.child(SerializationConstants.STORED);
+            renderOutput.putFloat(SerializationConstants.SCALE, prevWaterScale);
+            renderOutput.putFloat(SerializationConstants.SCALE_ALT, prevSteamScale);
+            NBTUtils.storeNonEmpty(renderOutput, SerializationConstants.FLUID, waterTank);
+            NBTUtils.storeNonEmpty(renderOutput, SerializationConstants.CHEMICAL, steamTank);
+        }
+        if (hasValveDataChanged()) {
+            writeValves(output.child(SerializationConstants.VALVE));
+        }
+    }
+
+    @Override
+    public void clearDynamicUpdateData() {
+        super.clearDynamicUpdateData();
+        renderDataChanged = false;
     }
 
     @Override

@@ -77,6 +77,8 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
     public double lastProcessed;
 
     public boolean couldOperate;
+    private boolean processDataChanged;
+    private boolean coilDataChanged;
     @Nullable
     private AABB deathZone, advancementArea;
 
@@ -131,6 +133,7 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
         }
 
         if (receivedEnergy != lastReceivedEnergy || !Mth.equal(processed, lastProcessed)) {
+            processDataChanged = true;
             needsPacket = true;
         }
         if (!chemicalOutputTargets.isEmpty() && !outputTank.isEmpty()) {
@@ -142,7 +145,10 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
 
         kill(world);
 
-        needsPacket |= coilData.tick();
+        if (coilData.tick()) {
+            coilDataChanged = true;
+            needsPacket = true;
+        }
         return needsPacket;
     }
 
@@ -171,6 +177,34 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
         coilData.write(output);
         output.putLong(SerializationConstants.ENERGY_USAGE, lastReceivedEnergy);
         output.putDouble(SerializationConstants.LAST_PROCESSED, lastProcessed);
+    }
+
+    @Override
+    public void readDynamicUpdateTag(ValueInput input) {
+        input.child(SerializationConstants.STORED).ifPresent(processInput -> {
+            lastReceivedEnergy = processInput.getLongOr(SerializationConstants.ENERGY_USAGE, lastReceivedEnergy);
+            lastProcessed = processInput.getDoubleOr(SerializationConstants.LAST_PROCESSED, lastProcessed);
+        });
+        input.child(SerializationConstants.COILS).ifPresent(coilData::read);
+    }
+
+    @Override
+    public void writeDynamicUpdateTag(ValueOutput output) {
+        if (processDataChanged) {
+            ValueOutput processOutput = output.child(SerializationConstants.STORED);
+            processOutput.putLong(SerializationConstants.ENERGY_USAGE, lastReceivedEnergy);
+            processOutput.putDouble(SerializationConstants.LAST_PROCESSED, lastProcessed);
+        }
+        if (coilDataChanged) {
+            coilData.write(output.child(SerializationConstants.COILS));
+        }
+    }
+
+    @Override
+    public void clearDynamicUpdateData() {
+        super.clearDynamicUpdateData();
+        processDataChanged = false;
+        coilDataChanged = false;
     }
 
     @Override

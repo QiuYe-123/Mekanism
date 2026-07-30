@@ -82,7 +82,7 @@ public class RenderFissionReactor extends MultiblockTileEntityRenderer<FissionRe
             state.heatedCoolantColor = MekanismRenderer.getColorARGB(chemical, heatedCoolantScale);
         }
 
-        if (multiblock.isBurning()) {
+        if (multiblock.isBurningForRendering()) {
             //TODO - 26.1: Do we need to copy this like this?
             state.assemblies.addAll(multiblock.assemblies);
         }

@@ -61,6 +61,9 @@ public class TankMultiblockData extends MultiblockData implements IValveHandler 
     OutputInventorySlot outputSlot;
     private long tankCapacity;
     public float prevScale;
+    private FluidResource lastRenderFluid;
+    private ChemicalResource lastRenderChemical;
+    private boolean renderDataChanged;
 
     public TankMultiblockData(TileEntityDynamicTank tile) {
         super(tile);
@@ -74,6 +77,8 @@ public class TankMultiblockData extends MultiblockData implements IValveHandler 
         inventorySlots.addAll(createBaseInventorySlots());
         directFluidHandler = (IMekanismResourceHandler<FluidResource, IFluidTank>) () -> fluidTanks;
         directChemicalHandler = (IMekanismResourceHandler<ChemicalResource, IChemicalTank>) () -> chemicalTanks;
+        lastRenderFluid = mergedTank.getFluidTank().resource();
+        lastRenderChemical = mergedTank.getChemicalTank().resource();
     }
 
     private List<IInventorySlot> createBaseInventorySlots() {
@@ -89,8 +94,14 @@ public class TankMultiblockData extends MultiblockData implements IValveHandler 
         boolean needsPacket = super.tick(world);
         inputSlot.handleTank(outputSlot, editMode, null);
         float scale = getScale();
-        if (MekanismUtils.scaleChanged(scale, prevScale)) {
+        FluidResource renderFluid = mergedTank.getFluidTank().resource();
+        ChemicalResource renderChemical = mergedTank.getChemicalTank().resource();
+        boolean renderResourceChanged = !lastRenderFluid.equals(renderFluid) || !lastRenderChemical.equals(renderChemical);
+        lastRenderFluid = renderFluid;
+        lastRenderChemical = renderChemical;
+        if (MekanismUtils.scaleChanged(scale, prevScale) || renderResourceChanged) {
             prevScale = scale;
+            renderDataChanged = true;
             needsPacket = true;
         }
         return needsPacket;
@@ -130,6 +141,33 @@ public class TankMultiblockData extends MultiblockData implements IValveHandler 
         output.putFloat(SerializationConstants.SCALE, prevScale);
         mergedTank.addToUpdateTag(output);
         writeValves(output);
+    }
+
+    @Override
+    public void readDynamicUpdateTag(ValueInput input) {
+        input.child(SerializationConstants.STORED).ifPresent(renderInput -> {
+            prevScale = renderInput.getFloatOr(SerializationConstants.SCALE, prevScale);
+            mergedTank.readFromUpdateTag(renderInput);
+        });
+        input.child(SerializationConstants.VALVE).ifPresent(this::readValves);
+    }
+
+    @Override
+    public void writeDynamicUpdateTag(ValueOutput output) {
+        if (renderDataChanged) {
+            ValueOutput renderOutput = output.child(SerializationConstants.STORED);
+            renderOutput.putFloat(SerializationConstants.SCALE, prevScale);
+            mergedTank.addToUpdateTag(renderOutput);
+        }
+        if (hasValveDataChanged()) {
+            writeValves(output.child(SerializationConstants.VALVE));
+        }
+    }
+
+    @Override
+    public void clearDynamicUpdateData() {
+        super.clearDynamicUpdateData();
+        renderDataChanged = false;
     }
 
     private float getScale() {

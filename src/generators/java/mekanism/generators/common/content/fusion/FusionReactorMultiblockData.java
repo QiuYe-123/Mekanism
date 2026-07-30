@@ -111,6 +111,7 @@ public class FusionReactorMultiblockData extends MultiblockData {
     private double biomeAmbientTemp;
     @ContainerSync(tags = HEAT_TAB)
     private double lastPlasmaTemperature;
+    private boolean renderDataChanged;
     @ContainerSync
     private double lastCaseTemperature;
     @ContainerSync
@@ -206,6 +207,26 @@ public class FusionReactorMultiblockData extends MultiblockData {
         output.putBoolean(SerializationConstants.BURNING, isBurning());
     }
 
+    @Override
+    public void readDynamicUpdateTag(ValueInput input) {
+        lastPlasmaTemperature = input.getDoubleOr(SerializationConstants.PLASMA_TEMP, lastPlasmaTemperature);
+        setBurning(input.getBooleanOr(SerializationConstants.BURNING, isBurning()));
+    }
+
+    @Override
+    public void writeDynamicUpdateTag(ValueOutput output) {
+        if (renderDataChanged) {
+            output.putDouble(SerializationConstants.PLASMA_TEMP, getLastPlasmaTemp());
+            output.putBoolean(SerializationConstants.BURNING, isBurning());
+        }
+    }
+
+    @Override
+    public void clearDynamicUpdateData() {
+        super.clearDynamicUpdateData();
+        renderDataChanged = false;
+    }
+
     public void addTemperatureFromEnergyInput(long energyAdded, TransactionContext transaction) {
         if (energyAdded > 0) {
             plasmaJournal.updateSnapshots(transaction);
@@ -266,6 +287,7 @@ public class FusionReactorMultiblockData extends MultiblockData {
         if (isBurning() != clientBurning || Math.abs(getLastPlasmaTemp() - clientTemp) > 1_000_000) {
             clientBurning = isBurning();
             clientTemp = getLastPlasmaTemp();
+            renderDataChanged = true;
             needsPacket = true;
         }
         return needsPacket;

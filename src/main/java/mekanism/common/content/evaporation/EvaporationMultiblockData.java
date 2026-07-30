@@ -64,6 +64,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidStackTemplate;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
@@ -95,6 +96,8 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
 
     private long inputTankCapacity;
     public float prevScale;
+    private FluidResource lastRenderInput;
+    private boolean renderDataChanged;
     @ContainerSync
     @SyntheticComputerMethod(getter = "getProductionAmount")
     public double lastGain;
@@ -138,6 +141,7 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
         inputInputSlot.setSlotType(ContainerSlotType.INPUT);
         inputOutputSlot.setSlotType(ContainerSlotType.INPUT);
         heatCapacitor = VariableHeatCapacitor.create(MekanismConfig.general.evaporationHeatCapacity.get() * 3, () -> biomeAmbientTemp, this);
+        lastRenderInput = inputTank.resource();
     }
 
     @Override
@@ -178,8 +182,12 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
         }
         recipeCacheLookupMonitor.updateAndProcess();
         float scale = MekanismUtils.getScale(prevScale, inputTank);
-        if (!Mth.equal(scale, prevScale)) {
+        FluidResource renderInput = inputTank.resource();
+        boolean renderResourceChanged = !lastRenderInput.equals(renderInput);
+        lastRenderInput = renderInput;
+        if (!Mth.equal(scale, prevScale) || renderResourceChanged) {
             prevScale = scale;
+            renderDataChanged = true;
             needsPacket = true;
         }
         return needsPacket;
@@ -225,6 +233,33 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
         NBTUtils.storeNonEmpty(output, SerializationConstants.FLUID, inputTank);
         output.putFloat(SerializationConstants.SCALE, prevScale);
         writeValves(output);
+    }
+
+    @Override
+    public void readDynamicUpdateTag(ValueInput input) {
+        input.child(SerializationConstants.STORED).ifPresent(renderInput -> {
+            NBTUtils.readOrEmpty(renderInput, SerializationConstants.FLUID, inputTank);
+            prevScale = renderInput.getFloatOr(SerializationConstants.SCALE, prevScale);
+        });
+        input.child(SerializationConstants.VALVE).ifPresent(this::readValves);
+    }
+
+    @Override
+    public void writeDynamicUpdateTag(ValueOutput output) {
+        if (renderDataChanged) {
+            ValueOutput renderOutput = output.child(SerializationConstants.STORED);
+            NBTUtils.storeNonEmpty(renderOutput, SerializationConstants.FLUID, inputTank);
+            renderOutput.putFloat(SerializationConstants.SCALE, prevScale);
+        }
+        if (hasValveDataChanged()) {
+            writeValves(output.child(SerializationConstants.VALVE));
+        }
+    }
+
+    @Override
+    public void clearDynamicUpdateData() {
+        super.clearDynamicUpdateData();
+        renderDataChanged = false;
     }
 
     @Override

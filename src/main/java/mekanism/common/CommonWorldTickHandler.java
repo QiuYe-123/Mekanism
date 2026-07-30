@@ -14,6 +14,7 @@ import mekanism.common.content.qio.IQIOCraftingWindowHolder;
 import mekanism.common.inventory.container.item.PortableQIODashboardContainer;
 import mekanism.common.lib.frequency.FrequencyControllerManager;
 import mekanism.common.lib.radiation.RadiationManager;
+import mekanism.common.network.PacketUtils;
 import mekanism.common.util.WorldUtils;
 import mekanism.common.world.GenHandler;
 import net.minecraft.resources.Identifier;
@@ -148,6 +149,11 @@ public class CommonWorldTickHandler {
     public void onTick(ServerTickEvent.Post event) {
         boolean tickingNormally = event.getServer().tickRateManager().runsNormally();
         FrequencyControllerManager.tick(tickingNormally);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void flushBlockEntityUpdates(ServerTickEvent.Post event) {
+        PacketUtils.flushBlockEntityUpdates();
     }
 
     @SubscribeEvent

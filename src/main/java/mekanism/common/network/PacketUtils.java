@@ -12,6 +12,7 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.content.filter.FilterManager;
 import mekanism.common.lib.math.Range3D;
 import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
+import mekanism.common.tile.base.TileEntityUpdateable;
 import mekanism.common.tile.component.TileComponentConfig;
 import mekanism.common.tile.component.TileComponentEjector;
 import mekanism.common.tile.interfaces.ISideConfiguration;
@@ -44,6 +45,8 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jspecify.annotations.Nullable;
 
 public class PacketUtils {
+
+    private static final BlockEntityUpdateBatcher BLOCK_ENTITY_UPDATE_BATCHER = new BlockEntityUpdateBatcherImpl();
 
     private PacketUtils() {
     }
@@ -129,6 +132,23 @@ public class PacketUtils {
 
     public static <MSG extends CustomPacketPayload> void sendToAllTracking(MSG message, BlockEntity tile) {
         sendToAllTracking(message, tile.getLevel(), tile.getBlockPos());
+    }
+
+    public static void queueBlockEntityUpdate(ServerLevel level, BlockEntity tracking, TileEntityUpdateable target,
+                                              BlockEntityUpdateBatcher.UpdateMode mode) {
+        BLOCK_ENTITY_UPDATE_BATCHER.enqueue(level, tracking.getBlockPos(), target, mode);
+    }
+
+    public static void flushBlockEntityUpdates() {
+        BLOCK_ENTITY_UPDATE_BATCHER.flush();
+    }
+
+    public static void clearBlockEntityUpdates(ServerLevel level) {
+        BLOCK_ENTITY_UPDATE_BATCHER.clear(level);
+    }
+
+    public static void clearBlockEntityUpdates() {
+        BLOCK_ENTITY_UPDATE_BATCHER.clear();
     }
 
     public static <MSG extends CustomPacketPayload> void sendToAllTracking(MSG message, @Nullable Level world, BlockPos pos) {

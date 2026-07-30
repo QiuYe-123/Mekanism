@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import mekanism.common.Mekanism;
+import mekanism.common.network.BlockEntityUpdateBatcher.UpdateMode;
 import mekanism.common.network.PacketUtils;
-import mekanism.common.network.to_client.PacketUpdateTile;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import mekanism.common.tile.interfaces.ITileWrapper;
 import mekanism.common.util.WorldUtils;
@@ -155,16 +155,34 @@ public abstract class TileEntityUpdateable extends BlockEntity implements ITileW
             Mekanism.logger.warn("Update packet call requested from client side", new IllegalStateException());
         } else if (isRemoved()) {
             Mekanism.logger.warn("Update packet call requested for removed tile", new IllegalStateException());
-        } else if (PacketUtils.hasPlayersTracking((ServerLevel) level, tracking.getBlockPos())) {
-            //Note: We use our own update packet/channel to avoid chunk trashing and minecraft attempting to rerender
-            // the entire chunk when most often we are just updating a TileEntityRenderer, so the chunk itself
-            // does not need to and should not be redrawn
-            try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(problemPath(), Mekanism.logger)) {
-                TagValueOutput output = TagValueOutput.createWithContext(reporter, level.registryAccess());
-                writeReducedUpdatedTag(output);
-                PacketUtils.sendToAllTracking(new PacketUpdateTile(getBlockPos(), output.buildResult()), tracking);
-            }
+        } else {
+            //Use our own update packet/channel to avoid chunk trashing and defer serialization so repeated requests in one tick can be coalesced.
+            PacketUtils.queueBlockEntityUpdate((ServerLevel) level, tracking, this, getUpdateMode());
         }
+    }
+
+    protected UpdateMode getUpdateMode() {
+        return UpdateMode.REDUCED;
+    }
+
+    public final CompoundTag collectUpdateTag(UpdateMode mode) {
+        Level level = Objects.requireNonNull(getLevel(), "Cannot collect update data before the block entity has a level.");
+        try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(problemPath(), Mekanism.logger)) {
+            TagValueOutput output = TagValueOutput.createWithContext(reporter, level.registryAccess());
+            writeUpdatePacketTag(output, mode);
+            return output.buildResult();
+        }
+    }
+
+    protected void writeUpdatePacketTag(ValueOutput output, UpdateMode mode) {
+        if (mode == UpdateMode.FULL) {
+            writeUpdatedTag(output);
+        } else {
+            writeReducedUpdatedTag(output);
+        }
+    }
+
+    public void updatePacketHandled() {
     }
 
     protected void updateModelData() {

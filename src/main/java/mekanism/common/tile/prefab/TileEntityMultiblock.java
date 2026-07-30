@@ -25,6 +25,7 @@ import mekanism.common.lib.multiblock.IMultiblock;
 import mekanism.common.lib.multiblock.IStructuralMultiblock;
 import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.lib.multiblock.Structure;
+import mekanism.common.network.BlockEntityUpdateBatcher.UpdateMode;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
@@ -57,6 +58,7 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
 
     /// This multiblock's previous "has structure" state.
     private boolean prevStructure;
+    private boolean fullUpdatePending;
 
     /// Whether this multiblock segment is rendering the structure.
     private boolean isMaster;
@@ -124,6 +126,7 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
             if (!prevStructure) {
                 structureChanged(level, multiblock);
                 prevStructure = true;
+                fullUpdatePending = true;
                 needsPacket = true;
             }
             if (multiblock.inventoryID != null) {
@@ -146,6 +149,7 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
             if (prevStructure) {
                 structureChanged(level, multiblock);
                 prevStructure = false;
+                fullUpdatePending = true;
                 needsPacket = true;
             }
             isMaster = false;
@@ -257,13 +261,36 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
     }
 
     @Override
+    protected void writeUpdatedTag(ValueOutput output) {
+        super.writeUpdatedTag(output);
+        output.discard(SerializationConstants.DATA);
+        T multiblock = getMultiblock();
+        if (multiblock.isFormed() && isMaster()) {
+            multiblock.writeUpdateTag(output);
+        }
+    }
+
+    @Override
     public void writeReducedUpdatedTag(ValueOutput output) {
         super.writeReducedUpdatedTag(output);
         output.putBoolean(SerializationConstants.RENDERING, isMaster());
         T multiblock = getMultiblock();
         output.putBoolean(SerializationConstants.HAS_STRUCTURE, multiblock.isFormed());
         if (multiblock.isFormed() && isMaster()) {
-            multiblock.writeUpdateTag(output);
+            multiblock.writeDynamicUpdateTag(output.child(SerializationConstants.DATA));
+        }
+    }
+
+    @Override
+    protected UpdateMode getUpdateMode() {
+        return fullUpdatePending ? UpdateMode.FULL : UpdateMode.REDUCED;
+    }
+
+    @Override
+    public void updatePacketHandled() {
+        fullUpdatePending = false;
+        if (isMaster()) {
+            getMultiblock().clearDynamicUpdateData();
         }
     }
 
@@ -276,8 +303,10 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
         multiblock.setFormedForce(input.getBooleanOr(SerializationConstants.HAS_STRUCTURE, multiblock.isFormed()));
         if (isMaster()) {
             if (multiblock.isFormed()) {
-                multiblock.readUpdateTag(input);
-                doMultiblockSparkle(multiblock);
+                input.child(SerializationConstants.DATA).ifPresentOrElse(multiblock::readDynamicUpdateTag, () -> {
+                    multiblock.readUpdateTag(input);
+                    doMultiblockSparkle(multiblock);
+                });
             } else {
                 // this will consecutively be set on the server
                 isMaster = false;

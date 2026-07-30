@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import mekanism.api.AutomationType;
 import mekanism.api.SerializationConstants;
+import mekanism.api.chemical.ChemicalResource;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.fluid.IFluidTank;
@@ -103,6 +105,10 @@ public class TurbineMultiblockData extends MultiblockData {
 
     public float clientRotation;
     public float prevSteamScale;
+    private ChemicalResource lastRenderSteam;
+    private FluidResource lastRenderVent;
+    private boolean rotationDataChanged;
+    private boolean renderDataChanged;
 
     public TurbineMultiblockData(TileEntityTurbineCasing tile) {
         super(tile);
@@ -110,6 +116,8 @@ public class TurbineMultiblockData extends MultiblockData {
         fluidTanks.add(ventTank = VariableCapacityFluidTank.output(this, () -> isFormed() ? (long) condensers * MekanismGeneratorsConfig.generators.condenserRate.get() : FluidType.BUCKET_VOLUME,
               fluid -> fluid.is(FluidTags.WATER), this));
         energyContainer = VariableCapacityEnergyContainer.create(this::getEnergyCapacity, _ -> isFormed(), automationType -> automationType.isInternal() && isFormed(), this);
+        lastRenderSteam = chemicalTank.resource();
+        lastRenderVent = ventTank.resource();
     }
 
     @Override
@@ -184,12 +192,19 @@ public class TurbineMultiblockData extends MultiblockData {
 
         if (Math.abs(newRotation - clientRotation) > ROTATION_THRESHOLD) {
             clientRotation = newRotation;
+            rotationDataChanged = true;
             needsPacket = true;
         }
         float scale = MekanismUtils.getScale(prevSteamScale, chemicalTank);
-        if (MekanismUtils.scaleChanged(scale, prevSteamScale)) {
+        ChemicalResource renderSteam = chemicalTank.resource();
+        FluidResource renderVent = ventTank.resource();
+        boolean renderResourceChanged = !lastRenderSteam.equals(renderSteam) || !lastRenderVent.equals(renderVent);
+        lastRenderSteam = renderSteam;
+        lastRenderVent = renderVent;
+        if (MekanismUtils.scaleChanged(scale, prevSteamScale) || renderResourceChanged) {
             needsPacket = true;
             prevSteamScale = scale;
+            renderDataChanged = true;
         }
         return needsPacket;
     }
@@ -222,8 +237,7 @@ public class TurbineMultiblockData extends MultiblockData {
         NBTUtils.readOrEmpty(input, SerializationConstants.CHEMICAL, chemicalTank);
         NBTUtils.readOrEmpty(input, SerializationConstants.FLUID, ventTank);
         input.read(SerializationConstants.COMPLEX, BlockPos.CODEC).ifPresent(value -> complex = value);
-        clientRotation = input.getFloatOr(SerializationConstants.ROTATION, clientRotation);
-        clientRotationMap.put(inventoryID, clientRotation);
+        updateClientRotation(input.getFloatOr(SerializationConstants.ROTATION, clientRotation));
     }
 
     @Override
@@ -238,6 +252,41 @@ public class TurbineMultiblockData extends MultiblockData {
             output.store(SerializationConstants.COMPLEX, BlockPos.CODEC, complex);
         }
         output.putFloat(SerializationConstants.ROTATION, clientRotation);
+    }
+
+    @Override
+    public void readDynamicUpdateTag(ValueInput input) {
+        updateClientRotation(input.getFloatOr(SerializationConstants.ROTATION, clientRotation));
+        input.child(SerializationConstants.STORED).ifPresent(renderInput -> {
+            prevSteamScale = renderInput.getFloatOr(SerializationConstants.SCALE, prevSteamScale);
+            NBTUtils.readOrEmpty(renderInput, SerializationConstants.CHEMICAL, chemicalTank);
+            NBTUtils.readOrEmpty(renderInput, SerializationConstants.FLUID, ventTank);
+        });
+    }
+
+    @Override
+    public void writeDynamicUpdateTag(ValueOutput output) {
+        if (rotationDataChanged) {
+            output.putFloat(SerializationConstants.ROTATION, clientRotation);
+        }
+        if (renderDataChanged) {
+            ValueOutput renderOutput = output.child(SerializationConstants.STORED);
+            renderOutput.putFloat(SerializationConstants.SCALE, prevSteamScale);
+            NBTUtils.storeNonEmpty(renderOutput, SerializationConstants.CHEMICAL, chemicalTank);
+            NBTUtils.storeNonEmpty(renderOutput, SerializationConstants.FLUID, ventTank);
+        }
+    }
+
+    @Override
+    public void clearDynamicUpdateData() {
+        super.clearDynamicUpdateData();
+        rotationDataChanged = false;
+        renderDataChanged = false;
+    }
+
+    private void updateClientRotation(float rotation) {
+        clientRotation = rotation;
+        clientRotationMap.put(Objects.requireNonNull(inventoryID, "Cannot update turbine rotation without an inventory ID."), rotation);
     }
 
     @ComputerMethod
