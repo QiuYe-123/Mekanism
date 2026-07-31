@@ -7,7 +7,6 @@ import java.util.function.Predicate;
 import mekanism.api.AutomationType;
 import mekanism.api.transaction.ITransactionHelper;
 import mekanism.api.transaction.RateLimitTracker;
-import net.neoforged.neoforge.transfer.TransferPreconditions;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
@@ -25,7 +24,7 @@ public class TransactionHelper implements ITransactionHelper {
         @Override
         public void consumeLimit(int limit, AutomationType automationType, TransactionContext transaction) {
             //NO-OP, as we don't actually want to decrease the remaining limit
-            TransferPreconditions.checkNonNegative(limit);
+            limit = Math.max(0, limit);
             Objects.requireNonNull(automationType, "Automation type must not be null.");
         }
     };

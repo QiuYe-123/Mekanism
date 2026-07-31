@@ -111,7 +111,7 @@ public final class ChemicalResource implements RegisteredResource<Chemical>, IHa
     ///
     /// @throws IllegalArgumentException when amount is negative.
     public ChemicalStack toStack(int amount) {
-        MekanismPreconditions.checkNonNegative(amount);
+        amount = MekanismPreconditions.clampNonNegative(amount);
         if (amount == 0) {
             return ChemicalStack.EMPTY;
         }

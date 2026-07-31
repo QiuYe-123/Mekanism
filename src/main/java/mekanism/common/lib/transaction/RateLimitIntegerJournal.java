@@ -6,7 +6,6 @@ import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 import mekanism.api.AutomationType;
 import mekanism.api.transaction.RateLimitTracker;
-import net.neoforged.neoforge.transfer.TransferPreconditions;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 class RateLimitIntegerJournal extends GameTimeBasedJournal<Integer> implements RateLimitTracker {
@@ -50,7 +49,7 @@ class RateLimitIntegerJournal extends GameTimeBasedJournal<Integer> implements R
 
     @Override
     public void consumeLimit(int limit, AutomationType automationType, TransactionContext transaction) {
-        TransferPreconditions.checkNonNegative(limit);
+        limit = Math.max(0, limit);
         Objects.requireNonNull(automationType, "Automation type must not be null.");
         //NO-OP if the automation type is not one being limited
         if (limitedAutomationTypes.test(automationType)) {

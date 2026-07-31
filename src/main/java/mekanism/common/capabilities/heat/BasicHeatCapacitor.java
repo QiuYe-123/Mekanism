@@ -102,7 +102,7 @@ public class BasicHeatCapacitor extends SnapshotJournal<Double> implements IHeat
 
     @Override
     public void setHeat(double heat, @Nullable TransactionContext transaction) {
-        MekanismPreconditions.checkNonNegative(heat);
+        heat = MekanismPreconditions.clampNonNegative(heat);
         double originalState = getHeat();
         if (!Mth.equal(heat, originalState)) {
             if (transaction == null) {

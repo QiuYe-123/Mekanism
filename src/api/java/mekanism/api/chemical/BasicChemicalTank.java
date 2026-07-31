@@ -35,7 +35,7 @@ public class BasicChemicalTank extends BasicResourceContainer<ChemicalResource> 
     /// @since 10.7.0 Previously was in ChemicalTankBuilder
     public static IChemicalTank createWithValidator(@Range(from = 0, to = Long.MAX_VALUE) long capacity, @Nullable ChemicalAttributeValidator attributeValidator,
           @Nullable IContentsListener listener) {
-        MekanismPreconditions.checkNonNegative(capacity);
+        capacity = MekanismPreconditions.clampNonNegative(capacity);
         return create(capacity, ConstantPredicates.alwaysTrueBi(), ConstantPredicates.alwaysTrueBi(), ConstantPredicates.alwaysTrue(), attributeValidator, listener);
     }
 
@@ -57,7 +57,7 @@ public class BasicChemicalTank extends BasicResourceContainer<ChemicalResource> 
     ///
     /// @since 10.7.11
     public static IChemicalTank create(@Range(from = 0, to = Long.MAX_VALUE) long capacity, Predicate<ChemicalResource> validator, @Nullable IContentsListener listener) {
-        MekanismPreconditions.checkNonNegative(capacity);
+        capacity = MekanismPreconditions.clampNonNegative(capacity);
         Objects.requireNonNull(validator, "Chemical validity check cannot be null");
         return create(capacity, ConstantPredicates.alwaysTrueBi(), ConstantPredicates.alwaysTrueBi(), validator, null, listener);
     }
@@ -71,7 +71,7 @@ public class BasicChemicalTank extends BasicResourceContainer<ChemicalResource> 
     ///
     /// @since 10.7.11
     public static IChemicalTank input(@Range(from = 0, to = Long.MAX_VALUE) long capacity, Predicate<ChemicalResource> validator, @Nullable IContentsListener listener) {
-        MekanismPreconditions.checkNonNegative(capacity);
+        capacity = MekanismPreconditions.clampNonNegative(capacity);
         Objects.requireNonNull(validator, "Chemical validity check cannot be null");
         return create(capacity, ConstantPredicates.notExternal(), ConstantPredicates.alwaysTrueBi(), validator, null, listener);
     }
@@ -87,7 +87,7 @@ public class BasicChemicalTank extends BasicResourceContainer<ChemicalResource> 
     /// @since 10.8.0
     public static IChemicalTank input(@Range(from = 0, to = Long.MAX_VALUE) long capacity, BiPredicate<ChemicalResource, AutomationType> canInsert,
           Predicate<ChemicalResource> validator, @Nullable IContentsListener listener) {
-        MekanismPreconditions.checkNonNegative(capacity);
+        capacity = MekanismPreconditions.clampNonNegative(capacity);
         Objects.requireNonNull(canInsert, "Insertion validity check cannot be null");
         Objects.requireNonNull(validator, "Chemical validity check cannot be null");
         return create(capacity, ConstantPredicates.notExternal(), canInsert, validator, null, listener);
@@ -101,7 +101,7 @@ public class BasicChemicalTank extends BasicResourceContainer<ChemicalResource> 
     ///
     /// @since 10.7.0 Previously was in ChemicalTankBuilder
     public static IChemicalTank output(@Range(from = 0, to = Long.MAX_VALUE) long capacity, @Nullable IContentsListener listener) {
-        MekanismPreconditions.checkNonNegative(capacity);
+        capacity = MekanismPreconditions.clampNonNegative(capacity);
         return create(capacity, ConstantPredicates.alwaysTrueBi(), ConstantPredicates.internalOnly(), ConstantPredicates.alwaysTrue(),
               ChemicalAttributeValidator.ALWAYS_ALLOW, listener);
     }
@@ -167,7 +167,7 @@ public class BasicChemicalTank extends BasicResourceContainer<ChemicalResource> 
     public static IChemicalTank create(@Range(from = 0, to = Long.MAX_VALUE) long capacity, BiPredicate<ChemicalResource, AutomationType> canExtract,
           BiPredicate<ChemicalResource, AutomationType> canInsert, Predicate<ChemicalResource> validator, @Nullable RateLimitTracker insertionRateLimiter,
           @Nullable RateLimitTracker extractionRateLimiter, @Nullable ChemicalAttributeValidator attributeValidator, @Nullable IContentsListener listener) {
-        MekanismPreconditions.checkNonNegative(capacity);
+        capacity = MekanismPreconditions.clampNonNegative(capacity);
         Objects.requireNonNull(canExtract, "Extraction validity check cannot be null");
         Objects.requireNonNull(canInsert, "Insertion validity check cannot be null");
         Objects.requireNonNull(validator, "Chemical validity check cannot be null");

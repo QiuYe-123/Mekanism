@@ -79,7 +79,7 @@ public class ComponentBackedEnergyContainer extends SimpleComponentBackedContain
     @Override
     @Range(from = 0, to = Integer.MAX_VALUE)
     public int insert(@Range(from = 0, to = Integer.MAX_VALUE) int amount, TransactionContext transaction, AutomationType automationType) {
-        MekanismPreconditions.checkNonNegative(amount);
+        amount = MekanismPreconditions.clampNonNegative(amount);
         if (amount == 0 || !isValidForInsertion(automationType)) {
             //"Fail quick" if nothing is being inserted, or we don't allow insertion for the given automation type
             return 0;
@@ -107,7 +107,7 @@ public class ComponentBackedEnergyContainer extends SimpleComponentBackedContain
     @Override
     @Range(from = 0, to = Integer.MAX_VALUE)
     public int extract(@Range(from = 0, to = Integer.MAX_VALUE) int amount, TransactionContext transaction, AutomationType automationType) {
-        MekanismPreconditions.checkNonNegative(amount);
+        amount = MekanismPreconditions.clampNonNegative(amount);
         if (amount == 0 || !isValidForExtraction(automationType)) {
             //"Fail quick" nothing is being extracted, or if we can never extract from this slot
             return 0;

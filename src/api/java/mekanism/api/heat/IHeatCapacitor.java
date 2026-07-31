@@ -106,8 +106,8 @@ public interface IHeatCapacitor extends ValueIOSerializable, IHeatHandler {
         ).apply(instance, CapacitorState::new));
 
         public CapacitorState {
-            MekanismPreconditions.checkNonNegative(heat);
-            MekanismPreconditions.checkHeatCapacity(heat);
+            heat = MekanismPreconditions.clampNonNegative(heat);
+            MekanismPreconditions.checkHeatCapacity(heatCapacity);
         }
     }
 }

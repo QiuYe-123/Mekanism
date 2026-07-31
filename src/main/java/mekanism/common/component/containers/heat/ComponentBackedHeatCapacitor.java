@@ -93,8 +93,8 @@ public class ComponentBackedHeatCapacitor extends SimpleComponentBackedContainer
 
     @Override
     public void setHeat(double heat, @Nullable TransactionContext transaction) {
-        MekanismPreconditions.checkNonNegative(heat);
-        updateContents(existing -> existing.withHeat(heat), transaction);
+        double clampedHeat = MekanismPreconditions.clampNonNegative(heat);
+        updateContents(existing -> existing.withHeat(clampedHeat), transaction);
     }
 
     @Override

@@ -44,7 +44,7 @@ public class BasicFluidTank extends BasicResourceContainer<FluidResource> implem
 
     public static BasicFluidTank create(@Range(from = 0, to = Long.MAX_VALUE) long capacity, BiPredicate<FluidResource, AutomationType> canExtract,
           BiPredicate<FluidResource, AutomationType> canInsert, Predicate<FluidResource> validator, @Nullable IContentsListener listener) {
-        MekanismPreconditions.checkNonNegative(capacity);
+        capacity = MekanismPreconditions.clampNonNegative(capacity);
         Objects.requireNonNull(canExtract, "Extraction validity check cannot be null");
         Objects.requireNonNull(canInsert, "Insertion validity check cannot be null");
         Objects.requireNonNull(validator, "Fluid validity check cannot be null");

@@ -203,7 +203,7 @@ public class MatrixEnergyContainer implements IEnergyContainer {
     @Override
     @Range(from = 0, to = Integer.MAX_VALUE)
     public int insert(@Range(from = 0, to = Integer.MAX_VALUE) int amount, TransactionContext transaction, AutomationType automationType) {
-        MekanismPreconditions.checkNonNegative(amount);
+        amount = MekanismPreconditions.clampNonNegative(amount);
         if (amount == 0 || !multiblock.isFormed() || !isValidForInsertion(automationType)) {
             return 0;
         }
@@ -219,7 +219,7 @@ public class MatrixEnergyContainer implements IEnergyContainer {
     @Override
     @Range(from = 0, to = Integer.MAX_VALUE)
     public int extract(@Range(from = 0, to = Integer.MAX_VALUE) int amount, TransactionContext transaction, AutomationType automationType) {
-        MekanismPreconditions.checkNonNegative(amount);
+        amount = MekanismPreconditions.clampNonNegative(amount);
         if (isEmpty() || amount == 0 || !multiblock.isFormed() || !isValidForExtraction(automationType)) {
             return 0;
         }

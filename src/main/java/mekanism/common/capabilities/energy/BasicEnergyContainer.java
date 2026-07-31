@@ -72,7 +72,7 @@ public class BasicEnergyContainer extends SnapshotJournal<Long> implements IEner
 
     @Override
     public void setEnergy(@Range(from = 0, to = Long.MAX_VALUE) long energy, @Nullable TransactionContext transaction) {
-        MekanismPreconditions.checkNonNegative(energy);
+        energy = MekanismPreconditions.clampNonNegative(energy);
         if (stored != energy) {
             if (transaction == null) {
                 long originalState = stored;
@@ -88,7 +88,7 @@ public class BasicEnergyContainer extends SnapshotJournal<Long> implements IEner
     @Override
     @Range(from = 0, to = Integer.MAX_VALUE)
     public int insert(@Range(from = 0, to = Integer.MAX_VALUE) int amount, TransactionContext transaction, AutomationType automationType) {
-        MekanismPreconditions.checkNonNegative(amount);
+        amount = MekanismPreconditions.clampNonNegative(amount);
         if (amount == 0 || !isValidForInsertion(automationType)) {
             //"Fail quick" if nothing is being inserted, or we don't allow insertion for the given automation type
             return 0;
@@ -112,7 +112,7 @@ public class BasicEnergyContainer extends SnapshotJournal<Long> implements IEner
     @Override
     @Range(from = 0, to = Integer.MAX_VALUE)
     public int extract(@Range(from = 0, to = Integer.MAX_VALUE) int amount, TransactionContext transaction, AutomationType automationType) {
-        MekanismPreconditions.checkNonNegative(amount);
+        amount = MekanismPreconditions.clampNonNegative(amount);
         if (isEmpty() || amount == 0 || !isValidForExtraction(automationType)) {
             //"Fail quick" if we are empty, nothing is being extracted, or if we can never extract from this slot
             return 0;

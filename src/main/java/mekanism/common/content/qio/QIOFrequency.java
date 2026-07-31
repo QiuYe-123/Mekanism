@@ -151,7 +151,7 @@ public class QIOFrequency extends Frequency implements IColorableFrequency, IQIO
     @Override
     public long massInsert(ItemResource itemType, long amount, TransactionContext transaction) {
         TransferPreconditions.checkNonEmpty(itemType);
-        MekanismPreconditions.checkNonNegative(amount);
+        amount = MekanismPreconditions.clampNonNegative(amount);
         if (amount == 0) {//Nothing to insert
             return 0;
         } else if (totalCount.value == totalCountCapacity) {
@@ -257,7 +257,7 @@ public class QIOFrequency extends Frequency implements IColorableFrequency, IQIO
     @Override
     public long massExtract(ItemResource itemType, long amount, TransactionContext transaction) {
         TransferPreconditions.checkNonEmpty(itemType);
-        MekanismPreconditions.checkNonNegative(amount);
+        amount = MekanismPreconditions.clampNonNegative(amount);
         if (amount == 0 || itemDataMap.isEmpty()) {
             //Nothing to extract, or nothing is stored
             return 0;

@@ -28,6 +28,21 @@ public final class MekanismPreconditions {
         }
     }
 
+    /// Clamps a value below zero to zero.
+    public static int clampNonNegative(int value) {
+        return Math.max(0, value);
+    }
+
+    /// Clamps a value below zero to zero.
+    public static long clampNonNegative(long value) {
+        return Math.max(0L, value);
+    }
+
+    /// Clamps a value below zero to zero.
+    public static double clampNonNegative(double value) {
+        return Math.max(0D, value);
+    }
+
     /// Ensures the value is a valid heat capacity, throws otherwise.
     ///
     /// @throws IllegalArgumentException when value is less than one.

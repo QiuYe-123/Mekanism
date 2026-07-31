@@ -37,7 +37,7 @@ public record LargeResourceStack<RESOURCE extends Resource>(RESOURCE resource, @
     public static final StackHelper<ItemResource> ITEM_HELPER = StackHelper.create(ItemResource.EMPTY, ItemResource.CODEC, ItemResource.STREAM_CODEC);
 
     public LargeResourceStack {
-        MekanismPreconditions.checkNonNegative(amount);
+        amount = MekanismPreconditions.clampNonNegative(amount);
         Objects.requireNonNull(resource, "Resource cannot be null");
         if (resource.isEmpty() != (amount == 0)) {
             throw new IllegalArgumentException("The resource can only be empty if the amount is zero");
@@ -77,7 +77,7 @@ public record LargeResourceStack<RESOURCE extends Resource>(RESOURCE resource, @
     ///
     /// @throws IllegalStateException if trying to grow the stack by an amount larger than zero and this stack is empty.
     public LargeResourceStack<RESOURCE> grow(@Range(from = 0, to = Long.MAX_VALUE) long amountToGrow, boolean clamp) {
-        MekanismPreconditions.checkNonNegative(amountToGrow);
+        amountToGrow = MekanismPreconditions.clampNonNegative(amountToGrow);
         if (amountToGrow == 0) {
             return this;
         } else if (isEmpty()) {
@@ -125,7 +125,6 @@ public record LargeResourceStack<RESOURCE extends Resource>(RESOURCE resource, @
         ///
         /// @return Large resource stack, or the empty instance if the resource is empty or the amount is zero.
         public LargeResourceStack<RESOURCE> createStack(RESOURCE resource, @Range(from = 0, to = Long.MAX_VALUE) long amount) {
-//            MekanismPreconditions.checkNonNegative(amount);
             Objects.requireNonNull(resource, "Resource cannot be null");
             if (resource.isEmpty() || amount <= 0) {
                 return empty;
