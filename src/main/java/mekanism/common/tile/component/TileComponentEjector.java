@@ -213,9 +213,17 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
                     case CHEMICAL -> emitResource(level, pos, sides, entry.getKey(), typeCapabilityCaches, Capabilities.CHEMICAL, chemicalEjectRate, transaction);
                     case FLUID -> emitResource(level, pos, sides, entry.getKey(), typeCapabilityCaches, Capabilities.FLUID, fluidEjectRate, transaction);
                     case ENERGY -> {
-                        List<BlockCapabilityCache<EnergyHandler, @Nullable Direction>> caches = initializeCaches(level, pos, sides, typeCapabilityCaches, Capabilities.ENERGY);
                         IEnergyContainer container = (IEnergyContainer) entry.getKey();
-                        EnergyUtils.emit(caches, container, energyEjectRate == null ? container.getAmountAsInt() : energyEjectRate.getAsInt(), transaction);
+                        int maxOutput = energyEjectRate == null ? container.getAmountAsInt() : energyEjectRate.getAsInt();
+                        if (sides.size() == 1) {
+                            Direction side = sides.iterator().next();
+                            EnergyHandler target = initializeCache(level, pos, side, typeCapabilityCaches, Capabilities.ENERGY).getCapability();
+                            EnergyUtils.emit(target, container, maxOutput, transaction);
+                        } else {
+                            List<BlockCapabilityCache<EnergyHandler, @Nullable Direction>> caches = initializeCaches(level, pos, sides, typeCapabilityCaches,
+                                  Capabilities.ENERGY);
+                            EnergyUtils.emit(caches, container, maxOutput, transaction);
+                        }
                     }
                 }
             }
@@ -226,8 +234,16 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
     private <RESOURCE extends Resource> void emitResource(ServerLevel level, BlockPos pos, Set<Direction> sides, Object container,
           Map<Direction, BlockCapabilityCache<?, @Nullable Direction>> typeCapabilityCaches, MultiTypeCapability<ResourceHandler<RESOURCE>> capability, IntSupplier ejectRate,
           @Nullable TransactionContext transaction) {
-        List<BlockCapabilityCache<ResourceHandler<RESOURCE>, @Nullable Direction>> caches = initializeCaches(level, pos, sides, typeCapabilityCaches, capability);
-        ResourceUtils.emit(caches, (IResourceContainer<RESOURCE>) container, ejectRate.getAsInt(), transaction);
+        IResourceContainer<RESOURCE> resourceContainer = (IResourceContainer<RESOURCE>) container;
+        int maxOutput = ejectRate.getAsInt();
+        if (sides.size() == 1) {
+            Direction side = sides.iterator().next();
+            ResourceHandler<RESOURCE> target = initializeCache(level, pos, side, typeCapabilityCaches, capability).getCapability();
+            ResourceUtils.emit(target, resourceContainer, maxOutput, transaction);
+        } else {
+            List<BlockCapabilityCache<ResourceHandler<RESOURCE>, @Nullable Direction>> caches = initializeCaches(level, pos, sides, typeCapabilityCaches, capability);
+            ResourceUtils.emit(caches, resourceContainer, maxOutput, transaction);
+        }
     }
 
     private <TYPE> List<BlockCapabilityCache<TYPE, @Nullable Direction>> initializeCaches(ServerLevel level, BlockPos pos, Set<Direction> sides,

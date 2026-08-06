@@ -50,6 +50,9 @@ import org.jspecify.annotations.Nullable;
 
 public class TileComponentConfig implements ITileComponent, ISpecificContainerTracker {
 
+    private static final String[] CONFIG_KEYS = createSerializationKeys(SerializationConstants.CONFIG);
+    private static final String[] EJECT_KEYS = createSerializationKeys(SerializationConstants.EJECT);
+
     public final TileEntityMekanism tile;
     private final Map<TransmissionType, ConfigInfo> configInfo = new EnumMap<>(TransmissionType.class);
     private final Map<TransmissionType, List<Consumer<Direction>>> configChangeListeners = new EnumMap<>(TransmissionType.class);
@@ -292,8 +295,8 @@ public class TileComponentConfig implements ITileComponent, ISpecificContainerTr
             //TODO - 26.1: Do we want to replace it using the ordinal with using a serialized name as part of the key?
             // Or maybe better yet, just have it be a input.child(type) and then have sub parts of the ejecting and side data?
             int ordinalToUse = type.ordinal();
-            info.setEjecting(configInput.getBooleanOr(SerializationConstants.EJECT + ordinalToUse, info.isEjecting()));
-            Optional<int[]> optionalConfigData = configInput.getIntArray(SerializationConstants.CONFIG + ordinalToUse);
+            info.setEjecting(configInput.getBooleanOr(EJECT_KEYS[ordinalToUse], info.isEjecting()));
+            Optional<int[]> optionalConfigData = configInput.getIntArray(CONFIG_KEYS[ordinalToUse]);
             if (optionalConfigData.isPresent()) {
                 int[] sideData = optionalConfigData.get();
                 for (int i = 0; i < sideData.length && i < EnumUtils.SIDES.length; i++) {
@@ -315,15 +318,30 @@ public class TileComponentConfig implements ITileComponent, ISpecificContainerTr
         for (Entry<TransmissionType, ? extends IPersistentConfigInfo> entry : configInfo.entrySet()) {
             TransmissionType type = entry.getKey();
             IPersistentConfigInfo info = entry.getValue();
+            int ordinal = type.ordinal();
             if (full) {
-                configOutput.putBoolean(SerializationConstants.EJECT + type.ordinal(), info.isEjecting());
+                configOutput.putBoolean(EJECT_KEYS[ordinal], info.isEjecting());
             }
-            int[] sideData = new int[EnumUtils.SIDES.length];
-            for (int i = 0; i < EnumUtils.SIDES.length; i++) {
-                sideData[i] = info.getDataType(EnumUtils.SIDES[i]).ordinal();
-            }
-            configOutput.putIntArray(SerializationConstants.CONFIG + type.ordinal(), sideData);
+            int[] sideData = info instanceof ConfigInfo runtimeInfo ? runtimeInfo.getSerializedSideConfig() : createSideData(info);
+            configOutput.putIntArray(CONFIG_KEYS[ordinal], sideData);
         }
+    }
+
+    private static int[] createSideData(IPersistentConfigInfo info) {
+        int[] sideData = new int[EnumUtils.SIDES.length];
+        for (int i = 0; i < EnumUtils.SIDES.length; i++) {
+            sideData[i] = info.getDataType(EnumUtils.SIDES[i]).ordinal();
+        }
+        return sideData;
+    }
+
+    private static String[] createSerializationKeys(String prefix) {
+        String[] keys = new String[EnumUtils.TRANSMISSION_TYPES.length];
+        for (TransmissionType type : EnumUtils.TRANSMISSION_TYPES) {
+            int ordinal = type.ordinal();
+            keys[ordinal] = prefix + ordinal;
+        }
+        return keys;
     }
 
     /// @implNote This is slightly different from read and write as we don't bother syncing the ejecting status. We can skip syncing the ejecting status as the client

@@ -32,6 +32,8 @@ public class ConfigInfo implements IPersistentConfigInfo {
     private Set<RelativeSide> disabledSides;
     @Nullable
     private Set<DataType> supportedDataTypes;
+    @Nullable
+    private int[] serializedSideConfig;
 
     public ConfigInfo() {
         canEject = true;
@@ -67,7 +69,9 @@ public class ConfigInfo implements IPersistentConfigInfo {
         }
         for (RelativeSide side : sides) {
             disabledSides.add(side);
-            sideConfig.put(side, DataType.NONE);
+            if (sideConfig.put(side, DataType.NONE) != DataType.NONE) {
+                serializedSideConfig = null;
+            }
         }
     }
 
@@ -88,7 +92,25 @@ public class ConfigInfo implements IPersistentConfigInfo {
     }
 
     public boolean setDataType(DataType dataType, RelativeSide side) {
-        return isSideEnabled(side) && sideConfig.put(side, dataType) != dataType;
+        if (isSideEnabled(side) && sideConfig.put(side, dataType) != dataType) {
+            serializedSideConfig = null;
+            return true;
+        }
+        return false;
+    }
+
+    /// Returns the cached side configuration used by tile serialization.
+    ///
+    /// @apiNote The returned array is immutable state owned by this config and must not be modified.
+    public int[] getSerializedSideConfig() {
+        if (serializedSideConfig == null) {
+            int[] sideData = new int[EnumUtils.SIDES.length];
+            for (int i = 0; i < EnumUtils.SIDES.length; i++) {
+                sideData[i] = getDataType(EnumUtils.SIDES[i]).ordinal();
+            }
+            serializedSideConfig = sideData;
+        }
+        return serializedSideConfig;
     }
 
     public Set<DataType> getSupportedDataTypes() {
@@ -149,7 +171,9 @@ public class ConfigInfo implements IPersistentConfigInfo {
         DataType current = getDataType(relativeSide);
         if (isSideEnabled(relativeSide)) {
             DataType newType = current.getNext(this::supports);
-            sideConfig.put(relativeSide, newType);
+            if (sideConfig.put(relativeSide, newType) != newType) {
+                serializedSideConfig = null;
+            }
             return newType;
         }
         return current;
@@ -160,7 +184,9 @@ public class ConfigInfo implements IPersistentConfigInfo {
         DataType current = getDataType(relativeSide);
         if (isSideEnabled(relativeSide)) {
             DataType newType = current.getPrevious(this::supports);
-            sideConfig.put(relativeSide, newType);
+            if (sideConfig.put(relativeSide, newType) != newType) {
+                serializedSideConfig = null;
+            }
             return newType;
         }
         return current;

@@ -85,6 +85,9 @@ public final class ResourceUtils {
     public static <RESOURCE extends Resource> int emit(Collection<BlockCapabilityCache<ResourceHandler<RESOURCE>, @Nullable Direction>> targets,
           IResourceContainer<RESOURCE> container, int maxOutput, @Nullable TransactionContext transaction) {
         if (!container.isEmpty() && maxOutput > 0 && !targets.isEmpty()) {
+            if (targets.size() == 1) {
+                return emit(targets.iterator().next().getCapability(), container, maxOutput, transaction);
+            }
             RESOURCE resourceType = container.resource();
             int resourceAmount;
             try (Transaction simulation = Transaction.open(transaction)) {

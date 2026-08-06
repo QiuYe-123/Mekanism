@@ -1,11 +1,11 @@
 package mekanism.common.network;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -142,24 +142,26 @@ final class BlockEntityUpdateBatcherImpl implements BlockEntityUpdateBatcher {
     private static final class PendingChunk {
 
         private final BlockPos trackingPos;
-        private final Map<Long, PendingUpdate> updates = new LinkedHashMap<>();
+        private final Long2ObjectMap<PendingUpdate> updates = new Long2ObjectLinkedOpenHashMap<>();
 
         private PendingChunk(BlockPos trackingPos) {
             this.trackingPos = trackingPos;
         }
 
         private void add(PendingUpdate update) {
-            updates.put(update.target.getBlockPos().asLong(), update);
+            updates.put(update.position, update);
         }
     }
 
     private static final class PendingUpdate {
 
         private final TileEntityUpdateable target;
+        private final long position;
         private UpdateMode mode;
 
         private PendingUpdate(TileEntityUpdateable target, UpdateMode mode) {
             this.target = target;
+            this.position = target.getWorldPositionLong();
             this.mode = mode;
         }
     }

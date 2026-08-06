@@ -42,31 +42,32 @@ public record PacketUpdateTile(List<TileUpdate> updates) implements IMekanismPac
         List<PacketUpdateTile> packets = new ArrayList<>();
         List<TileUpdate> current = new ArrayList<>();
         int currentSize = 5;
-        for (TileUpdate update : updates) {
-            int updateSize = encodedSize(update);
-            if (!current.isEmpty() && (current.size() == MAX_UPDATES_PER_PACKET || currentSize + updateSize > MAX_BATCH_DATA_SIZE)) {
-                packets.add(new PacketUpdateTile(current));
-                current = new ArrayList<>();
-                currentSize = 5;
+        ByteBuf scratchBuffer = Unpooled.buffer();
+        try {
+            for (TileUpdate update : updates) {
+                int updateSize = encodedSize(scratchBuffer, update);
+                if (!current.isEmpty() && (current.size() == MAX_UPDATES_PER_PACKET || currentSize + updateSize > MAX_BATCH_DATA_SIZE)) {
+                    packets.add(new PacketUpdateTile(current));
+                    current = new ArrayList<>();
+                    currentSize = 5;
+                }
+                if (updateSize + 5 > MAX_BATCH_DATA_SIZE) {
+                    Mekanism.logger.warn("Block entity update at {} is {} bytes and exceeds the preferred batch payload size.", update.pos, updateSize);
+                }
+                current.add(update);
+                currentSize += updateSize;
             }
-            if (updateSize + 5 > MAX_BATCH_DATA_SIZE) {
-                Mekanism.logger.warn("Block entity update at {} is {} bytes and exceeds the preferred batch payload size.", update.pos, updateSize);
-            }
-            current.add(update);
-            currentSize += updateSize;
+        } finally {
+            scratchBuffer.release();
         }
         packets.add(new PacketUpdateTile(current));
         return packets;
     }
 
-    private static int encodedSize(TileUpdate update) {
-        ByteBuf buffer = Unpooled.buffer();
-        try {
-            TileUpdate.STREAM_CODEC.encode(buffer, update);
-            return buffer.readableBytes();
-        } finally {
-            buffer.release();
-        }
+    private static int encodedSize(ByteBuf buffer, TileUpdate update) {
+        buffer.clear();
+        TileUpdate.STREAM_CODEC.encode(buffer, update);
+        return buffer.readableBytes();
     }
 
     @Override

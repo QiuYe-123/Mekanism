@@ -63,7 +63,10 @@ public final class EnergyUtils {
     @Range(from = 0, to = Integer.MAX_VALUE)
     public static int emit(Collection<BlockCapabilityCache<EnergyHandler, @Nullable Direction>> targets, IEnergyContainer container,
           @Range(from = 0, to = Integer.MAX_VALUE) int maxOutput, @Nullable TransactionContext transaction) {
-        if (!container.isEmpty() && maxOutput > 0) {
+        if (!container.isEmpty() && maxOutput > 0 && !targets.isEmpty()) {
+            if (targets.size() == 1) {
+                return emit(targets.iterator().next().getCapability(), container, maxOutput, transaction);
+            }
             int energyToSend;
             try (Transaction simulation = Transaction.open(transaction)) {
                 energyToSend = container.extract(maxOutput, simulation, AutomationType.INTERNAL);
@@ -98,6 +101,8 @@ public final class EnergyUtils {
           @Nullable TransactionContext transaction) {
         if (energyToSend <= 0 || targets.isEmpty()) {
             return 0;
+        } else if (targets.size() == 1) {
+            return emit(targets.iterator().next().getCapability(), energyToSend, transaction);
         }
         return emit(EmitUtils.getHandlersFromCaches(targets), energyToSend, transaction);
     }
@@ -115,14 +120,54 @@ public final class EnergyUtils {
         if (targets.isEmpty() || energyToSend <= 0) {
             return 0;
         } else if (targets.size() == 1) {
-            //If we only have a single target, optimize out wrapping it in a resource handler target
-            try (Transaction subTransaction = Transaction.open(transaction)) {
-                int sent = targets.getFirst().insert(Ints.saturatedCast(energyToSend), subTransaction);
-                subTransaction.commit();
-                return sent;
-            }
+            return emit(targets.getFirst(), energyToSend, transaction);
         }
         return EmitUtils.sendToAcceptors(new EnergyHandlerTarget(targets), energyToSend, EnergyNetwork.ENERGY, transaction);
+    }
+
+    private static long emit(@Nullable EnergyHandler target, @Range(from = 0, to = Long.MAX_VALUE) long energyToSend,
+          @Nullable TransactionContext transaction) {
+        if (target == null || energyToSend <= 0) {
+            return 0;
+        }
+        try (Transaction subTransaction = Transaction.open(transaction)) {
+            int sent = target.insert(Ints.saturatedCast(energyToSend), subTransaction);
+            subTransaction.commit();
+            return sent;
+        }
+    }
+
+    /// Emits energy from the given container to the given target at the specified maximum transfer rate.
+    ///
+    /// @param target      Energy handler to output to.
+    /// @param container   Container to transfer energy out of.
+    /// @param maxOutput   Maximum transfer rate to transfer out of the container.
+    /// @param transaction The transaction that this operation is part of. This method will always use a nested transaction that will be committed. `null` can be passed
+    /// to conveniently have this method open its own root transaction and perform the sending.
+    ///
+    /// @return the amount of energy transferred out of the container and emitted to the given target.
+    @Range(from = 0, to = Integer.MAX_VALUE)
+    public static int emit(@Nullable EnergyHandler target, IEnergyContainer container, @Range(from = 0, to = Integer.MAX_VALUE) int maxOutput,
+          @Nullable TransactionContext transaction) {
+        if (target != null && !container.isEmpty() && maxOutput > 0) {
+            int energyToSend;
+            try (Transaction simulation = Transaction.open(transaction)) {
+                energyToSend = container.extract(maxOutput, simulation, AutomationType.INTERNAL);
+                if (energyToSend == 0) {
+                    //If we failed to extract from it, just exit early
+                    return 0;
+                }
+            }
+            try (Transaction subTransaction = Transaction.open(transaction)) {
+                int sent = target.insert(energyToSend, subTransaction);
+                if (sent > 0 && container.extract(sent, subTransaction, AutomationType.INTERNAL) == sent) {
+                    //Validate that we were able to extract the amount we sent. In theory this should always be true
+                    subTransaction.commit();
+                    return sent;
+                }
+            }
+        }
+        return 0;
     }
 
     /// @param chargeFrom  Handler to take energy from to charge energy capabilities in `handler`.

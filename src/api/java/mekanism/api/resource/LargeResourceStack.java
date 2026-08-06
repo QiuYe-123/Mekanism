@@ -2,6 +2,9 @@ package mekanism.api.resource;
 
 import com.google.common.primitives.Ints;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Encoder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Objects;
 import java.util.Optional;
@@ -164,7 +167,7 @@ public record LargeResourceStack<RESOURCE extends Resource>(RESOURCE resource, @
         public static <RESOURCE extends Resource> StackHelper<RESOURCE> create(RESOURCE emptyResource, Codec<RESOURCE> resourceCodec,
               StreamCodec<RegistryFriendlyByteBuf, RESOURCE> resourceStreamCodec) {
             LargeResourceStack<RESOURCE> emptyStack = new LargeResourceStack<>(emptyResource, 0);
-            Codec<LargeResourceStack<RESOURCE>> codec = RecordCodecBuilder.create(instance -> instance.group(
+            Codec<LargeResourceStack<RESOURCE>> baseCodec = RecordCodecBuilder.create(instance -> instance.group(
                   resourceCodec.fieldOf(SerializationConstants.TYPE).forGetter(LargeResourceStack::resource),
                   ExtraCodecs.NON_NEGATIVE_LONG.fieldOf(SerializationConstants.AMOUNT).forGetter(LargeResourceStack::amount)
             ).apply(instance, (resource, amount) -> {
@@ -173,6 +176,15 @@ public record LargeResourceStack<RESOURCE extends Resource>(RESOURCE resource, @
                 }
                 return new LargeResourceStack<>(resource, amount);
             }));
+            Codec<LargeResourceStack<RESOURCE>> codec = Codec.of(new Encoder<>() {
+                @Override
+                public <T> DataResult<T> encode(LargeResourceStack<RESOURCE> stack, DynamicOps<T> ops, T prefix) {
+                    return ops.mapBuilder()
+                          .add(SerializationConstants.TYPE, resourceCodec.encodeStart(ops, stack.resource()))
+                          .add(SerializationConstants.AMOUNT, ops.createLong(stack.amount()))
+                          .build(prefix);
+                }
+            }, baseCodec);
             Codec<LargeResourceStack<RESOURCE>> optionalCodec = ExtraCodecs.optionalEmptyMap(codec)
                   .xmap(optional -> optional.orElse(emptyStack), stack -> stack.isEmpty() ? Optional.empty() : Optional.of(stack));
             Codec<LargeResourceStack<RESOURCE>> orEmptyCodec = optionalCodec.orElse(

@@ -1,10 +1,8 @@
 package mekanism.common.lib.transmitter;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiPredicate;
 import java.util.function.LongSupplier;
@@ -22,7 +20,6 @@ import mekanism.common.content.network.distribution.ResourceTransmitterSaveTarge
 import mekanism.common.content.network.transmitter.BufferedResourceTransmitter;
 import mekanism.common.util.EmitUtils;
 import mekanism.common.util.ResourceUtils;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.transfer.ResourceHandler;
@@ -229,19 +226,7 @@ public abstract class DynamicBufferedResourceNetwork<RESOURCE extends Resource, 
     }
 
     private long tickEmit(RESOURCE typeToSend, long amountToSend, TransactionContext transaction) {
-        List<ResourceHandler<RESOURCE>> targets = null;
-        for (Map<Direction, ResourceHandler<RESOURCE>> acceptors : acceptorCache.getAcceptorValues()) {
-            for (ResourceHandler<RESOURCE> acceptor : acceptors.values()) {
-                if (targets == null) {
-                    //Lazily initialize the list of targets, which allows us to also skip attempting to start emitting
-                    targets = new ArrayList<>();
-                }
-                //Note: We add the target regardless of if we can insert into it, as it skips the extra check,
-                // and sendToAcceptors needs to calculate if the target can accept anyway
-                targets.add(acceptor);
-            }
-        }
-        return targets == null ? 0 : ResourceUtils.emit(targets, typeToSend, amountToSend, transaction);
+        return ResourceUtils.emit(acceptorCache.getFlattenedAcceptors(), typeToSend, amountToSend, transaction);
     }
 
     @FunctionalInterface
