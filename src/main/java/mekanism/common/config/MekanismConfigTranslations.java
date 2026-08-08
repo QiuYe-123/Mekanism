@@ -107,8 +107,6 @@ public enum MekanismConfigTranslations implements IConfigTranslation {
           + "the default skin should have their skin randomized on the server."),
 
     //General Config
-    GENERAL_ALPHA_WARNING("general.misc.alpha_warning", "Alpha Warning",
-          "Display Mekanism's alpha warning when joining the game if Mekanism is currently in alpha. Dev mode only setting."),
     GENERAL_PACKET_LOGGING("general.misc.packet_logging", "Debug Packet Logging", "Log Mekanism packet names. Debug setting."),
     GENERAL_CHUNKLOADING("general.misc.chunkloading", "Allow Chunkloading",
           "Controls whether Mekanism allows players to load chunks. If this is disabled, neither the Anchor Upgrade nor the Dimensional Stabilizer will provide any functionality."),

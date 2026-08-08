@@ -3,8 +3,6 @@ package mekanism.common.config;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BooleanSupplier;
-import mekanism.api.functions.ConstantPredicates;
 import mekanism.common.Mekanism;
 import mekanism.common.config.value.CachedBooleanValue;
 import mekanism.common.config.value.CachedConfigValue;
@@ -27,8 +25,6 @@ import net.neoforged.neoforge.fluids.FluidType;
 public class GeneralConfig extends BaseMekanismConfig {
 
     private final ModConfigSpec configSpec;
-
-    public final BooleanSupplier enableAlphaWarning;
 
     public final CachedBooleanValue logPackets;
     public final CachedBooleanValue allowChunkloading;
@@ -111,13 +107,6 @@ public class GeneralConfig extends BaseMekanismConfig {
 
     GeneralConfig() {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
-
-        //Note: We only enable this config option in dev mode
-        if (SharedConstants.IS_RUNNING_IN_IDE) {
-            enableAlphaWarning = CachedBooleanValue.wrap(this, MekanismConfigTranslations.GENERAL_ALPHA_WARNING.applyToBuilder(builder).define("alphaWarning", true));
-        } else {
-            enableAlphaWarning = ConstantPredicates.ALWAYS_TRUE;
-        }
 
         logPackets = CachedBooleanValue.wrap(this, MekanismConfigTranslations.GENERAL_PACKET_LOGGING.applyToBuilder(builder)
               .define("logPackets", false));
